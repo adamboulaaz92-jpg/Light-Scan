@@ -2,7 +2,7 @@
 
 
 
-Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for both security professionals and network administrators. It combines speed, accuracy, and enterprise-grade features in a single tool.
+Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for both security professionals and network administrators. It combines speed, accuracy all those features in a single tool.
 
 ![](Light-Scan-Result.png)
 
@@ -77,29 +77,29 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
   ### Scan Entire Subnet
   
-      python lightscan.py -T 192.168.1.0/24 -F
+      python Lightscan.py -T 192.168.1.0/24 -F
   
   ### Multiple Targets
   
-      python lightscan.py -T 192.168.1.1,192.168.1.50,10.0.0.0/24
+      python Lightscan.py -T 192.168.1.1,192.168.1.50,10.0.0.0/24
   
   ### Fast Network Scan with Top Ports
   
-      python lightscan.py -T 10.0.0.0/16 -F -s fast
+      python Lightscan.py -T 10.0.0.0/16 -F -s fast
   
 ## Advanced Usage
   
   ### Custom Port Range with Retries
   
-      python lightscan.py -T target.com -p 1-1000 --max_retries 3
+      python Lightscan.py -T target.com -p 1-1000 --max_retries 3
   
   ### High-Speed Scan with Custom Threads
   
-      python lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
+      python Lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
   
   ### Verbose Output for Debugging
   
-      python lightscan.py -T 192.168.1.1 -v -st SYN
+      python Lightscan.py -T 192.168.1.1 -v -st SYN
   
 ## Command Line Options
   
