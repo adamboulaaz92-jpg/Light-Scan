@@ -801,8 +801,7 @@ Services_UDP = {
     1021: "exp2",
     1022: "exp2",
     1023: "reserved",
-    1024: "reserved",
-    65535: "lus"
+    1024: "reserved"
 }
 
 Services_TCP = {
@@ -2809,8 +2808,7 @@ Services_TCP = {
     2321: "rdlap",
     2322: "ofsd",
     2323: "3d-nfsd",
-    2324: "cosmocall",
-    65535: "lus"
+    2324: "cosmocall"
 }
 
 def Lightscan_Service_List(port,proto):
@@ -2820,4 +2818,5 @@ def Lightscan_Service_List(port,proto):
         return Services_UDP.get(port)
     else:
         return Services_TCP.get(port)
+
 
