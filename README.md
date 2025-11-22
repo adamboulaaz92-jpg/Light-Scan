@@ -1,4 +1,3 @@
-![](Lightscan-logo.png) 
 # Lightscan - Advanced Port Scanner
 
 
