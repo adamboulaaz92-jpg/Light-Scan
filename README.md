@@ -43,45 +43,55 @@ Professional Features
     Customizable timeouts and thread counts
 
     Clean, organized output with per-target results
-
+    
 Installation
 
   git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+  
   cd Light-Scan
+  
   pip install -r requirements.txt
 
-User Guide
-  Basic Scanning
+User Guide : Basic Scanning
   
   Single Target TCP Scan
+  
   python Lightscan.py -T 192.168.1.1
   
   SYN Stealth Scan
+  
   python Lightscan.py -T 192.168.1.1 -st SYN
   
   UDP Scan on Specific Port
+  
   python Lightscan.py -T 192.168.1.1 -st UDP -p 53
   
 Network Scanning
   
   Scan Entire Subnet
+  
   python lightscan.py -T 192.168.1.0/24 -F
   
   Multiple Targets
+  
   python lightscan.py -T 192.168.1.1,192.168.1.50-100,10.0.0.0/24
   
   Fast Network Scan with Top Ports
+  
   python lightscan.py -T 10.0.0.0/16 -F -s fast
   
 Advanced Usage
   
   Custom Port Range with Retries
+  
   python lightscan.py -T target.com -p 1-1000 --max_retries 3
   
   High-Speed Scan with Custom Threads
+  
   python lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
   
   Verbose Output for Debugging
+  
   python lightscan.py -T 192.168.1.1 -v -st SYN
   
 Command Line Options
@@ -116,15 +126,19 @@ Command Line Options
 Port Specification Examples
   
   Single Port
+  
   -p 80
   
   Port Range
+  
   -p 1-1000
   
   Multiple Ports
+  
   -p 22,80,443,8080
   
   Mixed Ranges and Single Ports
+  
   -p 20-25,80,443,8000-9000
   
 Scan Types
@@ -283,4 +297,4 @@ Legal Disclaimer
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
   License
   
-  This project is licensed under the MIT License - see the LICENSE file for details.
+  This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the LICENSE file for details.
