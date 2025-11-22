@@ -80,7 +80,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
   ### Multiple Targets
   
-  python lightscan.py -T 192.168.1.1,192.168.1.50-100,10.0.0.0/24
+  python lightscan.py -T 192.168.1.1,192.168.1.50,10.0.0.0/24
   
   ### Fast Network Scan with Top Ports
   
