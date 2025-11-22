@@ -55,6 +55,11 @@ class Lightscan:
         self.targets = []
         self.lock = threading.Lock()
 
+    def Banner(self):
+        banner = pyfiglet.figlet_format("Lightscan", font="slant")
+        print(banner)
+        print(f"Version : {self.version} ")
+    
     def initialize_target_results(self, target):
         self.target_results[target] = {
             'open_ports': [],
@@ -783,7 +788,8 @@ class Lightscan:
 
     def Scan_details(self):
         duration = self.end_time - self.start_time
-
+        self.Banner()
+        
         for target in self.targetss:
             if target in self.target_results:
                 self._sync_and_deduplicate_ports(target)
@@ -881,4 +887,5 @@ if __name__ == "__main__":
         print("\n[!] Scan interrupted by user")
     except Exception as e:
         print(f"\n[!] Unexpected error: {e}")
+
 
