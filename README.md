@@ -62,43 +62,43 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
   ### Single Target TCP Scan
   
-  python Lightscan.py -T 192.168.1.1
+      python Lightscan.py -T 192.168.1.1
   
   ### SYN Stealth Scan
   
-  python Lightscan.py -T 192.168.1.1 -st SYN
+      python Lightscan.py -T 192.168.1.1 -st SYN
   
   ### UDP Scan on Specific Port
   
-  python Lightscan.py -T 192.168.1.1 -st UDP -p 53
+      python Lightscan.py -T 192.168.1.1 -st UDP -p 53
   
 ## Network Scanning
   
   ### Scan Entire Subnet
   
-  python lightscan.py -T 192.168.1.0/24 -F
+      python lightscan.py -T 192.168.1.0/24 -F
   
   ### Multiple Targets
   
-  python lightscan.py -T 192.168.1.1,192.168.1.50,10.0.0.0/24
+      python lightscan.py -T 192.168.1.1,192.168.1.50,10.0.0.0/24
   
   ### Fast Network Scan with Top Ports
   
-  python lightscan.py -T 10.0.0.0/16 -F -s fast
+      python lightscan.py -T 10.0.0.0/16 -F -s fast
   
 ## Advanced Usage
   
   ### Custom Port Range with Retries
   
-  python lightscan.py -T target.com -p 1-1000 --max_retries 3
+      python lightscan.py -T target.com -p 1-1000 --max_retries 3
   
   ### High-Speed Scan with Custom Threads
   
-  python lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
+      python lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
   
   ### Verbose Output for Debugging
   
-  python lightscan.py -T 192.168.1.1 -v -st SYN
+      python lightscan.py -T 192.168.1.1 -v -st SYN
   
 ## Command Line Options
   
@@ -133,19 +133,19 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
   ### Single Port
   
-  -p 80
+      -p 80
   
   ### Port Range
-  
-  -p 1-1000
+      
+      -p 1-1000
   
   ### Multiple Ports
   
-  -p 22,80,443,8080
+      -p 22,80,443,8080
   
   ### Mixed Ranges and Single Ports
   
-  -p 20-25,80,443,8000-9000
+      -p 20-25,80,443,8000-9000
   
 ## Scan Types
   
@@ -181,13 +181,13 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   Lightscan supports standard CIDR notation for scanning entire networks:
   
   ### Class C subnet (256 hosts)
-  python lightscan.py -T 192.168.1.0/24
+      python lightscan.py -T 192.168.1.0/24
   
   ### Class B subnet (65,536 hosts) - with safety warning
-  python lightscan.py -T 10.0.0.0/16
+      python lightscan.py -T 10.0.0.0/16
   
   ### Class A subnet (16.7 million hosts) - extreme warning
-  python lightscan.py -T 10.0.0.0/8
+      python lightscan.py -T 10.0.0.0/8
   
 ## Smart Host Discovery
   
