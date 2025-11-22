@@ -1,10 +1,10 @@
-#Lightscan - Advanced Port Scanner
+# Lightscan - Advanced Port Scanner
 
 Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for both security professionals and network administrators. It combines speed, accuracy, and enterprise-grade features in a single tool.
 
-#Features
+# Features
 
-##High-Performance Scanning
+## High-Performance Scanning
 
     Multi-threaded architecture for fast scans
 
@@ -14,7 +14,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
     Smart host discovery with threaded ICMP/TCP detection
 
-##Network Range Support
+## Network Range Support
 
     CIDR notation (/8, /16, /24, etc.) for subnet scanning
 
@@ -24,7 +24,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
     Safety warnings for large network ranges
 
-##Advanced Detection
+## Advanced Detection
 
     Service detection with custom and system service databases
 
@@ -34,7 +34,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
     Retry mechanism for unreliable networks
 
-##Professional Features
+## Professional Features
 
     Flexible port specification: ranges, lists, and top ports
 
@@ -45,7 +45,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
     Clean, organized output with per-target results
     
 
-#Installation
+# Installation
 
       git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
   
@@ -53,51 +53,51 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
       
       pip install -r requirements.txt
     
-#User Guide : 
+# User Guide : 
 
-##Basic Scanning
+## Basic Scanning
   
-  ###Single Target TCP Scan
+  ### Single Target TCP Scan
   
   python Lightscan.py -T 192.168.1.1
   
-  ###SYN Stealth Scan
+  ### SYN Stealth Scan
   
   python Lightscan.py -T 192.168.1.1 -st SYN
   
-  ###UDP Scan on Specific Port
+  ### UDP Scan on Specific Port
   
   python Lightscan.py -T 192.168.1.1 -st UDP -p 53
   
-##Network Scanning
+## Network Scanning
   
-  ###Scan Entire Subnet
+  ### Scan Entire Subnet
   
   python lightscan.py -T 192.168.1.0/24 -F
   
-  ###Multiple Targets
+  ### Multiple Targets
   
   python lightscan.py -T 192.168.1.1,192.168.1.50-100,10.0.0.0/24
   
-  ###Fast Network Scan with Top Ports
+  ### Fast Network Scan with Top Ports
   
   python lightscan.py -T 10.0.0.0/16 -F -s fast
   
-##Advanced Usage
+## Advanced Usage
   
-  ###Custom Port Range with Retries
+  ### Custom Port Range with Retries
   
   python lightscan.py -T target.com -p 1-1000 --max_retries 3
   
-  ###High-Speed Scan with Custom Threads
+  ### High-Speed Scan with Custom Threads
   
   python lightscan.py -T 192.168.1.1 -t 200 -tm 0.5
   
-  ###Verbose Output for Debugging
+  ### Verbose Output for Debugging
   
   python lightscan.py -T 192.168.1.1 -v -st SYN
   
-##Command Line Options
+## Command Line Options
   
       Required:
         -T, --target        Target IP, hostname, or CIDR notation
@@ -112,7 +112,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
         -tm, --timeout      Socket timeout in seconds
         -v, --verbose       Show verbose output
   
-  ##Speed Presets
+  ## Speed Presets
   
       paranoid: 1 thread, 3s timeout
   
@@ -126,27 +126,27 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Light-mode: 400 threads, 1s timeout
   
-##Port Specification Examples
+## Port Specification Examples
   
-  ###Single Port
+  ### Single Port
   
   -p 80
   
-  ###Port Range
+  ### Port Range
   
   -p 1-1000
   
-  ###Multiple Ports
+  ### Multiple Ports
   
   -p 22,80,443,8080
   
-  ###Mixed Ranges and Single Ports
+  ### Mixed Ranges and Single Ports
   
   -p 20-25,80,443,8000-9000
   
-##Scan Types
+## Scan Types
   
-  ###TCP Connect Scan (-st TCP)
+  ### TCP Connect Scan (-st TCP)
   
       Uses full TCP three-way handshake
   
@@ -154,7 +154,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Works on all systems without special privileges
   
-  ###SYN Stealth Scan (-st SYN)
+  ### SYN Stealth Scan (-st SYN)
   
       Half-open scanning technique
   
@@ -164,7 +164,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Sends RST packet to close connection
   
-  ###UDP Scan (-st UDP)
+  ### UDP Scan (-st UDP)
   
       Connectionless protocol scanning
   
@@ -172,7 +172,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Useful for DNS, DHCP, SNMP services
   
-##Network Scanning Features
+## Network Scanning Features
   CIDR Notation Support
   
   Lightscan supports standard CIDR notation for scanning entire networks:
@@ -186,9 +186,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   ### Class A subnet (16.7 million hosts) - extreme warning
   python lightscan.py -T 10.0.0.0/8
   
-##Smart Host Discovery
+## Smart Host Discovery
   
-  ###When scanning multiple targets:
+  ### When scanning multiple targets:
   
       Performs threaded host discovery first
   
@@ -198,7 +198,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Saves time by skipping dead hosts
   
-  ###Safety Features
+  ### Safety Features
   
       Warnings for large network scans
   
@@ -206,9 +206,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Progress indicators for large expansions
   
-##Output Interpretation
+## Output Interpretation
 
-  ###Port States
+  ### Port States
   
       Open: Service is listening and accessible
   
@@ -218,9 +218,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Open|Filtered: Unable to determine (common with UDP)
   
-##Firewall Detection
+## Firewall Detection
   
-  ###Lightscan analyzes response patterns to detect firewalls:
+  ### Lightscan analyzes response patterns to detect firewalls:
   
       No Firewall: Most ports are closed or open
   
@@ -230,7 +230,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Inconclusive: Mixed response patterns
   
-  ###Performance Tips
+  ### Performance Tips
   
       Use -F for large networks: Scan top 100 ports instead of top 1000
   
@@ -242,9 +242,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Choose appropriate scan type: SYN for speed, TCP for reliability
   
-#Troubleshooting
+# Troubleshooting
   
-  ##Scan is too slow
+  ## Scan is too slow
   
       Reduce timeout: -tm 1.0
   
@@ -252,7 +252,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Use faster speed preset: -s fast
   
-  ##No results from UDP scan
+  ## No results from UDP scan
   
       UDP is connectionless - timeouts are normal
   
@@ -260,13 +260,13 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Check if service is actually running
   
-  ##SYN scan not working
+  ## SYN scan not working
   
       Ensure you have root/administrator privileges
   
       Try TCP connect scan instead: -st TCP
   
-  ##Host discovery missing hosts
+  ## Host discovery missing hosts
   
       Some hosts block ICMP
   
@@ -274,7 +274,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Check firewall rules on target hosts
   
-  ##Use Cases
+  ## Use Cases
   
       Penetration Testing: Network reconnaissance and service enumeration
   
@@ -284,9 +284,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
       Educational Purposes: Learning about network protocols and scanning techniques
   
-#Legal Disclaimer
+# Legal Disclaimer
   
-  ##This tool is intended for:
+  ## This tool is intended for:
   
       Security professionals conducting authorized assessments
   
