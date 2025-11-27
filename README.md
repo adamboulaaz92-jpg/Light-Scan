@@ -56,6 +56,10 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
       cd Light-Scan
       
       pip install -r requirements.txt
+      
+# Importante
+
+      before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run)
     
 # User Guide : 
 
