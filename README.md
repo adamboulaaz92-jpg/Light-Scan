@@ -355,3 +355,10 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
     [+] Successfully sent fragemented ACK to scanme.nmap.org, 2 responses received from scanme.nmap.org
     
 ### OS Figerprint
+
+    [+] Os Figerprint :
+    
+        Linux/Unix : 100.0%
+        Windows : 0.0%
+        Servers/Networking Device : 0.0
+        
