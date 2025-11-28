@@ -309,3 +309,49 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   License
   
   This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the LICENSE file for details.
+
+# Update 1.1.2 Features
+
+## adding 1700+ new services for Services.py for both TCP and UDP  
+## adding more flags for better experience :
+
+      -Rc, --recursively    recursively scan host that shown to be down or not responding and more
+      -f, --fragmente       fragmente the sending packet for more stealth
+      -Pn, --no_ping        Do not ping the target/s
+      -b, --banner          Banner Grabing
+      -O, --os              OS Figerprint
+## upgrade LightEngine with new abilitys like :
+### Banner Grabbing
+
+    ============================================================
+
+    [+] Banner from scanme.nmap.org: Port 22:
+    
+    SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13
+    
+    ============================================================
+    
+    ============================================================
+    
+    [+] Banner from scanme.nmap.org: Port 80:
+    
+    HTTP/1.1 200 OK
+    Date: Fri, 28 Nov 2025 20:49:32 GMT
+    Server: Apache/2.4.7 (Ubuntu)
+    Accept-Ranges: bytes
+    Vary: Accept-Encoding
+    Content-Type: text/html
+    
+    ============================================================
+    
+### Fragmentation
+
+    [+] Host scanme.nmap.org is shown to be down or not responding
+
+    [+] Fragmentation: 2 packets sent to 45.33.32.156, 2 responses received
+    
+    [+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)
+    
+    [+] Successfully sent fragemented ACK to scanme.nmap.org, 2 responses received from scanme.nmap.org
+    
+### OS Figerprint
