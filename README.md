@@ -1,7 +1,6 @@
 ![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)
 ![OS](https://img.shields.io/badge/OS-Linux%20%7C%20Windows-lightgrey?logo=linux&logo=windows)
 ![License](https://img.shields.io/badge/license-GNU-green?logo=gnu)
-![Cyber Security](https://img.shields.io/badge/Cyber-Security-blue?logo=lock)
 ![Open Source](https://img.shields.io/badge/Open%20Source-✓-brightgreen?logo=github)
 
 # Lightscan - Advanced Port Scanner
