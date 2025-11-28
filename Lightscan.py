@@ -1061,7 +1061,8 @@ class Lightscan:
                             f"     Port {results['open_filtered_ports'][i]} {results['open_filtered_ports_services'][i].lower()}\\{self.Proto}")
 
             self.Firewall_detection(target, results)
-            Payloads.OS_figerprint(target, results['open_ports'])
+            if self.args.os:
+                Payloads.OS_figerprint(target, results['open_ports'])
         print(f"\n[+] Lightscan scanned {len(self.targetss)} target(s) successfully")
 
     def Start(self):
@@ -1122,4 +1123,5 @@ if __name__ == "__main__":
         print("\n[!] Scan interrupted by user")
     except Exception as e:
         print(f"\n[!] Unexpected error: {e}")
+
 
