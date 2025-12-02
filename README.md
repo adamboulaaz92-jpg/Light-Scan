@@ -9,7 +9,69 @@
 
 Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for both security professionals and network administrators. It combines speed, accuracy all those features in a single tool.
 
+# Real scan output
 ![](image/Light-Scan-Result.png)
+
+    [+] Host 127.0.0.1 is up!
+    
+    
+    
+        __    _       __    __
+       / /   (_)___ _/ /_  / /_______________ _____
+      / /   / / __ `/ __ \/ __/ ___/ ___/ __ `/ __ \
+     / /___/ / /_/ / / / / /_(__  ) /__/ /_/ / / / /
+    /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/
+            /____/
+    
+    Version : 1.1.3
+    
+    
+    [*] Scan completed in 0.02 seconds
+    
+    ============================================================
+    Scan result for : 127.0.0.1
+    Scan Type: TCP | Protocol: TCP
+    ============================================================
+    
+    [+] Open Ports: 2
+         Port 445 microsoft-ds\tcp
+         Port 135 msrpc\tcp
+    
+    [+] Closed Ports: 0
+    
+    [+] Filtered Ports: 0
+    
+    [!] Firewall Analysis for 127.0.0.1:
+    
+        Total ports scanned: 2
+        Open ports: 2
+        Closed ports: 0
+        Filtered ports: 0
+        Open Filtered ports: 0
+        
+        [+] NO FIREWALL DETECTED: no port is filtered
+    
+    
+    [+] Captured Banner/s: 2
+    
+    [*] Banner from Port 445:
+    
+        ============================================================
+             SNB - Microsoft-DS
+        ============================================================
+        
+    [*] Banner from Port 135:
+    
+        ============================================================
+             Microsoft Windows Remote Procedure Call
+        ============================================================
+    
+    
+    [+] OS Fingerprint Results:
+    ----------------------------------------
+        [+] Windows      :  83.2% (score: 109.0)
+    
+    [+] Lightscan scanned 1 target(s) successfully
 
 # Features
 
