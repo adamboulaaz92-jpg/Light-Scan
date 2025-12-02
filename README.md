@@ -112,22 +112,33 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
   
 ## Command Line Options
   
-      Required:
-        -T, --target        Target IP, hostname, or CIDR notation
-      
-      Optional:
-        -p, --port          Port(s) to scan (e.g., 80, 1-1000, 22,80,443)
-        -s, --speed         Scan speed preset [paranoid|slow|normal|fast|insane|Light-mode]
-        -st, --scan_type    Scan type [TCP|SYN|UDP] (default: TCP)
-        -F                  Scan top 100 ports (fast mode)
-        -mx, --max_retries  Max retries for unresponsive ports (default: 1)
-        -t, --threads       Number of threads to use
-        -tm, --timeout      Socket timeout in seconds
-        -v, --verbose       Show verbose output
+      Lightscan Port Scanner
+
+        options:
+          -h, --help            show this help message and exit
+          -T, --target TARGET   Target IP or Hostname
+          -p, --port PORT       Port/s to scan
+          -s, --speed {paranoid,slow,normal,fast,insane,Light-mode}
+                                Scan speed preset
+          -v, --verbose         Show verbose output {True/False}
+          -st, --scan_type SCAN_TYPE
+                                Scan types {TCP,SYN,UDP}
+          -F                    Scan The Top 100 ports for fast scanning
+          -mx, --max_retries MAX_RETRIES
+                                Max number of retries if port show a no response
+          -t, --threads THREADS
+                                Number of threads to use
+          -tm, --timeout TIMEOUT
+                                Timeout with second
+          -Rc, --recursively    recursively scan host that shown to be down or not responding and more
+          -f, --fragmente       fragmente the sending packet for more stealth
+          -Pn, --no_ping        Do not ping the target/s
+          -b, --banner          Banner Grabing
+          -O, --os              OS Figerprint
   
   ## Speed Presets
   
-      paranoid: 1 thread, 3s timeout
+      paranoid: 2 thread, 3s timeout
   
       slow: 6 threads, 2s timeout
   
