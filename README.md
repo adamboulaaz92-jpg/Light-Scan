@@ -81,7 +81,9 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
 Multi-threaded architecture for fast scans
 Multiple scan types: TCP Connect, SYN Stealth, UDP
+
 Configurable speed presets from Paranoid to Light-mode (400 threads)
+
 Smart host discovery with threaded ICMP/TCP detection
 
 ## Network Range Support
