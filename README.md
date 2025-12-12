@@ -298,7 +298,7 @@ Filtered: Firewall blocking access (no response)
   
 Open|Filtered: Unable to determine (common with UDP)
   
-  ### Performance Tips
+## Performance Tips
   
 Use -F for large networks: Scan top 100 ports instead of top 1000
   
@@ -356,9 +356,6 @@ Educational and research purposes
   Contributing
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
-  License
-  
-  This project is licensed under the GNU GENERAL PUBLIC LICENSE - see the LICENSE file for details.
 
 # Update 1.1.2 Features
 
