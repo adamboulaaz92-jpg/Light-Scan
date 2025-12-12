@@ -118,7 +118,7 @@ Clean, organized output with per-target results
     
 # Installation
 
-     git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+      git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
   
       cd Light-Scan
       
@@ -126,7 +126,7 @@ Clean, organized output with per-target results
       
 # Importante
 
-      before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run)
+before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run)
     
 # User Guide : 
 
@@ -200,17 +200,17 @@ Clean, organized output with per-target results
   
   ## Speed Presets
   
-      paranoid: 2 thread, 3s timeout
+paranoid: 2 thread, 3s timeout
   
-      slow: 6 threads, 2s timeout
+slow: 6 threads, 2s timeout
   
-      normal: 30 threads, 1.5s timeout
+normal: 30 threads, 1.5s timeout
   
-      fast: 60 threads, 1.5s timeout
+fast: 60 threads, 1.5s timeout
   
-      insane: 160 threads, 1s timeout
+insane: 160 threads, 1s timeout
   
-      Light-mode: 400 threads, 1s timeout
+Light-mode: 400 threads, 1s timeout
   
 ## Port Specification Examples
   
@@ -233,30 +233,26 @@ Clean, organized output with per-target results
 ## Scan Types
   
   ### TCP Connect Scan (-st TCP)
+
+Uses full TCP three-way handshake
   
-      Uses full TCP three-way handshake
-  
-      Most reliable but easily detectable
-  
-      Works on all systems without special privileges
+Most reliable but easily detectable
   
   ### SYN Stealth Scan (-st SYN)
   
-      Half-open scanning technique
+Half-open scanning technique
   
-      Stealthier than TCP connect
+Stealthier than TCP connect
   
-      Requires root/administrator privileges
-  
-      Sends RST packet to close connection
+Sends RST packet to close connection
   
   ### UDP Scan (-st UDP)
   
-      Connectionless protocol scanning
+Connectionless protocol scanning
   
-      Slower than TCP scans due to timeouts
+Slower than TCP scans due to timeouts
   
-      Useful for DNS, DHCP, SNMP services
+Useful for DNS, DHCP, SNMP services
   
 ## Network Scanning Features
   CIDR Notation Support
@@ -264,121 +260,97 @@ Clean, organized output with per-target results
   Lightscan supports standard CIDR notation for scanning entire networks:
   
   ### Class C subnet (256 hosts)
-      python lightscan.py -T 192.168.1.0/24
+      python Lightscan.py -T 192.168.1.0/24
   
   ### Class B subnet (65,536 hosts) - with safety warning
-      python lightscan.py -T 10.0.0.0/16
+      python Lightscan.py -T 10.0.0.0/16
   
   ### Class A subnet (16.7 million hosts) - extreme warning
-      python lightscan.py -T 10.0.0.0/8
+      python Lightscan.py -T 10.0.0.0/8
   
 ## Smart Host Discovery
   
   ### When scanning multiple targets:
   
-      Performs threaded host discovery first
+Performs threaded host discovery first
   
-      Only scans hosts that respond to discovery probes
-  
-      Shows summary of responsive vs non-responsive hosts
-  
-      Saves time by skipping dead hosts
+Only scans hosts that respond to discovery probes
+
+Saves time by skipping dead hosts
   
   ### Safety Features
   
-      Warnings for large network scans
+Warnings for large network scans
   
-      Confirmation prompts for massive scans
+Confirmation prompts for massive scans
   
-      Progress indicators for large expansions
+Progress indicators for large expansions
   
 ## Output Interpretation
 
   ### Port States
   
-      Open: Service is listening and accessible
+Open: Service is listening and accessible
   
-      Closed: Host is up but no service listening
+Closed: Host is up but no service listening
   
-      Filtered: Firewall blocking access (no response)
+Filtered: Firewall blocking access (no response)
   
-      Open|Filtered: Unable to determine (common with UDP)
-  
-## Firewall Detection
-  
-  ### Lightscan analyzes response patterns to detect firewalls:
-  
-      No Firewall: Most ports are closed or open
-  
-      Firewall Detected: Significant port filtering
-  
-      Strong Firewall: Most ports are filtered
-  
-      Inconclusive: Mixed response patterns
+Open|Filtered: Unable to determine (common with UDP)
   
   ### Performance Tips
   
-      Use -F for large networks: Scan top 100 ports instead of top 1000
+Use -F for large networks: Scan top 100 ports instead of top 1000
   
-      Adjust timeout: Reduce timeout for internal networks (-tm 0.5)
+Adjust timeout: Reduce timeout for internal networks (-tm 0.5)
   
-      Increase threads: Use more threads for faster scanning (-t 100)
+Increase threads: Use more threads for faster scanning (-t 100)
   
-      Reduce retries: Use --max_retries 1 for reliable networks
+Reduce retries: Use --max_retries 1 for reliable networks
   
-      Choose appropriate scan type: SYN for speed, TCP for reliability
+Choose appropriate scan type: SYN for speed, TCP for reliability
   
 # Troubleshooting
   
   ## Scan is too slow
   
-      Reduce timeout: -tm 1.0
+Reduce timeout: -tm 1.0
   
-      Increase threads: -t 100
+Increase threads: -t 100
   
-      Use faster speed preset: -s fast
+Use faster speed preset: -s fast
   
   ## No results from UDP scan
   
-      UDP is connectionless - timeouts are normal
+UDP is connectionless - timeouts are normal
   
-      Increase retries: --max_retries 3
+Increase retries: --max_retries 3
   
-      Check if service is actually running
+Check if service is actually running
   
   ## SYN scan not working
   
-      Ensure you have root/administrator privileges
+Ensure you have root/administrator privileges
   
-      Try TCP connect scan instead: -st TCP
+Try TCP connect scan instead: -st TCP
   
   ## Host discovery missing hosts
   
-      Some hosts block ICMP
+Some hosts block ICMP
   
-      Use TCP-based discovery (automatic fallback)
+Use TCP-based discovery (automatic fallback) by  -Rc flag
   
-      Check firewall rules on target hosts
-  
-  ## Use Cases
-  
-      Penetration Testing: Network reconnaissance and service enumeration
-  
-      Network Administration: Inventory and monitoring of network services
-  
-      Security Auditing: Identifying unauthorized services and open ports
-  
-      Educational Purposes: Learning about network protocols and scanning techniques
+Check firewall rules on target hosts
   
 # Legal Disclaimer
   
   ## This tool is intended for:
   
-      Security professionals conducting authorized assessments
+Security professionals conducting authorized assessments
   
-      Network administrators monitoring their own networks
+Network administrators monitoring their own networks
   
-      Educational and research purposes
+Educational and research purposes
   
   Always ensure you have proper authorization before scanning any network or system. Unauthorized scanning may be illegal in your jurisdiction.
   Contributing
