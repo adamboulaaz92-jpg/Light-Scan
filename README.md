@@ -88,38 +88,37 @@ Smart host discovery with threaded ICMP/TCP detection
 
 ## Network Range Support
 
-    CIDR notation (/8, /16, /24, etc.) for subnet scanning
+CIDR notation (/8, /16, /24, etc.) for subnet scanning
 
-    Multiple target support via comma-separated lists
+Multiple target support via comma-separated lists
 
-    Intelligent host filtering - skips non-responsive hosts in network scans
+Intelligent host filtering - skips non-responsive hosts in network scans
 
-    Safety warnings for large network ranges
+Safety warnings for large network ranges
 
 ## Advanced Detection
 
-    Service detection with custom and system service databases
+Service detection with custom and system service databases
 
-    Firewall detection with detailed analysis
+Firewall detection with detailed analysis
 
-    Port state classification: Open, Closed, Filtered, Open|Filtered
+Port state classification: Open, Closed, Filtered, Open|Filtered
 
-    Retry mechanism for unreliable networks
+Retry mechanism for unreliable networks
 
 ## Professional Features
 
-    Flexible port specification: ranges, lists, and top ports
+Flexible port specification: ranges, lists, and top ports
 
-    Verbose output for debugging and analysis
+Verbose output for debugging and analysis
 
-    Customizable timeouts and thread counts
+Customizable timeouts and thread counts
 
-    Clean, organized output with per-target results
+Clean, organized output with per-target results
     
-
 # Installation
 
-      git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+     git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
   
       cd Light-Scan
       
