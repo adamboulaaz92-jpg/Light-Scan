@@ -61,24 +61,46 @@ Clean, organized output with per-target results
 # Installation
 
       git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
-  
-      cd Light-Scan
-      
-      pip install -r requirements.txt
       
 # Importante
 
 ## For Windows
 before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run)
 
+## Windows Setup
+
+    cd Light-Scan
+    
+    python -m venv venv
+
+    .\venv\Scripts\activate
+
+    pip install -r requirements.txt
+    
 ## For Linux
 before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run) or you can just install libpcap by the command :
 
-### For Debina Based Linux :
+### For Debian Based Linux :
         sudo apt install libpcap-dev
 ### For Arch Based Linux :
         sudo pacman -S libpcap
 
+## Linux Setup
+
+### For Debian Based Linux :
+
+    sudo apt install python3-venv
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+    
+### For Arch Based Linux :
+
+    python -m venv venv
+
+    source venv/bin/activate
+  
 # User Guide : 
 
 ## Basic Scanning
