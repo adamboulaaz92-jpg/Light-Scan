@@ -68,8 +68,17 @@ Clean, organized output with per-target results
       
 # Importante
 
+## For Windows
 before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run)
-    
+
+## For Linux
+before running Light-Scan you need to install Npcap from https://npcap.com/#download (it's required for Light-Scan to run) or you can just install libpcap by the command :
+
+### For Debina Based Linux :
+        sudo apt install libpcap-dev
+### For Arch Based Linux :
+        sudo pacman -S libpcap
+
 # User Guide : 
 
 ## Basic Scanning
