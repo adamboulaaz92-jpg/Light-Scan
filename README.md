@@ -94,12 +94,16 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
     python3 -m venv venv
 
     source venv/bin/activate
+
+    pip install -r requirements.txt
     
 ### For Arch Based Linux :
 
     python -m venv venv
 
     source venv/bin/activate
+
+    pip install -r requirements.txt
   
 # User Guide : 
 
