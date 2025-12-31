@@ -334,7 +334,7 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Light-Scan 1.1.4 release at 31/12/2025 11:30 PM
+# Light-Scan 1.1.4 release at 12/31/2025 11:30 PM
 
 
         
