@@ -14,7 +14,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 ![](image/Light-Scan-Logo.png)
 
 # Real scan output
-## Light-Scan Version 1.1.3
+## Light-Scan Version 1.1.4
 ![](image/Light-Scan-Result.png)
 
 # Features
@@ -334,62 +334,7 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Update 1.1.3 Features
+# Light-Scan 1.1.4 release at 31/12/2025 11:30 PM
 
-## Adding 1000+ new services for Services.py for both TCP and UDP  
-## Adding more flags for better experience :
-
-        -arp, --ARP           Do not do ARP Scan on Local Networks
-        -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and Scan Top 100 Ports
-        -Pt, --tcp-ping       Do scan a TCP Ping
-## Adding ARP Scan by default for Local Targets:
-        ============================================================
-        [+] Scan result for : 127.0.0.1
-        [+] Scan Type: TCP | Protocol: TCP
-        [+] IP Status: Local
-        [+] Mac Address: ff:ff:ff:ff:ff:ff
-        ============================================================
-## Adding specefique packets for SSH protocole
-## Upgrade stealth of the scanning methods
-## Add a new scanning method ( NULL Scan ):
-        [*] Scan completed in 0.02 seconds
-
-        ============================================================
-        [+] Scan result for : 127.0.0.1
-        [+] Scan Type: NULL | Protocol: TCP
-        [+] IP Status: Local
-        [+] Mac Address: ff:ff:ff:ff:ff:ff
-        ============================================================
-        
-        [+] Closed Ports: 0
-        
-        [+] Filtered Ports: 0
-
-        [+] (NULL Scan) Open | Filtered Ports: 4
-             Port 912 apex-mesh\tcp
-             Port 902 ideafarm-door\tcp
-             Port 135 msrpc\tcp
-             Port 445 microsoft-ds\tcp
-## Upgrade Banner Grabbing and OS Detection:
-### Banner Grabbing:
-        [+] Captured Banner/s: 2
-
-        [*] Banner from Port 902:
-
-        ============================================================
-             220 VMware Authentication Daemon Version 1.10: SSL Required, ServerDaemonProtocol:SOAP, MKSDisplayProtocol:VNC , , NFCSSL supported/t,
-        
-        ============================================================
-
-        [*] Banner from Port 912:
-
-        ============================================================
-             220 VMware Authentication Daemon Version 1.0, ServerDaemonProtocol:SOAP, MKSDisplayProtocol:VNC , , ,
-        
-        ============================================================
-### OS Detion:
-        [+] OS Fingerprint Results:
-        ----------------------------------------
-            [+] Windows      :  94.1% (score: 506.0)
 
         
