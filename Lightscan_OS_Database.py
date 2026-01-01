@@ -1,5 +1,9 @@
-import scapy.all as scapy
+from scapy.layers.inet import IP, TCP, sr1
 import random
+
+red = "\033[31m"
+reset = "\033[0m"
+yellow = "\033[33m"
 
 class OS_DB:
     def __init__(self):
@@ -72,12 +76,12 @@ class OS_DB:
             }
 
             if not open_ports:
-                print("\n[!] Lightscan need at least 1 open port for OS detection")
+                print(f"\n{yellow}[!] Lightscan need at least 1 open port for OS detection{reset}")
                 return
 
             for port in open_ports:
                 try:
-                    probe = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=64) / scapy.TCP(
+                    probe = IP(dst=target, id=random.randint(1, 65535), ttl=64) / TCP(
                         dport=port,
                         sport=random.randint(60000, 65535),
                         seq=random.randint(1000000000, 4294967295),
@@ -91,20 +95,20 @@ class OS_DB:
                         flags="S"
                     )
 
-                    resp = scapy.sr1(probe, timeout=2, verbose=False)
+                    resp = sr1(probe, timeout=2, verbose=False)
 
-                    if resp and resp.haslayer(scapy.TCP) and resp.haslayer(scapy.IP):
-                        if resp[scapy.TCP].flags & 0x12:
-                            ttl = resp[scapy.IP].ttl
-                            window = resp[scapy.TCP].window
-                            options = resp[scapy.TCP].options
+                    if resp and resp.haslayer(TCP) and resp.haslayer(IP):
+                        if resp[TCP].flags & 0x12:
+                            ttl = resp[IP].ttl
+                            window = resp[TCP].window
+                            options = resp[TCP].options
 
                             if verbose:
                                 print(f"\n[+] Response from port {port}:")
                                 print(f"    Window: {window}")
                                 print(f"    TTL: {ttl}")
-                                print(f"    IP ID: {resp[scapy.IP].id}")
-                                print(f"    TCP Seq: {resp[scapy.TCP].seq}")
+                                print(f"    IP ID: {resp[IP].id}")
+                                print(f"    TCP Seq: {resp[TCP].seq}")
                                 print(f"    Options: {options}")
 
                             analysis = self.analyze_options(options)
@@ -115,7 +119,7 @@ class OS_DB:
 
                 except Exception as e:
                     if verbose:
-                        print(f"[!] OS fingerprint error on port {port}: {e}")
+                        print(f"{red}[!] OS fingerprint error on port {port}: {e}{reset}")
                     continue
 
             Top_1 = max(os_list.values())
@@ -135,7 +139,7 @@ class OS_DB:
                         else:
                             pass
             else:
-                print("\n[!] No conclusive OS fingerprint detected")
+                print(f"\n{yellow}[!] No conclusive OS fingerprint detected{reset}")
 
     @staticmethod
     def analyze_options(options):
@@ -199,7 +203,7 @@ class OS_DB:
             if analysis.get('mss') == 65495:
                 scores['Windows'] += 25
             if analysis.get('mss') == 1380:
-                scores['Linux'] += 5
+                scores['Linux'] += 8
 
             if analysis.get('wscale') == 8:
                 scores['Windows'] += 3

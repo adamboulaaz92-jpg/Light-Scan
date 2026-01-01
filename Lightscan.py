@@ -15,13 +15,16 @@ import logging
 import random
 import platform
 
+red = "\033[31m"
+reset = "\033[0m"
+yellow = "\033[33m"
+
 conf.sniff_promisc = 0
 conf.bufsize = 65536
 conf.use_bpf = False
 conf.L3socket.timeout = 1
 conf.debug_dissector = 0
 conf.use_pcap = True
-
 
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore", message=".*MAC address to reach destination not found.*")
@@ -34,7 +37,7 @@ threading.excepthook = handle_thread_exception
 
 class Lightscan:
     __slots__ = [
-        'speed_presets', 'host_ext', 'Proto', 'scan_type', 'version',
+        'speed_presets', 'host_ext', 'Proto', 'scan_type', 'version','lsse_ports_to_scan',
         'max_threads', 'socket_timeout', 'args', 'parser',
         'targetss', 'ports_to_scan', 'target_results', 'targets',
         'start_time', 'end_time','lock','__weakref__','timeout_count','user_os','LSSE'
@@ -67,9 +70,10 @@ class Lightscan:
             '.expert', '.guru', '.agency', '.services',
             '.fitness', '.health', '.food', '.travel', '.cars', '.fashion'
         }
+        self.lsse_ports_to_scan = []
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.3"
+        self.version = "1.1.4"
         self.max_threads = 60
         self.socket_timeout = 0.0
         self.targetss = []
@@ -85,6 +89,7 @@ class Lightscan:
         print(banner)
         print(f"Version : {self.version}")
         print(f"Platform : {self.user_os} \n")
+
     def initialize_target_results(self, target):
         self.target_results[target] = {
             'open_ports': [],
@@ -92,11 +97,13 @@ class Lightscan:
             'filtered_ports': [],
             'open_filtered_ports': [],
             'null_ports': [],
+            'fin_ports':[],
             'opened_ports_services': [],
             'closed_ports_services': [],
             'filtered_ports_services': [],
             'open_filtered_ports_services': [],
             'null_ports_services': [],
+            'fin_ports_services': [],
             'banners': [],
             'banners_ports': []
         }
@@ -143,7 +150,7 @@ class Lightscan:
         closed = len(results['closed_ports']) / total_ports
         open_filtered = len(results['open_filtered_ports']) / total_ports
 
-        print(f"\n[!] Firewall Analysis for {target}:\n")
+        print(f"\n[!] Firewall Analysis for {target}:")
         print(f"    Total ports scanned: {total_ports}")
         print(f"    Open ports: {len(results['open_ports'])}")
         print(f"    Closed ports: {len(results['closed_ports'])}")
@@ -186,13 +193,13 @@ class Lightscan:
 
     def args_parse(self):
         self.parser = argparse.ArgumentParser(description="Lightscan Port Scanner")
-        self.parser.add_argument("-T", "--target", required=True, help="Target IP or Hostname")
+        self.parser.add_argument("-T", "--target", required=False, help="Target IP or Hostname")
         self.parser.add_argument("-p","--port", required=False, help="Port/s to scan")
         self.parser.add_argument("-s", "--speed", required=False, default="normal",
                                  choices=['paranoid', 'slow', 'normal', 'fast', 'insane', 'Light-mode'],
                                  help="Scan speed preset")
-        self.parser.add_argument("-v", "--verbose",action="store_true", help="Show verbose output {True/False}")
-        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL}")
+        self.parser.add_argument("-v", "--verbose",action="store_true", help="Show verbose output ")
+        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL,FIN}")
         self.parser.add_argument("-F",action="store_true",help="Scan The Top 100 ports for fast scanning")
         self.parser.add_argument("-mx","--max-retries",type=int,help="Max number of retries if port show a no response",default=1)
         self.parser.add_argument("-t","--threads",type=int,help="Number of threads to use")
@@ -202,9 +209,18 @@ class Lightscan:
         self.parser.add_argument("-Pn","--no-ping",action="store_true",help="Do not ping the target/s")
         self.parser.add_argument("-b","--banner",action="store_true",help="Banner Grabing")
         self.parser.add_argument("-O","--os",action="store_true",help="OS Figerprint ")
-        self.parser.add_argument("-arp","--ARP",action="store_true",help="Do not do ARP Scan on Local Networks")
+        self.parser.add_argument("--ARP",action="store_true",help="Do not do ARP Scan on Local Networks")
         self.parser.add_argument("-A","--agressive",action="store_true",help="Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and Scan Top 100 Ports")
         self.parser.add_argument("-Pt","--tcp-ping",action="store_true",help="Do scan a TCP Ping")
+        self.parser.add_argument("-PIt","--icmp-timestamp-ping",action="store_true",help="Do scan a ICMP Timestamp Ping")
+        self.parser.add_argument("-PA","--icmp-address-ping",action="store_true",help="Do scan a ICMP Address Ping")
+        self.parser.add_argument("-Pin","--icmp-information-ping",action="store_true",help="Do scan a ICMP Information Ping")
+        self.parser.add_argument("-q","--quiet",action="store_true",help="Quiet mode")
+        self.parser.add_argument("--script",type=str,help="LSSE Scripts")
+        self.parser.add_argument("--url",type=str,help="Url for http/https based scripts ")
+        self.parser.add_argument("--redirect",action="store_true",help="Redirect http/https requests")
+        self.parser.add_argument("-sp",help="Port/s to use by scripts")
+        self.parser.add_argument("--lsse",action="store_true",help="Use that flag when you want just to performe a script")
         self.args = self.parser.parse_args()
 
     def agressive_scan_config(self):
@@ -224,7 +240,7 @@ class Lightscan:
                 for target in target_list:
                     self.targets.append(target)
             except Exception as error:
-                print(f"\n[!] Unexpected error: {error}")
+                print(f"\n{red}[!] Unexpected error: {error}{reset}")
         elif "/" in self.args.target:
             self.targets = self.parse_multi_target(self.args.target)
         else:
@@ -273,8 +289,8 @@ class Lightscan:
                 return [cidr_target]
 
         except Exception as e:
-            print(f"\n[!] Invalid CIDR notation: {cidr_target}")
-            print(f"[!] Error: {e}")
+            print(f"\n{red}[!] Invalid CIDR notation: {cidr_target}")
+            print(f"[!] Error: {e}{reset}")
             exit(1)
 
 
@@ -324,13 +340,13 @@ class Lightscan:
                 try:
                     socket.inet_pton(socket.AF_INET, target)
                 except:
-                    print("\n[!] Invalid Target IP or Hostname\n")
+                    print(f"\n{red}[!] Invalid Target IP or Hostname{reset}\n")
                     exit(1)
             elif Target.isalpha():
                 try:
                     socket.gethostbyname(target)
                 except:
-                    print("\n[!] Invalid Target IP or Hostname\n")
+                    print(f"{red}\n[!] Invalid Target IP or Hostname{reset}\n")
 
             elif Target.isalnum():
                  for ext in self.host_ext:
@@ -338,22 +354,22 @@ class Lightscan:
                          try:
                              socket.gethostbyname(target)
                          except:
-                             print("\n[!] Invalid Target IP or Hostnamen\n")
+                             print(f"{red}\n[!] Invalid Target IP or Hostname{reset}\n")
 
                          break
                      else:
                          try:
                              socket.gethostbyname(target)
                          except:
-                             print("\n[!] Invalid Target IP or Hostname\n")
+                             print(f"\n{red}[!] Invalid Target IP or Hostname{reset}\n")
 
             else:
-                print("\n[!] Invalid Target IP or Hostname \n")
+                print(f"{red}\n[!] Invalid Target IP or Hostname {reset}\n")
 
     def show_network_info(self):
         if len(self.targets) > 1:
-            print(f"\n[+] Network Scan Mode Activated")
-            print(f"    Total targets: {len(self.targets)} hosts")
+            print(f"[+] Network Scan Mode Activated")
+            print(f"    Total targets: {len(self.targets)} hosts\n")
 
     def port_parse(self):
         if self.args.F:
@@ -371,10 +387,10 @@ class Lightscan:
                 if type(sport) == int and type(eport) == int:
                     self.ports_to_scan = list(range(int(sport), int(eport) + 1))
                 else:
-                    print("\n[!] Invalid ports range, Lightscan is going to use default values \n")
+                    print(f"{red}\n[!] Invalid ports range, Lightscan is going to use default values {reset}\n")
                     self.ports_to_scan = top_1000_ports
             except:
-                print("\n[!] Invalid ports range, Lightscan is going to use default values \n")
+                print(f"{red}\n[!] Invalid ports range, Lightscan is going to use default values {reset}\n")
                 self.ports_to_scan = top_1000_ports
 
         elif "," in self.args.port and "-" not in self.args.port:
@@ -386,9 +402,9 @@ class Lightscan:
                     if type(port) == int :
                         self.ports_to_scan.append(port)
                     else:
-                        print(f"\n[!] Invalid port, Lightscan is going to skip that one <{port}>\n")
+                        print(f"\n{red}[!] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
             except:
-                print(f"\n[!] Invalid port, Lightscan is going to skip that one <{port}>\n")
+                print(f"\n{red}[!] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
         elif "," in self.args.port and "-" in self.args.port:
             try:
                 port_list = self.args.port.split(",")
@@ -402,10 +418,10 @@ class Lightscan:
                             if type(sport) == int and type(eport) == int:
                                 self.ports_to_scan.extend(list(range(int(sport), int(eport) + 1)))
                             else:
-                                print("\n[!] Invalid ports range \n")
+                                print(f"\n{red}[!] Invalid ports range {reset}\n")
                                 exit(1)
                         except:
-                            print("\n[!] Invalid ports range \n")
+                            print(f"\n{red}[!] Invalid ports range {reset}\n")
                             exit(1)
                     else:
                         port = int(port)
@@ -413,9 +429,9 @@ class Lightscan:
                         if type(port) == int :
                             self.ports_to_scan.append(port)
                         else:
-                            print(f"\n[!] Invalid port, Lightscan is going to skip that one <{port}>\n")
+                            print(f"\n{red}[!] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
             except:
-                print(f"\n[!] Invalid port, Lightscan is going to skip that one <{port}>\n")
+                print(f"\n{red}[!] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
 
         else:
             try:
@@ -424,40 +440,120 @@ class Lightscan:
                 if type(self.args.port) == int :
                     self.ports_to_scan.append(int(self.args.port))
                 else:
-                    print("\n[!] Invalid ports range, Lightscan is going to use default values \n")
+                    print(f"\n{red}[!] Invalid ports range, Lightscan is going to use default values {reset}\n")
                     self.ports_to_scan = top_1000_ports
             except:
-                print("\n[!] Invalid ports range, Lightscan is going to use default values \n")
+                print(f"\n{red}[!] Invalid ports range, Lightscan is going to use default values {reset}\n")
                 self.ports_to_scan = top_1000_ports
 
         if len(self.ports_to_scan) <= 0:
-            print("\n[!] Invalid Port/s, Lightscan is going to use default values ")
+            print(f"\n{red}[!] Invalid Port/s, Lightscan is going to use default values {reset}")
             self.ports_to_scan = top_1000_ports
+        else:
+            pass
+
+    def script_port_parse(self):
+
+        if self.args.sp is None:
+            print(f"\n{yellow}[LSSE] No port/s was assagned for the script {reset}\n")
+            exit()
+
+        elif "-" in self.args.sp and "," not in self.args.sp:
+            try:
+                sport , eport = self.args.sp.split("-")
+                sport = int(sport)
+                eport = int(eport)
+                self.port_validation_1(sport, eport)
+                if type(sport) == int and type(eport) == int:
+                    self.lsse_ports_to_scan = list(range(int(sport), int(eport) + 1))
+                else:
+                    print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                    exit()
+            except:
+                print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                exit()
+
+        elif "," in self.args.sp and "-" not in self.args.sp:
+            try:
+                port_list = self.args.sp.split(",")
+                for port in port_list:
+                    port = int(port)
+                    self.port_validation_2(port)
+                    if type(port) == int :
+                        self.lsse_ports_to_scan.append(port)
+                    else:
+                        print(f"\n{red}[LSSE] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
+            except:
+                print(f"\n{red}[LSSE] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
+        elif "," in self.args.sp and "-" in self.args.sp:
+            try:
+                port_list = self.args.sp.split(",")
+                for port in port_list:
+                    if "-" in port:
+                        try:
+                            sport, eport = port.split("-")
+                            sport = int(sport)
+                            eport = int(eport)
+                            self.port_validation_1(sport, eport)
+                            if type(sport) == int and type(eport) == int:
+                                self.lsse_ports_to_scan.extend(list(range(int(sport), int(eport) + 1)))
+                            else:
+                                print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                                exit()
+                        except:
+                            print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                            exit()
+                    else:
+                        port = int(port)
+                        self.port_validation_2(port)
+                        if type(port) == int :
+                            self.lsse_ports_to_scan.append(port)
+                        else:
+                            print(f"\n{red}[LSSE] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
+            except:
+                print(f"\n{red}[LSSE] Invalid port, Lightscan is going to skip that one <{port}>{reset}\n")
+
+        else:
+            try:
+                self.args.sp = int(self.args.sp)
+                self.port_validation_2(self.args.sp)
+                if type(self.args.sp) == int :
+                    self.lsse_ports_to_scan.append(int(self.args.sp))
+                else:
+                    print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                    exit()
+            except:
+                print(f"\n{red}[LSSE] Invalid ports range {reset}\n")
+                exit()
+
+        if len(self.lsse_ports_to_scan) <= 0:
+            print(f"\n{yellow}[LSSE] No port/s was assagned for script {reset}\n")
+            exit()
         else:
             pass
 
     def port_validation_1(self,sport,eport):
         if sport < 0:
-            print("\n[!] Invalid Starting Port\n")
+            print(f"\n{red}[!] Invalid Starting Port{reset}\n")
             exit(1)
         elif eport < 0:
-            print("\n[!] Invalid Ending Port\n")
+            print(f"\n{red}[!] Invalid Ending Port{reset}\n")
             exit(1)
         elif eport < sport:
-            print("\n[!] Invalid Port Range\n")
+            print(f"\n{red}[!] Invalid Port Range{reset}\n")
             exit(1)
         elif eport > 65535:
-            print("\n[!] Invalid Ending Port\n")
+            print(f"\n{red}[!] Invalid Ending Port{reset}\n")
             exit(1)
         else:
             pass
 
     def port_validation_2(self,port):
         if port < 0 or port > 65535:
-            print("\n[!] Invalid Starting Port\n")
+            print(f"\n{red}[!] Invalid Starting Port{reset}\n")
             exit(1)
         elif type(port) != int:
-            print("\n[!] Invalid Starting Port\n")
+            print(f"\n{red}[!] Invalid Starting Port{reset}\n")
             exit(1)
         else:
             pass
@@ -472,16 +568,18 @@ class Lightscan:
                     packet = Payloads.dns_payload_udp(target)
                 elif port == 22:
                     packet = Payloads.ssh_payload_udp(target)
+                elif port == 21:
+                    packet = Payloads.ftp_payload_udp(target)
                 else:
                     packet = scapy.IP(dst=target,id=random.randint(1, 65535),ttl=random.choice([64, 128, 255]),flags="DF") / scapy.UDP(dport=port, sport=random.randint(60000, 65535))
                 if self.args.fragmente:
                     if self.args.recursively:
                         response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
                         if self.args.verbose:
-                            print("\n[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
+                            print("[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
                     else:
                         if self.args.verbose:
-                            print("\n[+] Fragmentation is Forbiden with UDP packets (if you want use flag -Rc)\n")
+                            print(f"{yellow}[+] Fragmentation is Forbiden with UDP packets (if you want use flag -Rc){reset}\n")
                         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                 else:
                     response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
@@ -497,7 +595,7 @@ class Lightscan:
                                 self.target_results[target]['open_filtered_ports_services'].append(service)
                     else:
                         if self.args.verbose:
-                            print(f"[!] No response from UDP port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries})")
+                            print(f"{yellow}[!] No response from UDP port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
                         time.sleep(0.1)
                         continue
 
@@ -574,7 +672,7 @@ class Lightscan:
 
             except Exception as e:
                 if self.args.verbose:
-                    print(f"[!] Error scanning port {port}: {e}")
+                    print(f"{red}[!] Error scanning port {port}: {e}{reset}")
                 if attempt == self.args.max_retries - 1:
                     service = self.service_detection(port)
                     with self.lock:
@@ -609,7 +707,7 @@ class Lightscan:
                         future.result()
                     except Exception as e:
                         if self.args.verbose:
-                            print(f"[!] UDP scan error: {e}")
+                            print(f"{red}[!] UDP scan error: {e}{reset}")
 
         self.end_time = time.perf_counter()
 
@@ -621,16 +719,18 @@ class Lightscan:
 
                 if port == 22:
                     packet = Payloads.ssh_payload_tcp(target)
+                elif port == 21:
+                    packet = Payloads.ftp_payload_tcp(target)
                 else:
                     packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),seq=random.randint(1000000000, 4294967295),window=random.choice([5840, 64240, 65535, 29200, 8760]),options=Payloads.Stealth_tcp_options(), flags="S")
                 if self.args.fragmente:
                     if self.args.recursively:
                         response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
                         if self.args.verbose:
-                            print("\n[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
+                            print("[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
                     else:
                         if self.args.verbose:
-                            print("\n[+] Fragmentation is Forbiden with SYN packets (if you want use flag -Rc)\n")
+                            print(f"{yellow}[+] Fragmentation is Forbiden with SYN packets (if you want use flag -Rc){reset}\n")
                         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                 else:
                     response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
@@ -646,7 +746,7 @@ class Lightscan:
                                 self.target_results[target]['filtered_ports_services'].append(service)
                     else:
                         if self.args.verbose:
-                            print(f"[!] No response from TCP(SYN) port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries})")
+                            print(f"{yellow}[!] No response from TCP(SYN) port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
                         time.sleep(0.1)
                         continue
 
@@ -725,7 +825,7 @@ class Lightscan:
 
             except Exception as e:
                 if self.args.verbose:
-                    print(f"[!] Error scanning port {port}: {e}")
+                    print(f"{red}[!] Error scanning port {port}: {e}{reset}")
                 if attempt == self.args.max_retries - 1:
                     service = self.service_detection(port)
                     with self.lock:
@@ -745,6 +845,8 @@ class Lightscan:
 
                 if port == 22:
                     packet = Payloads.ssh_payload_tcp(target)
+                elif port == 21:
+                    packet = Payloads.ftp_payload_tcp(target)
                 else:
                     packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),seq=random.randint(1000000000, 4294967295),window=random.choice([5840, 64240, 65535, 29200, 8760]),options=Payloads.Stealth_tcp_options(), flags="S")
                 response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
@@ -759,7 +861,7 @@ class Lightscan:
                                 self.target_results[target]['filtered_ports_services'].append(service)
                     else:
                         if self.args.verbose:
-                            print(f"[!] No response from TCP(SYN) port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries})")
+                            print(f"{yellow}[!] No response from TCP(SYN) port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
                         time.sleep(0.1)
                         continue
 
@@ -781,11 +883,10 @@ class Lightscan:
                             ack_responses = Payloads.fragementation(ack_packet, self.Proto, self.scan_type, self.args.verbose)
 
                             if self.args.verbose:
-                                print("[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
                                 if ack_responses:
-                                    print(f"[+] Successfully sent fragemented ACK to {target}, {ack_responses} responses received from {target}\n\n")
+                                    print(f"[+] Successfully sent fragemented ACK to {target}, {ack_responses} responses received from {target}")
                                 else:
-                                    print(f"[+] Successfully sent fragmented ACK to {target} (no responses)\n\n")
+                                    print(f"[+] Successfully sent fragmented ACK to {target} (no responses)")
 
                         else:
                             scapy.send(ack_packet, verbose=False)
@@ -856,7 +957,7 @@ class Lightscan:
 
             except Exception as e:
                 if self.args.verbose:
-                    print(f"[!] Error scanning port {port}: {e}")
+                    print(f"{red}[!] Error scanning port {port}: {e}{reset}")
                 if attempt == self.args.max_retries - 1:
                     service = self.service_detection(port)
                     with self.lock:
@@ -867,103 +968,102 @@ class Lightscan:
                 else:
                     time.sleep(0.1)
                     continue
-
-    def Tcp_host_discovery(self,Target):
+    
+    def Tcp_host_discovery(self,Target,port):
         self.Proto = "tcp"
-        for port in top_ports:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(self.socket_timeout)
-                result = s.connect_ex((Target, port))
-                if self.args.recursively:
-                    if len(self.targets) == 1:
-                        if result == 0:
-                            print(f"\n[+] Host {Target} is up! ")
-                            self.targetss.append(Target)
-                            break
-                        elif result in [61, 111, 10061]:
-                            self.targetss.append(Target)
-                        else:
-                            self.targetss.append(Target)
-                        if len(self.ports_to_scan) == 0:
-                            print(f"\n[+] Host {Target} is shown to be down or not responding")
-                            self.targetss.append(Target)
-                            self.ports_to_scan = []
-                    else:
-                        if self.args.verbose:
-                            if result == 0:
-                                print(f"\n[+] Host {Target} is up! ")
-                                self.targetss.append(Target)
-                                break
-                            elif result in [61, 111, 10061]:
-                                self.targetss.append(Target)
-                            else:
-                                self.targetss.append(Target)
-                            if len(self.ports_to_scan) == 0:
-                                print(f"\n[+] Host {Target} is shown to be down or not responding, <Skip it>")
-                                self.targetss.append(Target)
-                                self.ports_to_scan = []
-                        else:
-                            if result == 0:
-                                print(f"\n[+] Host {Target} is up! ")
-                                self.targetss.append(Target)
-                                break
-                            elif result in [61, 111, 10061]:
-                                self.targetss.append(Target)
-                            else:
-                                self.targetss.append(Target)
-                            if len(self.ports_to_scan) == 0:
-                                self.targetss.append(Target)
-                                self.ports_to_scan = []
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(self.socket_timeout)
+        result = s.connect_ex((Target, port))
+        if self.args.recursively:
+            if len(self.targets) == 1:
+                if result == 0:
+                    print(f"[TCP] Host {Target}:{port} is up! ")
+                    self.targetss.append(Target)
+                elif result in [61, 111, 10061]:
+                    self.targetss.append(Target)
                 else:
-                    if len(self.targets) == 1:
-                        if result == 0:
-                            print(f"\n[+] Host {Target} is up! ")
-                            self.targetss.append(Target)
-                            break
-                        elif result in [61, 111, 10061]:
-                            pass
-                        else:
-                            pass
-                        if len(self.ports_to_scan) == 0:
-                            print(f"\n[+] Host {Target} is shown to be down or not responding")
-                            self.targetss.append(Target)
-                            self.ports_to_scan = []
+                    self.targetss.append(Target)
+                if len(self.ports_to_scan) == 0:
+                    print(f"[TCP] Host {Target} is shown to be down or not responding")
+                    self.targetss.append(Target)
+                    self.ports_to_scan = []
+            else:
+                if self.args.verbose:
+                    if result == 0:
+                        print(f"[TCP] Host {Target}:{port} is up! ")
+                        self.targetss.append(Target)
+                    elif result in [61, 111, 10061]:
+                        self.targetss.append(Target)
                     else:
-                        if self.args.verbose:
-                            if result == 0:
-                                print(f"\n[+] Host {Target} is up! ")
-                                self.targetss.append(Target)
-                                break
-                            elif result in [61, 111, 10061]:
-                                pass
-                            else:
-                                pass
-                            if len(self.ports_to_scan) == 0:
-                                print(f"\n[+] Host {Target} is shown to be down or not responding, <Skip it>")
-                                self.ports_to_scan = []
-                        else:
-                            if result == 0:
-                                print(f"\n[+] Host {Target} is up! ")
-                                self.targetss.append(Target)
-                                break
-                            elif result in [61, 111, 10061]:
-                                pass
-                            else:
-                                pass
-                            if len(self.ports_to_scan) == 0:
-                                self.ports_to_scan = []
+                        self.targetss.append(Target)
+                    if len(self.ports_to_scan) == 0:
+                        print(f"[TCP] Host {Target} is shown to be down or not responding, <Skip it>")
+                        self.targetss.append(Target)
+                        self.ports_to_scan = []
+                else:
+                    if result == 0:
+                        print(f"[TCP] Host {Target}:{port} is up! ")
+                        self.targetss.append(Target)
+                    elif result in [61, 111, 10061]:
+                        self.targetss.append(Target)
+                    else:
+                        self.targetss.append(Target)
+                    if len(self.ports_to_scan) == 0:
+                        self.targetss.append(Target)
+                        self.ports_to_scan = []
+        else:
+            if len(self.targets) == 1:
+                if result == 0:
+                    print(f"[TCP] Host {Target}:{port} is up! ")
+                    self.targetss.append(Target)
+
+                elif result in [61, 111, 10061]:
+                    pass
+                else:
+                    pass
+                if len(self.ports_to_scan) == 0:
+                    print(f"[TCP] Host {Target} is shown to be down or not responding")
+                    self.targetss.append(Target)
+                    self.ports_to_scan = []
+            else:
+                if self.args.verbose:
+                    if result == 0:
+                        print(f"[TCP] Host {Target}:{port} is up! ")
+                        self.targetss.append(Target)
+
+                    elif result in [61, 111, 10061]:
+                        pass
+                    else:
+                        pass
+                    if len(self.ports_to_scan) == 0:
+                        print(f"[TCP] Host {Target} is shown to be down or not responding, <Skip it>")
+                        self.ports_to_scan = []
+                else:
+                    if result == 0:
+                        print(f"[TCP] Host {Target}:{port} is up! ")
+                        self.targetss.append(Target)
+
+                    elif result in [61, 111, 10061]:
+                        pass
+                    else:
+                        pass
+                    if len(self.ports_to_scan) == 0:
+                        self.ports_to_scan = []
+
         self.targetss = list(set(self.targetss))
 
     def threded_Tcp_host_discovery(self):
         if self.max_threads == 1:
             for Target in self.targets:
-                    self.Tcp_host_discovery(Target)
+                for port in top_ports:
+                    self.Tcp_host_discovery(Target,port)
         else:
             with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
                 futures = []
                 for target in self.targets:
+                    for port in top_ports:
                         future = executor.submit(
-                            self.Tcp_host_discovery,target
+                            self.Tcp_host_discovery,target,port
                         )
                         time.sleep(0.02)
                         futures.append(future)
@@ -973,51 +1073,203 @@ class Lightscan:
                         future.result()
                     except Exception as e:
                         if self.args.verbose:
-                            print(f"[!] TCP ping error: {e}")
+                            print(f"{red}[!] TCP ping error: {e}{reset}")
 
-    def host_discovery(self, Target):
-            Echo = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.ICMP(type=8, code=0)
-            response = scapy.sr1(Echo, timeout=self.socket_timeout, verbose=0)
+    def host_discovery_3(self, Target):
+            icmp_id = random.randint(1, 65535)
+            icmp_seq = random.randint(1, 65535)
+            Address = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.ICMP(type=15,seq=icmp_seq,id=icmp_id, code=0)
+            response = scapy.sr1(Address, timeout=self.socket_timeout, verbose=0)
             if self.args.recursively:
                 if len(self.targets) == 1:
                     if response:
-                        print(f"\n[+] Host {Target} is up! ")
+                        print(f"[INFO] Host {Target} is up! ")
                         self.targetss.append(Target)
                     else:
-                        print(f"\n[+] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        print(f"[INFO] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
                         self.Tcp_host_discovery(Target)
                 else:
                     if self.args.verbose:
                         if response:
-                            print(f"\n[+] Host {Target} is up! ")
+                            print(f"[INFO] Host {Target} is up! ")
                             self.targetss.append(Target)
                         else:
-                            print(f"\n[+] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                            print(f"[INFO] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
                             self.Tcp_host_discovery(Target)
                     else:
                         if response:
-                            print(f"\n[+] Host {Target} is up! ")
+                            print(f"[INFO] Host {Target} is up! ")
                             self.targetss.append(Target)
                         else:
                             self.Tcp_host_discovery(Target)
             else:
                 if len(self.targets) == 1:
                     if response:
-                        print(f"\n[+] Host {Target} is up! ")
+                        print(f"[INFO] Host {Target} is up! ")
                         self.targetss.append(Target)
                     else:
-                        print(f"\n[+] Host {Target} is shown to be down or not responding")
+                        print(f"[INFO] Host {Target} is shown to be down or not responding")
                         self.targetss.append(Target)
                 else:
                     if self.args.verbose:
                         if response:
-                            print(f"\n[+] Host {Target} is up! ")
+                            print(f"[INFO] Host {Target} is up! ")
                             self.targetss.append(Target)
                         else:
-                            print(f"\n[+] Host {Target} is shown to be down or not responding, <Skip it>")
+                            print(f"[INFO] Host {Target} is shown to be down or not responding, <Skip it>")
                     else:
                         if response:
-                            print(f"\n[+] Host {Target} is up! ")
+                            print(f"[INFO] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            pass
+            self.targetss = list(set(self.targetss))
+
+    def host_discovery_2(self, Target):
+            icmp_id = random.randint(1, 65535)
+            icmp_seq = random.randint(1, 65535)
+            Address = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.ICMP(type=17,seq=icmp_seq,id=icmp_id, code=0)
+            response = scapy.sr1(Address, timeout=self.socket_timeout, verbose=0)
+            if self.args.recursively:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[ADDR] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[ADDR] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.Tcp_host_discovery(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[ADDR] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[ADDR] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                            self.Tcp_host_discovery(Target)
+                    else:
+                        if response:
+                            print(f"[ADDR] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            self.Tcp_host_discovery(Target)
+            else:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[ADDR] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[ADDR] Host {Target} is shown to be down or not responding")
+                        self.targetss.append(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[ADDR] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[ADDR] Host {Target} is shown to be down or not responding, <Skip it>")
+                    else:
+                        if response:
+                            print(f"[ADDR] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            pass
+            self.targetss = list(set(self.targetss))
+
+    def host_discovery_1(self, Target):
+            icmp_id = random.randint(1, 65535)
+            icmp_seq = random.randint(1, 65535)
+            TimeStamp = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.ICMP(type=13,seq=icmp_seq,id=icmp_id,code=0)
+            response = scapy.sr1(TimeStamp, timeout=self.socket_timeout, verbose=0)
+            if self.args.recursively:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[TIME STAMP] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[TIME STAMP] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.Tcp_host_discovery(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[TIME STAMP] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[TIME STAMP] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                            self.Tcp_host_discovery(Target)
+                    else:
+                        if response:
+                            print(f"[TIME STAMP] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            self.Tcp_host_discovery(Target)
+            else:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[TIME STAMP] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[TIME STAMP] Host {Target} is shown to be down or not responding")
+                        self.targetss.append(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[TIME STAMP] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[TIME STAMP] Host {Target} is shown to be down or not responding, <Skip it>")
+                    else:
+                        if response:
+                            print(f"[TIME STAMP] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            pass
+            self.targetss = list(set(self.targetss))
+
+    def host_discovery(self, Target):
+            icmp_id = random.randint(1, 65535)
+            icmp_seq = random.randint(1, 65535)
+            Echo = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.ICMP(type=8,id=icmp_id,seq=icmp_seq, code=0)
+            response = scapy.sr1(Echo, timeout=self.socket_timeout, verbose=0)
+            if self.args.recursively:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[ECHO] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[ECHO] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.Tcp_host_discovery(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[ECHO] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[ECHO] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                            self.Tcp_host_discovery(Target)
+                    else:
+                        if response:
+                            print(f"[ECHO] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            self.Tcp_host_discovery(Target)
+            else:
+                if len(self.targets) == 1:
+                    if response:
+                        print(f"[ECHO] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(f"[ECHO] Host {Target} is shown to be down or not responding")
+                        self.targetss.append(Target)
+                else:
+                    if self.args.verbose:
+                        if response:
+                            print(f"[ECHO] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(f"[ECHO] Host {Target} is shown to be down or not responding, <Skip it>")
+                    else:
+                        if response:
+                            print(f"[ECHO] Host {Target} is up! ")
                             self.targetss.append(Target)
                         else:
                             pass
@@ -1042,7 +1294,70 @@ class Lightscan:
                         future.result()
                     except Exception as e:
                         if self.args.verbose:
-                            print(f"[!] ICMP ECHO ping error: {e}")
+                            print(f"{red}[!] ICMP ECHO ping error: {e}{reset}")
+
+    def threaded_host_discovery_1(self):
+        if self.max_threads == 1:
+            for Target in self.targets:
+                self.host_discovery_1(Target)
+        else:
+            with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                futures = []
+                for target in self.targets:
+                        future = executor.submit(
+                            self.host_discovery_1,target
+                        )
+                        time.sleep(0.02)
+                        futures.append(future)
+
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        if self.args.verbose:
+                            print(f"{red}[!] ICMP TIMESTAMP ping error: {e}{reset}")
+
+    def threaded_host_discovery_2(self):
+        if self.max_threads == 1:
+            for Target in self.targets:
+                self.host_discovery_2(Target)
+        else:
+            with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                futures = []
+                for target in self.targets:
+                        future = executor.submit(
+                            self.host_discovery_2,target
+                        )
+                        time.sleep(0.02)
+                        futures.append(future)
+
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        if self.args.verbose:
+                            print(f"{red}[!] ICMP Address ping error: {e}{reset}")
+
+    def threaded_host_discovery_3(self):
+        if self.max_threads == 1:
+            for Target in self.targets:
+                self.host_discovery_3(Target)
+        else:
+            with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                futures = []
+                for target in self.targets:
+                        future = executor.submit(
+                            self.host_discovery_3,target
+                        )
+                        time.sleep(0.02)
+                        futures.append(future)
+
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        if self.args.verbose:
+                            print(f"{red}[!] ICMP Information ping error: {e}{reset}")
 
     def threaded_tcp_3_ways_handshake(self):
 
@@ -1068,7 +1383,7 @@ class Lightscan:
                         future.result()
                     except Exception as e:
                         if self.args.verbose:
-                            print(f"[!] TCP scan error: {e}")
+                            print(f"{red}[!] TCP scan error: {e}{reset}")
 
         self.end_time = time.perf_counter()
 
@@ -1095,7 +1410,7 @@ class Lightscan:
                         future.result()
                     except Exception as e:
                         if self.args.verbose:
-                            print(f"[!] TCP SYN scan error: {e}")
+                            print(f"{red}[!] TCP SYN scan error: {e}{reset}")
 
         self.end_time = time.perf_counter()
 
@@ -1106,22 +1421,20 @@ class Lightscan:
             default_gateway = gateways.get('default', {})
 
             if not default_gateway:
-                print(f"\n[!] Warning: No default gateway found. Network scanning may have issues.")
-                print(f"[!] Scapy will use broadcast MAC addresses which may generate warnings.")
+                print(f"\n{red}[!] Warning: No default gateway found. Network scanning may have issues.")
+                print(f"[!] Scapy will use broadcast MAC addresses which may generate warnings.{reset}")
         except ImportError:
             pass
 
     def Scan_details(self):
         duration = self.end_time - self.start_time
-        self.Banner()
+
 
         for target in self.targetss:
             if target in self.target_results:
                 self._sync_and_deduplicate_ports(target)
 
         print(f"\n[*] Scan completed in {duration:.2f} seconds")
-
-
 
         for target in self.targetss:
 
@@ -1152,6 +1465,8 @@ class Lightscan:
             print(f"{'=' * 60}")
 
             if self.scan_type == "null":
+                pass
+            elif self.scan_type == "fin":
                 pass
             else:
                 print(f"\n[+] Open Ports: {len(results['open_ports'])}")
@@ -1203,6 +1518,16 @@ class Lightscan:
                     for i in range(len(results['null_ports'])):
                         print(
                             f"     Port {results['null_ports'][i]} {results['null_ports_services'][i].lower()}\\{self.Proto}")
+            elif self.scan_type == "fin":
+                print(f"\n[+] (FIN Scan) Open | Filtered Ports: {len(results['null_ports'])}")
+                if len(results['fin_ports']) >= 21:
+                    for i in range(len(results['fin_ports'][:20])):
+                        print(
+                            f"     Port {results['fin_ports'][i]} {results['fin_ports_services'][i].lower()}\\{self.Proto}")
+                elif len(results['fin_ports']) <= 20 and len(results['fin_ports']) > 0:
+                    for i in range(len(results['fin_ports'])):
+                        print(
+                            f"     Port {results['fin_ports'][i]} {results['fin_ports_services'][i].lower()}\\{self.Proto}")
             self.Firewall_detection(target, results)
 
             if self.args.banner:
@@ -1223,87 +1548,132 @@ class Lightscan:
                 except Exception as e:
                     print(f"\n[+] OS Detection Error: {e}")
 
+            if self.args.script:
 
-        print(f"\n[+] Lightscan scanned {len(self.targetss)} target(s) successfully")
+                from LSSE import lsse
+                try:
+                    self.script_port_parse()
+                    print(f"\n[+] LSSE Response for {target}: ")
+                    lsse.Lsse.script_list(self.args.script,self.args.url,self.lsse_ports_to_scan,self.args.redirect)
+                except Exception as e:
+                    print(f"\n[+] Script Error with {self.args.script} : {e}")
+
+
+        print(f"\n[+] Lightscan scanned {len(self.targetss)} target(s) successfully\n")
 
     def Start(self):
         self.args_parse()
-        self.agressive_scan_config()
-        if self.args.os:
-            if self.args.banner:
-                pass
-            if self.args.recursively:
-                pass
-            if self.args.banner == False and self.args.recursively == False:
-                print("\n[!] OS Fingerprint need banner grabbing (-b,--banner)\n")
-                exit(1)
-        self.target_parse()
-        self.target_validation()
-        self.configure_speed()
-        self.port_parse()
-        self.check_network_config()
+        if self.args.quiet:
+            print()
+        else:
+            self.Banner()
 
-        if len(self.targets) > 1:
-            self.show_network_info()
-
-        if self.args.no_ping:
-            if self.args.verbose:
+        if self.args.lsse:
+            from LSSE import lsse
+            try:
+                self.script_port_parse()
+                print(f"[+] LSSE Response for {self.args.url}: ")
+                lsse.Lsse.script_list(self.args.script, self.args.url, self.lsse_ports_to_scan,self.args.redirect)
+                print(f"\n[+] LSSE run successfully\n")
+            except Exception as e:
+                print(f"\n{red}[+] Script Error with {self.args.script} : {e}{reset}")
+        else:
+            self.agressive_scan_config()
+            if self.args.os:
+                if self.args.banner:
+                    pass
                 if self.args.recursively:
-                    print("\n[!] Skipping flag -Pn because flag -Rc is active ")
+                    pass
+                if self.args.banner == False and self.args.recursively == False:
+                    print(f"\n{yellow}[!] OS Fingerprint need banner grabbing (-b,--banner){reset}\n")
+                    exit(1)
+            self.target_parse()
+            self.target_validation()
+            self.configure_speed()
+            self.port_parse()
+            self.check_network_config()
+
+            if len(self.targets) > 1:
+                self.show_network_info()
+
+            if self.args.no_ping:
+                if self.args.verbose:
+                    if self.args.recursively:
+                        print(f"\n{yellow}[!] Skipping flag -Pn because flag -Rc is active {reset}")
+                        try:
+                            self.threaded_host_discovery()
+                        except:
+                            self.threded_Tcp_host_discovery()
+                    else:
+                        print(f"\n{yellow}[!] Disabeling Host discovery{reset}")
+                        self.targetss = self.targets
+                else:
+                    if self.args.recursively:
+                        try:
+                            self.threaded_host_discovery()
+                        except:
+                            self.threded_Tcp_host_discovery()
+                    else:
+                        self.targetss = self.targets
+            else:
+                if self.args.tcp_ping:
+                    try:
+                        self.threded_Tcp_host_discovery()
+                    except:
+                        print(f"\n{red}[!] Error while TCP Ping <skip>{reset}\n")
+                elif self.args.icmp_timestamp_ping:
+                    try:
+                        self.threaded_host_discovery_1()
+                    except:
+                        print(f"\n{red}[!] Error while ICMP Timestap Ping <skip>{reset}\n")
+                elif self.args.icmp_information_ping:
+                    try:
+                        self.threaded_host_discovery_3()
+                    except:
+                        print(f"\n{red}[!] Error while ICMP Information Ping <skip>{reset}\n")
+                elif self.args.icmp_address_ping:
+                    try:
+                        self.threaded_host_discovery_2()
+                    except:
+                        print(f"\n{red}[!] Error while ICMP Address Ping <skip>{reset}\n")
+                else:
                     try:
                         self.threaded_host_discovery()
                     except:
-                        self.threded_Tcp_host_discovery()
-                else:
-                    print(f"\n[!] Disabeling Host discovery")
-                    self.targetss = self.targets
+                        print(f"\n{red}[!] Error while ICMP Ping <skip>{reset}\n")
+
+            for target in self.targetss:
+                self.initialize_target_results(target)
+
+            if self.args.scan_type == "TCP":
+                self.threaded_tcp_3_ways_handshake()
+            elif self.args.scan_type == "SYN":
+                self.threaded_tcp_syn_scan()
+            elif self.args.scan_type == "NULL":
+                self.start_time = time.perf_counter()
+                self.Proto = "tcp"
+                self.scan_type = "null"
+                Payloads.threaded_null_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                self.end_time = time.perf_counter()
+            elif self.args.scan_type == "FIN":
+                self.start_time = time.perf_counter()
+                self.Proto = "tcp"
+                self.scan_type = "fin"
+                Payloads.threaded_fin_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                self.end_time = time.perf_counter()
+            elif self.args.scan_type == "UDP":
+                self.threaded_udp_scan()
             else:
-                if self.args.recursively:
-                    try:
-                        self.threaded_host_discovery()
-                    except:
-                        self.threded_Tcp_host_discovery()
-                else:
-                    self.targetss = self.targets
-        else:
-            if self.args.tcp_ping:
-                try:
-                    self.threded_Tcp_host_discovery()
-                except:
-                    print("\n[!] Error while TCP Ping <skip>\n")
-            else:
-                try:
-                    self.threaded_host_discovery()
-                except:
-                    print("\n[!] Error while ICMP Ping <skip>\n")
-        print("\n")
+                self.threaded_tcp_3_ways_handshake()
 
-        for target in self.targetss:
-            self.initialize_target_results(target)
-
-        if self.args.scan_type == "TCP":
-            self.threaded_tcp_3_ways_handshake()
-        elif self.args.scan_type == "SYN":
-            self.threaded_tcp_syn_scan()
-        elif self.args.scan_type == "NULL":
-            self.start_time = time.perf_counter()
-            self.Proto = "tcp"
-            self.scan_type = "null"
-            Payloads.threaded_null_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
-            self.end_time = time.perf_counter()
-        elif self.args.scan_type == "UDP":
-            self.threaded_udp_scan()
-        else:
-            self.threaded_tcp_3_ways_handshake()
-
-        self.Scan_details()
+            self.Scan_details()
 
 if __name__ == "__main__":
     try:
         Scanner = Lightscan()
         Scanner.Start()
     except KeyboardInterrupt:
-        print("\n[!] Scan interrupted by user")
+        print(f"\n{yellow}[!] Scan interrupted by user{reset}")
     except Exception as e:
-        print(f"\n[!] Unexpected error: {e}")
+        print(f"\n{red}[!] Unexpected error: {e}{reset}")
 

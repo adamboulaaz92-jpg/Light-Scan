@@ -1,6 +1,10 @@
 import socket
 import random
 
+red = "\033[31m"
+reset = "\033[0m"
+yellow = "\033[33m"
+
 class Banner:
     def __init__(self):
         pass
@@ -19,12 +23,12 @@ class Banner:
                 return Banner._udp_banner_grab(target, port, payload, timeout, verbose)
             else:
                 if verbose:
-                    print(f"[!] Unknown protocol: {protocol}")
+                    print(f"{yellow}[!] Unknown protocol: {protocol}{reset}")
                 return None
 
         except Exception as e:
             if verbose:
-                print(f"\n[!] Banner grab error: {e}")
+                print(f"\n{red}[!] Banner grab error: {e}{reset}")
             return None
 
     @staticmethod
@@ -42,7 +46,7 @@ class Banner:
                 banner = b""
             except Exception as e:
                 if verbose:
-                    print(f"\n[!] Recv error: {e}")
+                    print(f"\n{red}[!] Recv error: {e}{reset}")
 
             if not banner.strip() and payload:
                 if verbose:
@@ -65,20 +69,20 @@ class Banner:
                 return decoded_banner
             else:
                 if verbose:
-                    print(f"\n[!] No TCP banner received")
+                    print(f"\n{yellow}[!] No TCP banner received{reset}")
                 return None
 
         except socket.timeout:
             if verbose:
-                print(f"\n[!] TCP socket timeout on {target}:{port}")
+                print(f"\n{red}[!] TCP socket timeout on {target}:{port}{reset}")
             return None
         except ConnectionRefusedError:
             if verbose:
-                print(f"\n[!] TCP connection refused on {target}:{port}")
+                print(f"\n{red}[!] TCP connection refused on {target}:{port}{reset}")
             return None
         except Exception as e:
             if verbose:
-                print(f"\n[!] TCP socket error: {e}")
+                print(f"\n{red}[!] TCP socket error: {e}{reset}")
             return None
 
     @staticmethod
@@ -104,18 +108,18 @@ class Banner:
                     return decoded_banner
                 else:
                     if verbose:
-                        print(f"\n[!] Empty UDP response")
+                        print(f"\n{yellow}[!] Empty UDP response{reset}")
                     return None
 
             except socket.timeout:
                 if verbose:
-                    print(f"\n[!] UDP socket timeout on {target}: Port {port}")
+                    print(f"\n{red}[!] UDP socket timeout on {target}: Port {port}{reset}")
                 sock.close()
                 return None
 
         except Exception as e:
             if verbose:
-                print(f"\n[!] UDP socket error: {e}")
+                print(f"\n{red}[!] UDP socket error: {e}{reset}")
             return None
 
     @staticmethod
@@ -226,19 +230,13 @@ class Banner:
                 ("openssh", "ssh"),
                 ("dropbear", "ssh")
             ],
+            "https": [
+                ("the plain http request was sent to https port","https"),
+                ("you're speaking plain http to an ssl-enabled server port","https"),
+            ],
             "http": [
-                ("server: simplehttp/0.6 python/3.12.12", "http"),
-                ("http/1.1", "http"),
-                ("server: apache", "http"),
-                ("server: nginx", "http"),
-                ("server: iis", "http"),
-                ("server: microsoft-httpapi", "http"),
-                ("content-type: text/html", "http"),
-                ("http/1.1 200", "http"),
-                ("http/1.0 200", "http"),
-                ("http/1.1 301", "http"),
-                ("http/1.1 302", "http"),
-                ("http/1.1 404", "http")
+                ("server: simplehttp/0.6", "http"),
+                ("400 bad request","http"),
             ],
             "database": [
                 ("mysql", "mysql"),
@@ -305,8 +303,6 @@ class Banner:
 
         try:
             for i, opened_port in enumerate(target_result["open_ports"]):
-                if port == 443:
-                    break
                 if opened_port == port:
                     target_result["opened_ports_services"][i] = detected_service
                     break
