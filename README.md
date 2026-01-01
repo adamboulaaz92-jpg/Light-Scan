@@ -151,29 +151,45 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
   
 ## Command Line Options
   
-      Lightscan Port Scanner
-
-        options:
-          -h, --help            show this help message and exit
-          -T, --target TARGET   Target IP or Hostname
-          -p, --port PORT       Port/s to scan
-          -s, --speed {paranoid,slow,normal,fast,insane,Light-mode}
-                                Scan speed preset
-          -v, --verbose         Show verbose output {True/False}
-          -st, --scan_type SCAN_TYPE
-                                Scan types {TCP,SYN,UDP}
-          -F                    Scan The Top 100 ports for fast scanning
-          -mx, --max_retries MAX_RETRIES
-                                Max number of retries if port show a no response
-          -t, --threads THREADS
-                                Number of threads to use
-          -tm, --timeout TIMEOUT
-                                Timeout with second
-          -Rc, --recursively    recursively scan host that shown to be down or not responding and more
-          -f, --fragmente       fragmente the sending packet for more stealth
-          -Pn, --no_ping        Do not ping the target/s
-          -b, --banner          Banner Grabing
-          -O, --os              OS Figerprint
+    Lightscan Port Scanner
+    
+    options:
+      -h, --help            show this help message and exit
+      -T, --target TARGET   Target IP or Hostname
+      -p, --port PORT       Port/s to scan
+      -s, --speed {paranoid,slow,normal,fast,insane,Light-mode}
+                            Scan speed preset
+      -v, --verbose         Show verbose output
+      -st, --scan-type SCAN_TYPE
+                            Scan types {TCP,SYN,UDP,NULL,FIN}
+      -F                    Scan The Top 100 ports for fast scanning
+      -mx, --max-retries MAX_RETRIES
+                            Max number of retries if port show a no response
+      -t, --threads THREADS
+                            Number of threads to use
+      -tm, --timeout TIMEOUT
+                            Timeout with second
+      -Rc, --recursively    recursively scan host that shown to be down or not responding and more
+      -f, --fragmente       fragmente the sending packet for more stealth
+      -Pn, --no-ping        Do not ping the target/s
+      -b, --banner          Banner Grabing
+      -O, --os              OS Figerprint
+      --ARP                 Do not do ARP Scan on Local Networks
+      -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and
+                            Scan Top 100 Ports
+      -Pt, --tcp-ping       Do scan a TCP Ping
+      -PIt, --icmp-timestamp-ping
+                            Do scan a ICMP Timestamp Ping
+      -PA, --icmp-address-ping
+                            Do scan a ICMP Address Ping
+      -Pin, --icmp-information-ping
+                            Do scan a ICMP Information Ping
+      -q, --quiet           Quiet mode
+      --script SCRIPT       LSSE Scripts
+      --url URL             Url for http/https based scripts
+      --redirect            Redirect http/https requests
+      -sp SP                Port/s to use by scripts
+      --lsse                Use that flag when you want just to performe a script
   
   ## Speed Presets
   
@@ -334,7 +350,38 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Light-Scan 1.1.4 release at 12/31/2025 11:30 PM
+# Light-Scan 1.1.4 :
+
+## Extend Light-Scan Service Database 
+## Fixing Multiple bugs
+## Add a new scaning method (FIN SCAN)
+    ============================================================
+    [+] Scan result for : scanme.nmap.org
+    [+] Scan Type: FIN | Protocol: TCP
+    [+] IP Status: Public
+    ============================================================
+## Adding Light-Scan Scripting Engine (LSSE)
+        __    _       __    __
+       / /   (_)___ _/ /_  / /_______________ _____
+      / /   / / __ `/ __ \/ __/ ___/ ___/ __ `/ __ \
+     / /___/ / /_/ / / / / /_(__  ) /__/ /_/ / / / /
+    /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/
+            /____/
+    
+    Version : 1.1.4
+    Platform : Windows
+    
+    [+] LSSE Response for scanme.nmap.org:
+    
+      [Port 80]
+         [Protocole] HTTP : [Status Code] 200 : [Server] Apache/2.4.7 (Ubuntu)    : [Title] Go ahead and ScanMe!...
+         [Protocole] HTTPS: SSL Error
+    
+      [Port 443]
+         [Protocole] HTTP: Connection failed
+         [Protocole] HTTPS: Connection failed
+    
+    [+] LSSE run successfully
 
 
         
