@@ -3,15 +3,14 @@
 ![License](https://img.shields.io/badge/license-GNU-green?logo=gnu)
 ![Open Source](https://img.shields.io/badge/Open%20Source-✓-brightgreen?logo=github)
 
+![](image/Light-Scan-Logo.png)
+
 # Lightscan - Advanced Port Scanner
 
 
 
 Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for both security professionals and network administrators. It combines speed, accuracy all those features in a single tool.
 
-
-
-![](image/Light-Scan-Logo.png)
 
 # Real scan output
 ## Light-Scan Version 1.1.4
@@ -22,7 +21,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 ## High-Performance Scanning
 
 Multi-threaded architecture for fast scans
-Multiple scan types: TCP Connect, SYN Stealth, UDP
+Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN
 
 Configurable speed presets from Paranoid to Light-mode (400 threads)
 
@@ -139,7 +138,7 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
   
   ### Custom Port Range with Retries
   
-      python Lightscan.py -T target.com -p 1-1000 --max_retries 3
+      python Lightscan.py -T target.com -p 1-1000 --max-retries 3
   
   ### High-Speed Scan with Custom Threads
   
@@ -193,17 +192,17 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
   
   ## Speed Presets
   
-paranoid: 2 thread, 3s timeout
+paranoid: 2 thread, 4s timeout
   
-slow: 6 threads, 2s timeout
+slow: 30 threads, 3s timeout
   
-normal: 30 threads, 1.5s timeout
+normal: 60 threads, 2.5s timeout
   
-fast: 60 threads, 1.5s timeout
+fast: 120 threads, 2.5s timeout
   
-insane: 160 threads, 1s timeout
+insane: 240 threads, 1.25s timeout
   
-Light-mode: 400 threads, 1s timeout
+Light-mode: 400 threads, 1.25s timeout
   
 ## Port Specification Examples
   
@@ -246,6 +245,19 @@ Connectionless protocol scanning
 Slower than TCP scans due to timeouts
   
 Useful for DNS, DHCP, SNMP services
+
+  ### NULL Scan (-st NULL)
+
+NULL TCP Flag scanning technique
+
+Stealthier than TCP connect
+
+  ### FIN Scan (-st FIN)
+
+FIN TCP Flag scanning technique
+
+Stealthier than TCP connect
+
   
 ## Network Scanning Features
   CIDR Notation Support
@@ -295,11 +307,11 @@ Open|Filtered: Unable to determine (common with UDP)
   
 Use -F for large networks: Scan top 100 ports instead of top 1000
   
-Adjust timeout: Reduce timeout for internal networks (-tm 0.5)
+Adjust timeout: Reduce timeout for internal networks (-tm 1.5)
   
 Increase threads: Use more threads for faster scanning (-t 100)
   
-Reduce retries: Use --max_retries 1 for reliable networks
+Reduce retries: Use --max-retries 1 for reliable networks
   
 Choose appropriate scan type: SYN for speed, TCP for reliability
   
@@ -309,7 +321,7 @@ Choose appropriate scan type: SYN for speed, TCP for reliability
   
 Reduce timeout: -tm 1.0
   
-Increase threads: -t 100
+Increase threads: -t 150
   
 Use faster speed preset: -s fast
   
@@ -317,13 +329,11 @@ Use faster speed preset: -s fast
   
 UDP is connectionless - timeouts are normal
   
-Increase retries: --max_retries 3
+Increase retries: --max-retries 3
   
 Check if service is actually running
   
   ## SYN scan not working
-  
-Ensure you have root/administrator privileges
   
 Try TCP connect scan instead: -st TCP
   
@@ -331,7 +341,7 @@ Try TCP connect scan instead: -st TCP
   
 Some hosts block ICMP
   
-Use TCP-based discovery (automatic fallback) by  -Rc flag
+Use TCP-based discovery by using -Pt Flag
   
 Check firewall rules on target hosts
   
