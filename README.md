@@ -156,38 +156,51 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
       -h, --help            show this help message and exit
       -T, --target TARGET   Target IP or Hostname
       -p, --port PORT       Port/s to scan
+      -pp, --ping-port PING_PORT
+                            Port/s to Ping on it
       -s, --speed {paranoid,slow,normal,fast,insane,Light-mode}
                             Scan speed preset
       -v, --verbose         Show verbose output
       -st, --scan-type SCAN_TYPE
-                            Scan types {TCP,SYN,UDP,NULL,FIN}
+                            Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD}
       -F                    Scan The Top 100 ports for fast scanning
       -mx, --max-retries MAX_RETRIES
                             Max number of retries if port show a no response
       -t, --threads THREADS
                             Number of threads to use
+      -lst                  List all targets
       -tm, --timeout TIMEOUT
                             Timeout with second
-      -Rc, --recursively    recursively scan host that shown to be down or not responding and more
-      -f, --fragmente       fragmente the sending packet for more stealth
+      -Rc, --recursively    recursively scan host that shown to be down or not responding and disable flags like -v,-Pn,etc ...
+      -f, --fragmente       fragment the sending packet for more stealth
       -Pn, --no-ping        Do not ping the target/s
       -b, --banner          Banner Grabing
-      -O, --os              OS Figerprint
-      --ARP                 Do not do ARP Scan on Local Networks
-      -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and
-                            Scan Top 100 Ports
-      -Pt, --tcp-ping       Do scan a TCP Ping
+      -O, --os              OS Fingerprint
+      -mac                  Light-Scan will not be capabelle of getting target mac on Local Networks
+      -Pa, --arp-ping       ARP Ping on Local Networks
+      -Pi, --ip-ping        IP Protocol Ping
+      -Pip PIP              For Specefiy The IP Protocols that -Pi is going to use rather then default
+      -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and Scan Top 100 Ports
+      -Pt, --tcp-ping       Do a TCP Ping
+      -Ps, --syn-ping       Do a Syn Ping
+      -Pk, --ack-ping       DO a ACK Ping
+      -Pu, --udp-ping       Do a UDP Ping
       -PIt, --icmp-timestamp-ping
                             Do scan a ICMP Timestamp Ping
       -PA, --icmp-address-ping
                             Do scan a ICMP Address Ping
       -Pin, --icmp-information-ping
                             Do scan a ICMP Information Ping
-      -q, --quiet           Quiet mode
-      --script SCRIPT       LSSE Scripts
+      -q, --quiet           Quiet mode {does't print the Tool Banner}
+      --script SCRIPT       LSSE Script ,Ex: --script http-cert
       --url URL             Url for http/https based scripts
-      --redirect            Redirect http/https requests
-      -sp SP                Port/s to use by scripts
+      --domain DOMAIN       Domain for http/https and Dns based scripts
+      --dns-server DNS_SERVER
+                            dns server that Light-Scan is going to use (Is Set by Default
+      -W, --wordlist WORDLIST
+                            Wordlist for scripts
+      --redirect            Redirect http/https requests for http scripts
+      -sp SP                Port/s that are going to use by scripts
       --lsse                Use that flag when you want just to performe a script
   
   ## Speed Presets
