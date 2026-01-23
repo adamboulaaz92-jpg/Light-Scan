@@ -21,7 +21,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 ## High-Performance Scanning
 
 Multi-threaded architecture for fast scans
-Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN
+Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIMON, FDD, XMAS
 
 Configurable speed presets from Paranoid to Light-mode (400 threads)
 
@@ -43,7 +43,7 @@ Service detection with custom and system service databases
 
 Firewall detection with detailed analysis
 
-Port state classification: Open, Closed, Filtered, Open|Filtered
+Port state classification: Open, Closed, Filtered, Open|Filtered, Defended, Undefended
 
 Retry mechanism for unreliable networks
 
@@ -234,44 +234,7 @@ Light-mode: 400 threads, 1.25s timeout
   ### Mixed Ranges and Single Ports
   
       -p 20-25,80,443,8000-9000
-  
-## Scan Types
-  
-  ### TCP Connect Scan (-st TCP)
-
-Uses full TCP three-way handshake
-  
-Most reliable but easily detectable
-  
-  ### SYN Stealth Scan (-st SYN)
-  
-Half-open scanning technique
-  
-Stealthier than TCP connect
-  
-Sends RST packet to close connection
-  
-  ### UDP Scan (-st UDP)
-  
-Connectionless protocol scanning
-  
-Slower than TCP scans due to timeouts
-  
-Useful for DNS, DHCP, SNMP services
-
-  ### NULL Scan (-st NULL)
-
-NULL TCP Flag scanning technique
-
-Stealthier than TCP connect
-
-  ### FIN Scan (-st FIN)
-
-FIN TCP Flag scanning technique
-
-Stealthier than TCP connect
-
-  
+    
 ## Network Scanning Features
   CIDR Notation Support
   
@@ -433,8 +396,9 @@ Educational and research purposes
     [+] LSSE run successfully
 
 ## FDD Scan
-Fdd scan is a new scaning methode developped by Light-Scan to detect firewall presense 
-by sending a TCP packet with the URGENT flag and the expected response is
+FDD scan is a new scanning method developed by Light-Scan to detect firewall presence by sending a TCP packet with the URGENT flag. 
+
+###The expected response is
 #### RST or RST-ACK --> Undefended Port
 #### No Response --> Defended Port
 #### ICMP type 3 code 1,2,3,9,10,13 --> Defended Port
