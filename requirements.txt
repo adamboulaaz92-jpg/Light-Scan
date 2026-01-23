@@ -1,6 +1,7 @@
-scapy>=2.4.5
-argparse>=1.4.0
-pyfiglet>=0.8
+scapy
+argparse
+pyfiglet
 requests
 urllib3
 beautifulsoup4
+pyopenssl

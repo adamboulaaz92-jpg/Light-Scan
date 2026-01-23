@@ -17,7 +17,7 @@ class OS_DB:
                     ['MSS', 'Timestamp', 'SAckOK', 'WScale'],
                     ['MSS', 'SAckOK', 'Timestamp', 'NOP', 'NOP', 'WScale']
                 ],
-                'windows': [5840, 5720, 29200, 65535, 64240, 32120, 65160],
+                'windows': [5720, 29200, 65535, 64240, 32120, 65160],
                 'ttl_range': (64, 255),
                 'timestamp_high': True
             },
@@ -30,7 +30,7 @@ class OS_DB:
                     ['MSS', 'NOP', 'WScale', 'SAckOK', 'Timestamp'],
                     ['MSS', 'SAckOK', 'Timestamp', 'WScale']
                 ],
-                'windows': [64240, 65535, 8192, 16384, 32768, 25600, 51200],
+                'windows': [64240, 65535, 8192, 16384, 32768, 25600, 51200,5840],
                 'ttl_range': (65, 128),
                 'timestamp_high': False
             },
@@ -64,7 +64,8 @@ class OS_DB:
             }
         }
 
-    def OS_fingerprint(self, target, open_ports, banner, Services, verbose=False):
+    def OS_fingerprint(self, target, open_ports, banner, Services,window_scan_os,verbose=False,print_output=True):
+
             os_list = {
                 'Linux': 0,
                 'Windows': 0,
@@ -78,10 +79,11 @@ class OS_DB:
             if not open_ports:
                 print(f"\n{yellow}[!] Lightscan need at least 1 open port for OS detection{reset}")
                 return
+            for port in list([open_ports]):
 
-            for port in open_ports:
+
                 try:
-                    probe = IP(dst=target, id=random.randint(1, 65535), ttl=64) / TCP(
+                    probe = IP(dst=target, id=random.randint(1, 65535), ttl=128) / TCP(
                         dport=port,
                         sport=random.randint(60000, 65535),
                         seq=random.randint(1000000000, 4294967295),
@@ -104,12 +106,16 @@ class OS_DB:
                             options = resp[TCP].options
 
                             if verbose:
-                                print(f"\n[+] Response from port {port}:")
-                                print(f"    Window: {window}")
-                                print(f"    TTL: {ttl}")
-                                print(f"    IP ID: {resp[IP].id}")
-                                print(f"    TCP Seq: {resp[TCP].seq}")
-                                print(f"    Options: {options}")
+
+                                if print_output == False:
+                                    pass
+                                else:
+                                    print(f"\n[+] Response from port {port}:")
+                                    print(f"    Window: {window}")
+                                    print(f"    TTL: {ttl}")
+                                    print(f"    IP ID: {resp[IP].id}")
+                                    print(f"    TCP Seq: {resp[TCP].seq}")
+                                    print(f"    Options: {options}")
 
                             analysis = self.analyze_options(options)
                             port_scores = self.match_os_signature(analysis, window, ttl, banner, Services)
@@ -119,27 +125,38 @@ class OS_DB:
 
                 except Exception as e:
                     if verbose:
-                        print(f"{red}[!] OS fingerprint error on port {port}: {e}{reset}")
+                        if print_output == False:
+                            pass
+                        else:
+                            print(f"{red}[!] OS fingerprint error on port {port}: {e}{reset}")
                     continue
 
             Top_1 = max(os_list.values())
             total_score = sum(os_list.values())
             if total_score > 0:
-                print(f"\n[+] OS Fingerprint Results:")
-                print("-" * 40)
-                for os_type, score in sorted(os_list.items(), key=lambda x: x[1], reverse=True):
-                    percentage = (score / total_score) * 100
-                    if verbose:
-                        print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
-                    if verbose:
-                        pass
-                    else:
+                if print_output == False:
+                    for os_type, score in sorted(os_list.items(), key=lambda x: x[1], reverse=True):
                         if Top_1 == score:
-                            print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                            window_scan_os.append(os_type)
                         else:
                             pass
+                else:
+                    print(f"\n[+] OS Fingerprint Results:")
+                    print("-" * 40)
+                    for os_type, score in sorted(os_list.items(), key=lambda x: x[1], reverse=True):
+                        percentage = (score / total_score) * 100
+                        if verbose:
+                            print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                        else:
+                            if Top_1 == score:
+                                print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                            else:
+                                pass
             else:
-                print(f"\n{yellow}[!] No conclusive OS fingerprint detected{reset}")
+                if print_output == False:
+                    pass
+                else:
+                    print(f"\n{yellow}[!] No conclusive OS fingerprint detected{reset}")
 
     @staticmethod
     def analyze_options(options):
@@ -200,13 +217,13 @@ class OS_DB:
                 if ts_val > 100000000:
                     scores['Linux'] += 2
 
-            if analysis.get('mss') == 65495:
-                scores['Windows'] += 25
+            if analysis.get('mss') == 65495 or analysis.get('mss') == 5840:
+                scores['Windows'] += 8
             if analysis.get('mss') == 1380:
                 scores['Linux'] += 8
 
             if analysis.get('wscale') == 8:
-                scores['Windows'] += 3
+                scores['Windows'] += 5
                 scores['Linux'] += 2
                 scores['Android'] += 0.25
             if analysis.get('wscale') == 13 or analysis.get('wscale') == 7:
@@ -235,9 +252,9 @@ class OS_DB:
                     scores['Linux'] += 2
 
             for banner in banners:
-                if "dnsmasq-2.51" in banner.lower():
-                    scores['Android'] += 25
-                    scores['Linux'] += 4
+                if "dnsmasq" in banner.lower():
+                    scores['Android'] += 15
+                    scores['Linux'] += 5
                     scores['IOS'] = 0
                     scores['Windows'] = 0
                     scores['MacOS'] = 0
@@ -258,7 +275,7 @@ class OS_DB:
                     scores['IOS'] = 0
                 if "microsoft-ds" in Services:
                     scores['Windows'] += 12.5
-                if "centos" in banner.lower():
+                if "centos" in banner.lower() or "ubuntu" in banner.lower() or "debian" in banner.lower():
                     scores['Windows'] = 0
                     scores['Android'] = 0
                     scores['Linux'] = 25
@@ -283,11 +300,60 @@ class OS_DB:
                 if "openssh" in banner.lower():
                     scores['Linux'] += 15
                 if "microsoft" in banner.lower() or "iis" in banner.lower():
-                    scores['Windows'] += 10
+                    scores['Windows'] += 15
                 if "apache" in banner.lower():
-                    scores['Linux'] += 12.5
+                    scores['Linux'] += 15
                 if "nginx" in banner.lower():
+                    scores['Linux'] += 15
+                if "vsftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "Proftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "pure-ftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "filezilla" in banner.lower():
+                    scores['Linux'] += 6
+                    scores['MacOS'] += 5
+                    scores['Windows'] += 12
+                if "microsoft ftp service" in banner.lower():
+                    scores['Windows'] += 15
+                if "cerberus" in banner.lower():
+                    scores['Windows'] += 15
+                if "ws_ftp" in banner.lower():
+                    scores['Windows'] += 15
+                if "gene6" in banner.lower():
+                    scores['Windows'] += 15
+                if "serv-u" in banner.lower():
+                    scores['Windows'] += 15
+                if "titan" in banner.lower():
+                    scores['Windows'] += 15
+                if "completeftp" in banner.lower():
+                    scores['Windows'] += 15
+                if "wing" in banner.lower():
+                    scores['Windows'] += 15
+                    scores['Linux'] += 5
+                    scores['MacOS'] += 5
+                if "baby ftp" in banner.lower():
+                    scores['Windows'] += 15
+                if "xlight" in banner.lower():
+                    scores['Windows'] += 15
+                if "core ftp" in banner.lower():
+                    scores['Windows'] += 15
+                if "glftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "bftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "tnftpd" in banner.lower():
+                    scores['Linux'] += 15
+                if "pyftpdlib" in banner.lower():
                     scores['Linux'] += 10
+                    scores['MacOS'] += 7
+                    scores['Windows'] += 7
+                if "crushftp" in banner.lower():
+                    scores['Linux'] += 25
+                if "mongoose" in banner.lower():
+                    scores['Linux'] += 15
+
 
             return scores
 
