@@ -398,7 +398,7 @@ Educational and research purposes
 ## FDD Scan
 FDD scan is a new scanning method developed by Light-Scan to detect firewall presence by sending a TCP packet with the URGENT flag. 
 
-###The expected response is
+### The expected response is
 #### RST or RST-ACK --> Undefended Port
 #### No Response --> Defended Port
 #### ICMP type 3 code 1,2,3,9,10,13 --> Defended Port
