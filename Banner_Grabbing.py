@@ -315,6 +315,242 @@ class Banner:
                     "00000000000000000000000000000000000000000000000000000000"
                 )
 
+        elif port == 5000:
+            # Kubernetes API server
+            return b"GET /api/v1/namespaces/default/pods HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer test-token\r\n\r\n"
+
+        elif port == 5001:
+            # Docker Registry
+            return b"GET /v2/_catalog HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 5984:
+            # CouchDB
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 5985 or port == 5986:
+            # WinRM
+            return bytes.fromhex(
+                "0300000002010000000000000000000000000000000000000000000000000000"
+                "0000000000000000000000000000000000000000000000000000000000000000"
+            )
+
+        elif port == 7000 or port == 7001:
+            # Cassandra inter-node communication
+            return b"\x04\x00\x00\x00\x0a"
+
+        elif port == 7199:
+            # Cassandra JMX
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9043:
+            # WebSphere administration
+            return b"GET /ibm/console/logon.jsp HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 61616:
+            # ActiveMQ
+            return bytes.fromhex("0000004f01010000000000000000436f6e6e656374000000000000000100")
+
+        elif port == 8161:
+            # ActiveMQ Web Console
+            return b"GET /admin/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9000:
+            # PHP-FPM / SonarQube
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9092:
+            # Kafka
+            return bytes.fromhex("0000000000")
+
+        elif port == 9093:
+            # Kafka REST Proxy
+            return b"GET /topics HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9100:
+            # Node Exporter (Prometheus)
+            return b"GET /metrics HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9201:
+            # Elasticsearch alternative port
+            return b"GET /_cat/indices HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9300:
+            # Elasticsearch transport
+            return bytes.fromhex("5d000000000000000000000000000000")
+
+        elif port == 9418:
+            # Git daemon
+            return b"git-upload-pack /\r\n"
+
+        elif port == 9999:
+            # Jupyter Notebook / HiveServer2
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 10000:
+            # Webmin
+            return b"GET /session_login.cgi HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 10050 or port == 10051:
+            # Zabbix agent/server
+            if port == 10050:
+                return b"agent.version\n"
+            else:
+                return b"ZBXD\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+
+        elif port == 11214:
+            # Memcached SSL
+            return b"stats\r\n"
+
+        elif port == 15672:
+            # RabbitMQ management
+            return b"GET /api/overview HTTP/1.1\r\nHost: localhost\r\nAuthorization: Basic YWRtaW46YWRtaW4=\r\n\r\n"
+
+        elif port == 162:
+            # SNMP trap
+            if Proto == "udp":
+                return bytes.fromhex(
+                    "302602010104067075626c6963a4190201010201000201003010300e060a2b06010201"
+                    "020102010101004300"
+                )
+
+        elif port == 51413:
+            # BitTorrent
+            if Proto == "udp":
+                return b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+
+        elif port == 27018:
+            # MongoDB alternative port
+            return b"\x3a\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\xd4\x07\x00\x00\x00\x00\x00\x00admin.$cmd\x00\x00\x00\x00\x00\x01\x00\x00\x00\x08ismaster\x00\x00"
+
+        elif port == 28017:
+            # MongoDB HTTP interface
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 3260:
+            # iSCSI
+            return bytes.fromhex(
+                "00000000"
+                "00000000"
+                "00000000"
+                "00000000"
+                "00000000"
+                "00000000"
+                "00000000"
+                "00000000"
+            )
+
+        elif port == 3690:
+            # SVN (Subversion)
+            return b"( success ( 2 2 ( ) ) )\r\n"
+
+        elif port == 4369:
+            # Erlang Port Mapper Daemon (EPMD)
+            return b"\x00\x01\x6e\x00\x0b\x00\x0b\x00\x00\x05\x00"
+
+        elif port == 5353:
+            # mDNS (Bonjour/Avahi)
+            if Proto == "udp":
+                return bytes.fromhex(
+                    "0000010000010000000000000f5f676f6f676c65636173740c5f746370"
+                    "076c6f63616c00000c0001"
+                )
+
+        elif port == 5433:
+            return b"\x00\x00\x00\x08\x04\xd2\x16\x2f"
+
+        elif port == 5500:
+            return b"RFB 003.003\n"
+
+        elif port == 5601:
+            return b"GET /api/status HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 5901:
+            return b"RFB 003.003\n"
+
+        elif port == 5985:
+            return b"POST /wsman HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/soap+xml;charset=UTF-8\r\n\r\n"
+
+        elif port == 6378:
+            return b"INFO\r\n"
+
+        elif port == 6667:
+            return b"USER test test test :test\r\nNICK test\r\n"
+
+        elif port == 6881:
+            return b"\x13BitTorrent protocol\x00\x00\x00\x00\x00\x00\x00\x00"
+
+        elif port == 7648:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 8009:
+            return bytes.fromhex("1234")
+
+        elif port == 8010:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 8069:
+            return b"GET /web HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 8200:
+            return b"GET /v1/sys/health HTTP/1.1\r\nHost: localhost\r\nX-Vault-Token: test\r\n\r\n"
+
+        elif port == 8333:
+            return bytes.fromhex("f9beb4d976657273696f6e0000000000650000005d1c769d")
+
+        elif port == 8444:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 8880:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9001:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9044:
+            return b"\x04\x00\x00\x00\x01"
+
+        elif port == 9202:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 9301:
+            return bytes.fromhex("5d000000000000000000000000000000")
+
+        elif port == 9419:
+            return b"git-upload-pack /\r\n"
+
+        elif port == 9990:
+            return b"GET /console HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 10001:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 11215:
+            return b"stats\r\n"
+
+        elif port == 15674:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 16379:
+            return b"PING\r\n"
+
+        elif port == 27019:
+            return b"\x3a\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\xd4\x07\x00\x00\x00\x00\x00\x00admin.$cmd\x00\x00\x00\x00\x00\x01\x00\x00\x00\x08ismaster\x00\x00"
+
+        elif port == 28018:
+            return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 50000:
+            return bytes.fromhex("030000000001000002000000")
+
+        elif port == 50070:
+            return b"GET /jmx HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 50075:
+            return b"GET /jmx HTTP/1.1\r\nHost: localhost\r\n\r\n"
+
+        elif port == 60000:
+            return b"GET /services/search/jobs HTTP/1.1\r\nHost: localhost\r\nAuthorization: Basic YWRtaW46Y2hhbmdlbWU=\r\n\r\n"
+
         elif port == 123:
             if Proto == "udp":
                 return b"\x17\x00\x03\x2a\x00\x00\x00\x00"

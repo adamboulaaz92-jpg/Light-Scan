@@ -21,6 +21,19 @@ class OS_DB:
                 'ttl_range': (64, 255),
                 'timestamp_high': True
             },
+            'BSD': {
+                'common_orders': [
+                    ['MSS', 'NOP', 'WScale', 'SAckOK', 'Timestamp'],
+                    ['MSS', 'SAckOK', 'Timestamp', 'WScale'],
+                    ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK', 'Timestamp'],
+                    ['MSS', 'WScale', 'SAckOK', 'Timestamp'],
+                    ['MSS', 'NOP', 'WScale', 'Timestamp', 'SAckOK']
+                ],
+                'windows': [65535, 57344, 29200, 16384, 8760, 17520],
+                'ttl_range': (64, 64),
+                'timestamp_high': True,
+                'ip_id_sequential': True
+            },
             'Windows': {
                 'common_orders': [
                     ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK', 'NOP', 'NOP'],
@@ -49,7 +62,7 @@ class OS_DB:
                     ['MSS', 'SAckOK', 'Timestamp', 'WScale'],
                     ['MSS', 'NOP', 'WScale', 'NOP', 'SAckOK', 'Timestamp']
                 ],
-                'windows': [65535, 29200, 64240, 14600, 32120],
+                'windows': [65535, 29200, 64240, 14600, 32120,8760],
                 'ttl_range': (64, 64),
                 'timestamp_high': True
             },
@@ -65,11 +78,12 @@ class OS_DB:
         }
 
     def OS_fingerprint(self, target, open_ports, banner, Services,window_scan_os,verbose=False,print_output=True):
-
+            os_that_have_versions_detection = ['BSD','Android']
             os_list = {
                 'Linux': 0,
                 'Windows': 0,
                 'Cisco': 0,
+                'BSD': 0,
                 'Android': 0,
                 'MacOS': 0,
                 'IOS': 0,
@@ -92,6 +106,7 @@ class OS_DB:
                             ('MSS', 1460),
                             ('SAckOK', b''),
                             ('Timestamp', (random.randint(1, 1000000000), 0)),
+                            ('NOP', None),
                             ('WScale', 8)
                         ],
                         flags="S"
@@ -117,7 +132,7 @@ class OS_DB:
                                     print(f"    TCP Seq: {resp[TCP].seq}")
                                     print(f"    Options: {options}")
 
-                            analysis = self.analyze_options(options)
+                            analysis = self.analyze_options(options, resp[IP].id)
                             port_scores = self.match_os_signature(analysis, window, ttl, banner, Services)
 
                             for os_type, score in port_scores.items():
@@ -146,10 +161,25 @@ class OS_DB:
                     for os_type, score in sorted(os_list.items(), key=lambda x: x[1], reverse=True):
                         percentage = (score / total_score) * 100
                         if verbose:
-                            print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                            if Top_1 == score:
+                                print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                                if os_type in os_that_have_versions_detection:
+                                    if os_type == "BSD":
+                                        for Banner in banner:
+                                            bsd = self.detect_freebsd_version(Banner)
+                                            if bsd != None:
+                                                print(f"         --> [-] {bsd} \n")
+                            else:
+                                print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
                         else:
                             if Top_1 == score:
                                 print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
+                                if os_type in os_that_have_versions_detection:
+                                    if os_type == "BSD":
+                                        for Banner in banner:
+                                            bsd = self.detect_freebsd_version(Banner)
+                                            if bsd != None:
+                                                print(f"         --> [-] {bsd} \n")
                             else:
                                 pass
             else:
@@ -158,8 +188,47 @@ class OS_DB:
                 else:
                     print(f"\n{yellow}[!] No conclusive OS fingerprint detected{reset}")
 
+    def detect_freebsd_version(self, banner):
+        version_map = {
+            '20170902': '10.4-RELEASE',
+            '20160310': '10.3-RELEASE',
+            '20140420': '9.3-RELEASE | 10.1,10.2-RELEASE',
+            '20140131': '9.2-RELEASE',
+            '20130630': '9.1-RELEASE',
+            '20121220': '9.0-RELEASE',
+            '20120630': '8.3-RELEASE',
+            '20111222': '8.2-RELEASE',
+            '20110225': '8.1-RELEASE',
+            '20101124': '8.0-RELEASE',
+            '20091128': '7.2-RELEASE',
+            '20090104': '7.1-RELEASE',
+            '20080228': '7.0-RELEASE'
+        }
+
+        for date_str, version in version_map.items():
+            if date_str in banner:
+                return f"FreeBSD {version}"
+
+        if "OpenSSH_6.6" in banner:
+            return "FreeBSD 9.x | FreeBSD 10.x"
+        elif "OpenSSH_7.3" in banner:
+            return "FreeBSD 10.4-RELEASE"
+        elif "OpenSSH_7.2" in banner:
+            return "FreeBSD 10.3-RELEASE"
+        elif "OpenSSH_5." in banner:
+            return "FreeBSD 8.x"
+        elif "OpenSSH_4." in banner:
+            return "FreeBSD 7.x"
+        elif "OpenSSH" not in banner:
+            return None
+
+        if "FreeBSD" in banner:
+            return f"FreeBSD (unknown version)"
+        else:
+            return "BSD (unknown version)"
+
     @staticmethod
-    def analyze_options(options):
+    def analyze_options(options,id):
             if not options:
                 return {}
 
@@ -168,7 +237,8 @@ class OS_DB:
                 'mss': None,
                 'wscale': None,
                 'timestamp': None,
-                'sack': False
+                'sack': False,
+                'id': id
             }
 
             for opt_name, opt_value in options:
@@ -189,6 +259,7 @@ class OS_DB:
                 'Linux': 0,
                 'Windows': 0,
                 'Cisco': 0,
+                'BSD':0,
                 'Android': 0,
                 'MacOS': 0,
                 'IOS': 0,
@@ -200,34 +271,39 @@ class OS_DB:
             for os_name, signature in self.os_signatures.items():
                 for common_order in signature.get('common_orders', []):
                     if option_order == common_order:
-                        scores[os_name] += 3
-                    elif all(opt in option_order for opt in common_order):
-                        scores[os_name] += 1.5
+                        scores[os_name] += 8
 
                 if window in signature.get('windows', []):
-                    scores[os_name] += 2
+                    scores[os_name] += 5
 
                 ttl_min, ttl_max = signature.get('ttl_range', (0, 0))
                 if ttl_min <= ttl <= ttl_max:
-                    scores[os_name] += 1
-
+                    scores[os_name] += 3
 
             if analysis.get('timestamp') and isinstance(analysis['timestamp'], tuple):
                 ts_val, _ = analysis['timestamp']
                 if ts_val > 100000000:
                     scores['Linux'] += 2
+                    scores['BSD'] += 2
 
             if analysis.get('mss') == 65495 or analysis.get('mss') == 5840:
                 scores['Windows'] += 8
             if analysis.get('mss') == 1380:
                 scores['Linux'] += 8
+            if analysis.get('mss') == 1460:
+                scores['Android'] += 8
+                scores['BSD'] += 8
+            if analysis.get('id') == 0:
+                scores['Android'] += 5
 
             if analysis.get('wscale') == 8:
                 scores['Windows'] += 5
                 scores['Linux'] += 2
-                scores['Android'] += 0.25
+                scores['Android'] += 3.5
             if analysis.get('wscale') == 13 or analysis.get('wscale') == 7:
                 scores['Linux'] += 5
+            if analysis.get('wscale') == 6:
+                scores['BSD'] += 5
 
             if ttl in [50,51,44,42,46,47]:
                 scores['Linux'] += 5
@@ -241,9 +317,15 @@ class OS_DB:
                 scores['IOS'] = 0
                 scores['Cisco'] = 10
             if ttl <= 64:
-                if window in [65535, 29200, 14600, 64240]:
-                    scores['Android'] += 4
-                    scores['Linux'] += 1.25
+                if window == 65535:
+                    scores['Linux'] += 2
+                    scores['BSD'] += 2
+                    scores['Android'] += 2
+                if window in [29200, 14600, 64240]:
+                    scores['Android'] += 1.25
+                    scores['Linux'] += 3
+                if window in [57344, 29200, 16384, 8760, 17520]:
+                    scores['BSD'] += 4
                 if window in [65160]:
                     scores['Linux'] += 3.5
                 elif window in [32768, 16384, 8760]:
@@ -252,6 +334,14 @@ class OS_DB:
                     scores['Linux'] += 2
 
             for banner in banners:
+                if "freebsd" in banner.lower():
+                    scores['BSD'] += 15
+                    scores['Linux'] = 0
+                    scores['Android'] = 0
+                    scores['IOS'] = 0
+                    scores['Windows'] = 0
+                    scores['MacOS'] = 0
+                    scores['Cisco'] = 0
                 if "dnsmasq" in banner.lower():
                     scores['Android'] += 15
                     scores['Linux'] += 5
@@ -298,7 +388,12 @@ class OS_DB:
                     scores['Android'] = 0
                     scores['Cisco'] = 0
                 if "openssh" in banner.lower():
-                    scores['Linux'] += 15
+                    if "hpn13v11" in banner.lower() or "hpn14v" in banner.lower():
+                        scores['BSD'] += 15
+                        scores['Linux'] = 0
+                    else:
+                        scores['Linux'] += 10
+                        scores['BSD'] += 2.5
                 if "microsoft" in banner.lower() or "iis" in banner.lower():
                     scores['Windows'] += 15
                 if "apache" in banner.lower():

@@ -1,5 +1,3 @@
-from http.client import responses
-
 import scapy.all as scapy
 from scapy.config import conf
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -78,7 +76,7 @@ class Lightscan:
         self.pp = []
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.5"
+        self.version = "1.1.5 Alpha"
         self.dns = None
         self.max_threads = 60
         self.socket_timeout = 0.0
@@ -258,11 +256,13 @@ class Lightscan:
         self.parser.add_argument("-Pin","--icmp-information-ping",action="store_true",help="Do scan a ICMP Information Ping")
         self.parser.add_argument("-q","--quiet",action="store_true",help="Quiet mode {does't print the Tool Banner}")
         self.parser.add_argument("--script",type=str,help="LSSE Script ,Ex: --script http-cert")
-        self.parser.add_argument("--url",type=str,help="Url for http/https based scripts ")
         self.parser.add_argument("--domain",type=str,help="Domain for http/https and Dns based scripts ")
         self.parser.add_argument("--dns-server",type=str,help="dns server that Light-Scan is going to use (Is Set by Default ")
         self.parser.add_argument("-W","--wordlist",type=str,help="Wordlist for scripts ")
         self.parser.add_argument("--redirect",action="store_true",help="Redirect http/https requests for http scripts")
+        self.parser.add_argument("--url",type=str,help="Victime URL")
+        self.parser.add_argument("--mxp",help="max pages to get")
+        self.parser.add_argument("--mxd", help="max depth to crawl")
         self.parser.add_argument("-sp",help="Port/s that are going to use by scripts")
         self.parser.add_argument("--lsse",action="store_true",help="Use that flag when you want just to performe a script")
         self.args = self.parser.parse_args()
@@ -387,9 +387,9 @@ class Lightscan:
         for target in self.targets:
             Target = target.replace(".", "")
             if Target.isdigit():
-                print(Target,Target.isdigit())
                 try:
                     socket.inet_pton(socket.AF_INET, target)
+                    self.valid.append(target)
                 except:
                     print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
                     exit(1)
@@ -413,6 +413,8 @@ class Lightscan:
                             for i in range(1):
                                 if dns_layer.an[i].type == 1:
                                     self.valid.append(dns_layer.an[i].rdata)
+                    else:
+                        print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
                 except:
                     print(f"{red}\n[!] Invalid Target IP or Hostname {target}{reset}\n")
                     exit(1)
@@ -440,6 +442,8 @@ class Lightscan:
                                      for i in range(1):
                                          if dns_layer.an[i].type == 1:
                                              self.valid.append(dns_layer.an[i].rdata)
+                             else:
+                                 print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
                          except:
                              print(f"{red}\n[!] Invalid Target IP or Hostname {target}{reset}\n")
                              exit(1)
@@ -465,6 +469,8 @@ class Lightscan:
                                      for i in range(1):
                                          if dns_layer.an[i].type == 1:
                                              self.valid.append(dns_layer.an[i].rdata)
+                             else:
+                                 print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
                          except:
                              print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
                              exit(1)
@@ -865,7 +871,7 @@ class Lightscan:
                     if self.args.timeout:
                         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                     else:
-                        response = scapy.sr1(packet, timeout=10, verbose=0)
+                        response = scapy.sr1(packet, timeout=5, verbose=0)
 
                 service = self.service_detection(port)
 
@@ -900,15 +906,6 @@ class Lightscan:
                                     self.initialize_target_results(target)
                                 self.target_results[target]['filtered_ports'].append(port)
                                 self.target_results[target]['filtered_ports_services'].append(service)
-                        break
-
-                    elif icmp_type == 11:
-                        with self.lock:
-                                if target not in self.target_results:
-                                    self.initialize_target_results(target)
-                                self.target_results[target]['open_filtered_ports'].append(port)
-                                self.target_results[target]['open_filtered_ports_services'].append(service)
-                        self.timeout_count += 1
                         break
 
                     else:
@@ -1077,25 +1074,6 @@ class Lightscan:
                                 self.initialize_target_results(target)
                             self.target_results[target]['filtered_ports'].append(port)
                             self.target_results[target]['filtered_ports_services'].append(service)
-                        break
-
-                elif response.haslayer(scapy.ICMP):
-                    icmp_type = response.getlayer(scapy.ICMP).type
-
-                    if icmp_type == 11:
-                        with self.lock:
-                            if target not in self.target_results:
-                                self.initialize_target_results(target)
-                            self.target_results[target]['open_filtered_ports'].append(port)
-                            self.target_results[target]['open_filtered_ports_services'].append(service)
-                        self.timeout_count += 1
-                        break
-                    else:
-                        with self.lock:
-                                if target not in self.target_results:
-                                    self.initialize_target_results(target)
-                                self.target_results[target]['filtered_ports'].append(port)
-                                self.target_results[target]['filtered_ports_services'].append(service)
                         break
 
                 else:
@@ -2140,12 +2118,15 @@ class Lightscan:
                 try:
                     if self.args.script == "dns-subdomain-fuzzing":
                         print(f"\n[+] LSSE Response for {self.args.domain}: ")
+                    elif self.args.script == "spider":
+                        print(f"\n[+] LSSE Response for {self.args.url}: ")
                     else:
                         self.script_port_parse()
-                        print(f"[+] LSSE Response for {self.args.url}: ")
-                    lsse.Lsse.script_list(self.args.script, self.args.url, ports=self.lsse_ports_to_scan,
+                        print(f"[+] LSSE Response for {self.args.domain}: ")
+                    lsse.Lsse.script_list(self.args.script, ports=self.lsse_ports_to_scan,
                                           redirect=self.args.redirect, domain=self.args.domain,
-                                          dns=self.args.dns_server,wordlist=self.args.wordlist)
+                                          dns=self.args.dns_server,wordlist=self.args.wordlist,url=self.args.url,
+                                          max_pages=self.args.mxp,max_depth=self.args.mxd)
                     print(f"\n[+] LSSE run successfully\n")
                 except Exception as e:
                     print(f"\n{red}[+] Script Error with {self.args.script} : {e}{reset}")
@@ -2166,10 +2147,13 @@ class Lightscan:
             try:
                 if self.args.script == "dns-subdomain-fuzzing":
                     print(f"\n[+] LSSE Response for {self.args.domain}: ")
+                elif self.args.script == "spider":
+                    print(f"\n[+] LSSE Response for {self.args.url}: ")
                 else:
                     self.script_port_parse()
-                    print(f"[+] LSSE Response for {self.args.url}: ")
-                lsse.Lsse.script_list(self.args.script, self.args.url, ports=self.lsse_ports_to_scan,redirect=self.args.redirect,domain=self.args.domain,dns=self.args.dns_server,wordlist=self.args.wordlist)
+                    print(f"[+] LSSE Response for {self.args.domain}: ")
+                lsse.Lsse.script_list(self.args.script, ports=self.lsse_ports_to_scan,redirect=self.args.redirect,domain=self.args.domain,dns=self.args.dns_server,wordlist=self.args.wordlist,url=self.args.url,
+                                          max_pages=self.args.mxp,max_depth=self.args.mxd)
                 print(f"\n[+] LSSE run successfully\n")
             except Exception as e:
                 print(f"\n{red}[+] Script Error with {self.args.script} : {e}{reset}")

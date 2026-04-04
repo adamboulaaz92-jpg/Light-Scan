@@ -359,12 +359,14 @@ class Payloads:
                             target_results[target]['filtered_ports_services'].append(service)
                         break
 
+
                 else:
                     with lock:
-                            if target not in target_results:
-                                initialize_target_results(target)
-                            target_results[target]['null_ports'].append(port)
-                            target_results[target]['null_ports_services'].append(service)
+                        if target not in target_results:
+                            initialize_target_results(target)
+                        target_results[target]['filtered_ports'].append(port)
+                        target_results[target]['filtered_ports_services'].append(service)
+
                     break
 
             except Exception as e:
@@ -476,8 +478,8 @@ class Payloads:
                         with lock:
                             if target not in target_results:
                                 initialize_target_results(target)
-                            target_results[target]['fin_ports'].append(port)
-                            target_results[target]['fin_ports_services'].append(service)
+                            target_results[target]['filtered_ports'].append(port)
+                            target_results[target]['filtered_ports_services'].append(service)
                         break
 
                 elif response.haslayer(scapy.ICMP):
@@ -504,8 +506,8 @@ class Payloads:
                     with lock:
                         if target not in target_results:
                             initialize_target_results(target)
-                        target_results[target]['fin_ports'].append(port)
-                        target_results[target]['fin_ports_services'].append(service)
+                        target_results[target]['filtered_ports'].append(port)
+                        target_results[target]['filtered_ports_services'].append(service)
                     break
 
             except Exception as e:
