@@ -481,7 +481,7 @@ class Lightscan:
 
         self.targets.clear()
         for v in self.valid:
-            self.targets.append(v)
+            self.targetss.append(v)
 
     def show_network_info(self):
         if len(self.targets) > 1:
