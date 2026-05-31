@@ -40,7 +40,7 @@ class Lightscan:
         'speed_presets', 'host_ext', 'Proto', 'scan_type', 'version','lsse_ports_to_scan',
         'max_threads', 'socket_timeout', 'args', 'parser','pp','valid',
         'targetss', 'ports_to_scan', 'target_results', 'targets','dns',
-        'start_time', 'end_time','lock','__weakref__','timeout_count','user_os','LSSE',"protocols"
+        'start_time', 'end_time','lock','__weakref__','timeout_count','user_os','LSSE',"protocols","saving"
     ]
 
     def __init__(self):
@@ -74,9 +74,10 @@ class Lightscan:
         self.protocols = []
         self.valid = []
         self.pp = []
+        self.saving = None
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.5 Alpha"
+        self.version = "1.1.5 Beta"
         self.dns = None
         self.max_threads = 60
         self.socket_timeout = 0.0
@@ -93,6 +94,8 @@ class Lightscan:
         print(banner)
         print(f"Version : {self.version}")
         print(f"Platform : {self.user_os} \n")
+
+
 
     def initialize_target_results(self, target):
         self.target_results[target] = {
@@ -236,6 +239,7 @@ class Lightscan:
         self.parser.add_argument("-mx","--max-retries",type=int,help="Max number of retries if port show a no response",default=1)
         self.parser.add_argument("-t","--threads",type=int,help="Number of threads to use")
         self.parser.add_argument("-lst",action="store_true",help="List all targets")
+        self.parser.add_argument("-So",help="Save Format (TXT)")
         self.parser.add_argument("-tm","--timeout",type=float,help="Timeout with second")
         self.parser.add_argument("-Rc","--recursively",action="store_true",help="recursively scan host that shown to be down or not responding and disable flags like -v,-Pn,etc ...")
         self.parser.add_argument("-f","--fragmente",action="store_true",help="fragment the sending packet for more stealth ")
@@ -267,6 +271,9 @@ class Lightscan:
         self.parser.add_argument("--lsse",action="store_true",help="Use that flag when you want just to performe a script")
         self.args = self.parser.parse_args()
 
+
+    def Save(self):
+        pass
 
     def list_targets(self):
         for target in self.targets:
@@ -481,7 +488,7 @@ class Lightscan:
 
         self.targets.clear()
         for v in self.valid:
-            self.targetss.append(v)
+            self.targets.append(v)
 
     def show_network_info(self):
         if len(self.targets) > 1:
