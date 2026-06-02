@@ -13,7 +13,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
 
 # Real scan output
-## Light-Scan Version 1.1.5 Beta
+## Light-Scan Version 1.1.5 
 ![](image/Light-Scan-Result.png)
 
 # Features
@@ -21,7 +21,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 ## High-Performance Scanning
 
 Multi-threaded architecture for fast scans
-Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIMON, FDD, XMAS
+Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIMON, FDD, XMAS, FTP-BOUNCE
 
 Configurable speed presets from Paranoid to Light-mode (400 threads)
 
@@ -154,6 +154,12 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
   
 ## Command Line Options
   
+    usage: Lightscan.py [-h] [-T TARGET] [-p PORT] [-pp PING_PORT] [-s {paranoid,slow,normal,fast,insane,Light-mode}] [-v]
+                        [-st SCAN_TYPE] [--ftp-bounce FTP_SERVER] [-F] [-mx MAX_RETRIES] [-t THREADS] [-lst] [-tm TIMEOUT]
+                        [-Rc] [-f] [-Pn] [-b] [-O] [-mac] [-Pa] [-Pi] [-Pip PIP] [-A] [-Pt] [-Ps] [-Pk] [-Pu] [-PIt] [-PA]
+                        [-Pin] [-q] [--script SCRIPT] [--domain DOMAIN] [--dns-server DNS_SERVER] [-W WORDLIST]
+                        [--redirect] [--url URL] [--mxp MXP] [--mxd MXD] [-sp SP] [--lsse]
+    
     Lightscan Port Scanner
     
     options:
@@ -166,7 +172,9 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
                             Scan speed preset
       -v, --verbose         Show verbose output
       -st, --scan-type SCAN_TYPE
-                            Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD}
+                            Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE}
+      --ftp-bounce FTP_SERVER
+                            FTP server for bounce scan (e.g., 192.168.1.100)
       -F                    Scan The Top 100 ports for fast scanning
       -mx, --max-retries MAX_RETRIES
                             Max number of retries if port show a no response
@@ -175,7 +183,8 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
       -lst                  List all targets
       -tm, --timeout TIMEOUT
                             Timeout with second
-      -Rc, --recursively    recursively scan host that shown to be down or not responding and disable flags like -v,-Pn,etc ...
+      -Rc, --recursively    recursively scan host that shown to be down or not responding and disable flags like
+                            -v,-Pn,etc ...
       -f, --fragmente       fragment the sending packet for more stealth
       -Pn, --no-ping        Do not ping the target/s
       -b, --banner          Banner Grabing
@@ -184,7 +193,8 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
       -Pa, --arp-ping       ARP Ping on Local Networks
       -Pi, --ip-ping        IP Protocol Ping
       -Pip PIP              For Specefiy The IP Protocols that -Pi is going to use rather then default
-      -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and Scan Top 100 Ports
+      -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and
+                            Scan Top 100 Ports
       -Pt, --tcp-ping       Do a TCP Ping
       -Ps, --syn-ping       Do a Syn Ping
       -Pk, --ack-ping       DO a ACK Ping
@@ -197,13 +207,15 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
                             Do scan a ICMP Information Ping
       -q, --quiet           Quiet mode {does't print the Tool Banner}
       --script SCRIPT       LSSE Script ,Ex: --script http-cert
-      --url URL             Url for http/https based scripts
       --domain DOMAIN       Domain for http/https and Dns based scripts
       --dns-server DNS_SERVER
                             dns server that Light-Scan is going to use (Is Set by Default
       -W, --wordlist WORDLIST
                             Wordlist for scripts
       --redirect            Redirect http/https requests for http scripts
+      --url URL             Victime URL
+      --mxp MXP             max pages to get
+      --mxd MXD             max depth to crawl
       -sp SP                Port/s that are going to use by scripts
       --lsse                Use that flag when you want just to performe a script
   
@@ -340,11 +352,65 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Light-Scan 1.1.5 Beta:
+# Light-Scan 1.1.5 :
 
 ## Fixing Multiple bugs
 
 ## Extend Lightscan Services Data-Base
+
+## Add a new legacy scaning technique FTP-BOUNCE Scan
+
+## Upgrading LSSE with a new plugin "script" 
+
+        __    _       __    __
+       / /   (_)___ _/ /_  / /_______________ _____
+      / /   / / __ `/ __ \/ __/ ___/ ___/ __ `/ __ \
+     / /___/ / /_/ / / / / /_(__  ) /__/ /_/ / / / /
+    /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/
+            /____/
+    
+    Version : 1.1.5
+    Platform : Windows
+    
+    
+    [+] LSSE Response for http://scanme.nmap.org:
+    
+    [LSSE] Html Script Detection Script
+    
+    [+] Script/s Detected
+    [+] Final Url: http://scanme.nmap.org/
+    [+] NUmber of Scripts 2
+    
+    [#1] <script async="" src="/shared/js/nst.js?v=2"></script>
+    
+    [#2] <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-11009417-1', 'auto');
+    ga('send', 'pageview');
+    </script>
+    
+    
+    [+] LSSE run successfully
+
+## Updating the setup script for more reliability 
+
+## LightSave for save the scans result as a text fil for analyse
+
+    usage: LightSave.py [-h] -C C
+
+    LightSave : Lightscan Scans Saving Tool
+    
+    options:
+      -h, --help  show this help message and exit
+      -C C        Lightscan command
+      
+### Exemple of LightSave
+    python LightSave.py -C "python Lightscan.py -T 127.0.0.1 -F -st UDP"
+by that LightSave save your scan result ,it's obligatory to write the scan command inside ""
+to make sure it going to run well
 
 # FDD Scan
 FDD scan is a new scanning method developed by Light-Scan developper to detect firewall presence by sending a TCP packet with the URGENT flag. 
