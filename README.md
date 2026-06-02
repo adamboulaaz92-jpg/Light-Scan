@@ -340,69 +340,15 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Light-Scan 1.1.5 :
+# Light-Scan 1.1.5 Beta:
 
 ## Fixing Multiple bugs
-## Add a new scaning methodes:
-### ACK Scan
-### Window Scan
-### Maimon Scan
-### Xmas Scan
-### FDD Scan
 
-## Extend Light-Scan Scripting Engine (LSSE) by a new script "dns-subdomain-fuzzing"
+## Extend Lightscan Services Data-Base
 
-        __    _       __    __
-       / /   (_)___ _/ /_  / /_______________ _____
-      / /   / / __ `/ __ \/ __/ ___/ ___/ __ `/ __ \
-     / /___/ / /_/ / / / / /_(__  ) /__/ /_/ / / / /
-    /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/
-            /____/
-    
-    Version : 1.1.5
-    Platform : Windows
-    
-    
-    [+] LSSE Response for nmap.org:
-    
-       [*] Progress: 50/191 (26.2%) | Found: 1 | Elapsed: 2.9s
-    
-       [*] Progress: 100/191 (52.4%) | Found: 1 | Elapsed: 5.1s
-    
-       [*] Progress: 150/191 (78.5%) | Found: 1 | Elapsed: 7.2s
-    
-       [*] Progress: 191/191 (100.0%) | Found: 1 | Elapsed: 8.8s
-    
-       Dns Subdomain Fuzzing:
-       ---------------------------------------------------
-    
-          [+] Target Domain: nmap.org
-          [+] DNS Server: 10.243.156.131
-          [+] Time Elapsed: 8.78 seconds
-          [+] Subdomains Tested: 191
-          [+] Valid Subdomains Found: 1
-          [+] Successful Queries: 1
-          [+] Failed Queries: 190
-    
-          [+] Wildcard Records:
-            *A (IPv4)   : 50.116.1.184
-            *AAAA (IPv6): 2600:3c01:e000:3e6::6d4e:7061
-    
-       Discovered Subdomains:
-       ----------------------------------------
-    
-          [+] chat.nmap.org :
-    
-               IPv4 *A   : 45.33.32.156
-               IPv6 *AAAA: 2600:3c01::f03c:91ff:fe18:bb2f
-    
-    
-    [+] LSSE run successfully
-
-## FDD Scan
-FDD scan is a new scanning method developed by Light-Scan to detect firewall presence by sending a TCP packet with the URGENT flag. 
-
-### The expected response is
+# FDD Scan
+FDD scan is a new scanning method developed by Light-Scan developper to detect firewall presence by sending a TCP packet with the URGENT flag. 
+## The expected response is
 #### RST or RST-ACK --> Undefended Port
 #### No Response --> Defended Port
 #### ICMP type 3 code 1,2,3,9,10,13 --> Defended Port
