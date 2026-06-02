@@ -3,7 +3,8 @@ import random
 import time
 import ipaddress
 from Banner_Grabbing import Banner
-from Lightscan_OS_Database import DB
+import socket
+from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Services import top_20_tcp_ports
 
@@ -1493,3 +1494,155 @@ class Payloads:
                     except Exception as e:
                         if verbose:
                             print(f"{red}[!] Fdd scan error: {e}{reset}")
+
+    @staticmethod
+    def FTPBounceScan(target, ftpserver, ftp_port, port_range, max_retries=2, fragment=False, recursively=False,
+                      verbose=False, socket_timeout=5, lock=None, target_results=None, banner_option=False,
+                      initialize_target_results=None, service_detection=None):
+
+
+        def encode_ip(ip):
+            return ",".join(ip.split("."))
+
+        def encode_port(p):
+            return f"{p // 256},{p % 256}"
+
+        def test_single_port(ftp_control, target_ip, target_port, lock_obj):
+            try:
+                target_ip_comma = encode_ip(target_ip)
+                port_code = encode_port(target_port)
+                port_cmd = f"PORT {target_ip_comma},{port_code}\r\n".encode()
+
+                with lock_obj:
+                    ftp_control.send(port_cmd)
+                    resp = ftp_control.recv(1024).decode()
+
+                if "200" not in resp:
+                    return None
+
+                with lock_obj:
+                    ftp_control.send(b"LIST\r\n")
+                    data_resp = ftp_control.recv(1024).decode()
+
+                if "150" in data_resp:
+
+                    with lock_obj:
+                        ftp_control.send(b"ABOR\r\n")
+                        ftp_control.recv(1024)
+                    return ("open", target_port)
+                elif "425" in data_resp:
+
+                    return ("closed", target_port)
+                else:
+
+                    return ("filtered", target_port)
+
+            except socket.timeout:
+                return ("filtered", target_port)
+            except Exception as e:
+                return ("error", target_port, str(e))
+
+        results = []
+
+        ports = port_range
+
+        if verbose:
+            print(f"\n[+] FTP Bounce Scan: {ftpserver}:{ftp_port} -> {target}")
+            print(f"[+] Testing {len(ports)} ports")
+
+        ftp_control = None
+        for attempt in range(max_retries):
+            try:
+                ftp_control = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                ftp_control.settimeout(socket_timeout)
+                ftp_control.connect((ftpserver, ftp_port))
+                ftp_control.recv(1024)
+                ftp_control.send(b"USER anonymous\r\n")
+                ftp_control.recv(1024)
+                ftp_control.send(b"PASS test@\r\n")
+                resp = ftp_control.recv(1024).decode()
+
+                if "230" not in resp:
+                    raise Exception("FTP login failed - anonymous not allowed")
+
+                if verbose:
+                    print(f"[+] Connected to FTP server {ftpserver}:{ftp_port} (anonymous)")
+                break
+
+            except Exception as e:
+                ftp_control = None
+                if verbose:
+                    print(f"[-] FTP connection attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    print(f"[-] Cannot connect to FTP server {ftpserver}:{ftp_port}")
+                    return False
+                time.sleep(1)
+
+        if ftp_control is None:
+            return False
+
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+
+        ftp_lock = lock if lock else threading.Lock()
+
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            futures = {
+                executor.submit(test_single_port, ftp_control, target, port, ftp_lock): port
+                for port in ports
+            }
+
+            completed = 0
+            for future in as_completed(futures):
+                completed += 1
+                try:
+                    result = future.result()
+                    if result:
+                        status = result[0]
+                        port_num = result[1]
+                        service = service_detection(port_num) if service_detection else f"port_{port_num}"
+
+                        if verbose:
+                            status_icon = "🟢" if status == "open" else "🔴" if status == "closed" else "🟡"
+                            print(f"  [{completed}/{len(ports)}] {status_icon} Port {port_num}: {status.upper()}")
+
+                        if lock and target_results and initialize_target_results:
+                            with lock:
+                                if target not in target_results:
+                                    initialize_target_results(target)
+
+                                if status == "open":
+                                    target_results[target]['open_ports'].append(port_num)
+                                    target_results[target]['open_ports_services'].append(service)
+                                elif status == "closed":
+                                    target_results[target]['closed_ports'].append(port_num)
+                                    target_results[target]['closed_ports_services'].append(service)
+                                elif status == "filtered":
+                                    target_results[target]['filtered_ports'].append(port_num)
+                                    target_results[target]['filtered_ports_services'].append(service)
+
+                        results.append({"port": port_num, "status": status, "service": service})
+
+                except Exception as e:
+                    if verbose:
+                        print(f"  [!] Error testing port: {e}")
+
+
+        try:
+            ftp_control.send(b"QUIT\r\n")
+            ftp_control.close()
+        except:
+            pass
+
+        open_count = len([r for r in results if r["status"] == "open"])
+        closed_count = len([r for r in results if r["status"] == "closed"])
+        filtered_count = len([r for r in results if r["status"] == "filtered"])
+
+        print(f"\n[+] FTP Bounce Scan Complete: {target}")
+        print(f"    🟢 Open: {open_count} | 🔴 Closed: {closed_count} | 🟡 Filtered: {filtered_count}")
+
+        if open_count > 0:
+            open_ports_list = ', '.join(str(r['port']) for r in results if r['status'] == 'open')
+            print(f"    Open ports: {open_ports_list}")
+
+        return True

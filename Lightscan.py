@@ -9,6 +9,7 @@ from Services import Lightscan_Service_List, top_1000_ports, top_100_ports, top_
 from LightEngine import Payloads
 from Lightscan_OS_Database import DB
 import pyfiglet
+import sys
 import threading
 import warnings
 import logging
@@ -77,7 +78,7 @@ class Lightscan:
         self.saving = None
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.5 Beta"
+        self.version = "1.1.5"
         self.dns = None
         self.max_threads = 60
         self.socket_timeout = 0.0
@@ -234,12 +235,12 @@ class Lightscan:
                                  choices=['paranoid', 'slow', 'normal', 'fast', 'insane', 'Light-mode'],
                                  help="Scan speed preset")
         self.parser.add_argument("-v", "--verbose",action="store_true", help="Show verbose output ")
-        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD}")
+        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE}")
+        self.parser.add_argument('--ftp-bounce', dest='ftp_server',help='FTP server for bounce scan (e.g., 192.168.1.100)')
         self.parser.add_argument("-F",action="store_true",help="Scan The Top 100 ports for fast scanning")
         self.parser.add_argument("-mx","--max-retries",type=int,help="Max number of retries if port show a no response",default=1)
         self.parser.add_argument("-t","--threads",type=int,help="Number of threads to use")
         self.parser.add_argument("-lst",action="store_true",help="List all targets")
-        self.parser.add_argument("-So",help="Save Format (TXT)")
         self.parser.add_argument("-tm","--timeout",type=float,help="Timeout with second")
         self.parser.add_argument("-Rc","--recursively",action="store_true",help="recursively scan host that shown to be down or not responding and disable flags like -v,-Pn,etc ...")
         self.parser.add_argument("-f","--fragmente",action="store_true",help="fragment the sending packet for more stealth ")
@@ -271,9 +272,6 @@ class Lightscan:
         self.parser.add_argument("--lsse",action="store_true",help="Use that flag when you want just to performe a script")
         self.args = self.parser.parse_args()
 
-
-    def Save(self):
-        pass
 
     def list_targets(self):
         for target in self.targets:
@@ -2127,6 +2125,8 @@ class Lightscan:
                         print(f"\n[+] LSSE Response for {self.args.domain}: ")
                     elif self.args.script == "spider":
                         print(f"\n[+] LSSE Response for {self.args.url}: ")
+                    elif self.args.script == "script":
+                        print(f"\n[+] LSSE Response for {self.args.url}: ")
                     else:
                         self.script_port_parse()
                         print(f"[+] LSSE Response for {self.args.domain}: ")
@@ -2144,7 +2144,6 @@ class Lightscan:
 
     def Start(self):
         self.args_parse()
-
         if self.args.quiet:
             print()
         else:
@@ -2155,6 +2154,8 @@ class Lightscan:
                 if self.args.script == "dns-subdomain-fuzzing":
                     print(f"\n[+] LSSE Response for {self.args.domain}: ")
                 elif self.args.script == "spider":
+                    print(f"\n[+] LSSE Response for {self.args.url}: ")
+                elif self.args.script == "script":
                     print(f"\n[+] LSSE Response for {self.args.url}: ")
                 else:
                     self.script_port_parse()
@@ -2278,6 +2279,26 @@ class Lightscan:
                 self.Proto = "tcp"
                 self.scan_type = "null"
                 Payloads.threaded_null_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                self.end_time = time.perf_counter()
+            elif self.args.scan_type == 'FTP-BOUNCE':
+                if not self.args.ftp_server:
+                    print("[!] FTP Bounce scan requires --ftp-bounce <server>")
+                    sys.exit(1)
+                self.start_time = time.perf_counter()
+
+                Payloads.FTPBounceScan(
+                    target=target,
+                    ftpserver=self.args.ftp_server,
+                    ftp_port=21,
+                    port_range=self.ports_to_scan,
+                    max_retries=self.args.max_retries if self.args.max_retries else 2,
+                    verbose=self.args.verbose,
+                    socket_timeout=self.args.timeout if self.args.timeout else 5,
+                    lock=self.lock,
+                    target_results=self.target_results,
+                    initialize_target_results=self.initialize_target_results,
+                    service_detection=self.service_detection
+                )
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "FIN":
                 self.start_time = time.perf_counter()
