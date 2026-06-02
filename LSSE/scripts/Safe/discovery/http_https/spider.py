@@ -1,3 +1,16 @@
+"""
+Light-Scan Scripting Engine (LSSE)
+Script Name : spider
+Author : Adam Boulaaz
+Arguments
+--> Required Arguments
+----> --url
+--> Optional Arguments
+----> --mxd
+----> --mxp
+Categorie :safe/discovery/http_https
+"""
+
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
