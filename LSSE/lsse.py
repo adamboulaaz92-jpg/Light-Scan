@@ -6,23 +6,43 @@ yellow = "\033[33m"
 
 class LSSE:
     def __init__(self):
-        self.scripts_list = ["http-title","http-cert","http-robots","dns-subdomain-fuzzing"]
+        self.scripts_list = ["http-title","http-cert","http-robots","dns-subdomain-fuzzing","spider","script"]
 
-    def script_list(self,sname,url,ports=None,redirect=None,domain=None,dns=None,wordlist=None):
+    def script_list(self,sname,ports=None,redirect=None,domain=None,dns=None,wordlist=None,url=None,max_pages=None,max_depth=None):
         if sname in self.scripts_list:
             match sname:
                 case "http-title":
-                    from LSSE.scripts.http_title import threaded_http_title
-                    threaded_http_title(url,ports,redirect)
+                    from LSSE.scripts.safe.extracting.http_https.http_title import threaded_http_title
+                    threaded_http_title(domain,ports,redirect)
                 case "http-cert":
-                    from LSSE.scripts.http_cert import threaded_tls_ssl_cert_info
-                    threaded_tls_ssl_cert_info(url,ports)
+                    from LSSE.scripts.safe.analysis.https.http_cert import threaded_tls_ssl_cert_info
+                    threaded_tls_ssl_cert_info(domain,ports)
                 case "http-robots":
-                    from LSSE.scripts.http_robots import threaded_http_robots
-                    threaded_http_robots(url,ports)
+                    from LSSE.scripts.safe.extracting.http_https.http_robots import threaded_http_robots
+                    threaded_http_robots(domain,ports)
+                case "spider":
+                    from LSSE.scripts.safe.discovery.http_https.spider import Spider
+                    spider = Spider()
+                    if max_pages is None:
+                        max_pages = 5
+                    if max_depth is None:
+                        max_depth = 2
+                    results = spider.spider(
+                        start_url=url,
+                        max_pages=int(max_pages),
+                        max_depth=int(max_depth)
+                    )
                 case "dns-subdomain-fuzzing":
-                    from LSSE.scripts.dns_subdomain_fuzzing import main
+                    from LSSE.scripts.safe.discovery.dns.dns_subdomain_fuzzing import main
                     main(domain,dns=dns,wordlist=wordlist)
+                case "script":
+                    from LSSE.scripts.safe.discovery.http_https.script import Script
+                    try:
+                        script = Script(url=url)
+                        script.start()
+                    except Exception as e:
+                        print(f"\n{red}[!] {e}{reset}")
+                        exit(1)
                 case _:
                     print(f"\n{yellow}[!] Script not found {reset}\n")
                     sys.exit(2)
