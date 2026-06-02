@@ -103,6 +103,10 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
     source venv/bin/activate
 
     pip install -r requirements.txt
+
+## Guided Auto Setup
+
+    python setup.py 
   
 # User Guide : 
 
