@@ -13,7 +13,7 @@ Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy
 
 
 
-# Light-Scan Version 1.1.5 
+# Light-Scan Version 1.1.5 (Current Version)
 
 # Features
 
