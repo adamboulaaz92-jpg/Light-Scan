@@ -83,6 +83,14 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
         sudo apt install libpcap-dev
 ### For Arch Based Linux :
         sudo pacman -S libpcap
+### For RHEL/CentOS/Fedora :
+        sudo yum install libpcap-devel
+        # or for newer Fedora:
+        sudo dnf install libpcap-devel
+### For SUSE :
+        sudo zypper install libpcap-devel
+### For Alpine Linux :
+        sudo apk add libpcap-dev
 
 ## Linux Setup
 
@@ -104,9 +112,104 @@ before running Light-Scan you need to install Npcap from https://npcap.com/#down
 
     pip install -r requirements.txt
 
+### For RHEL/CentOS/Fedora :
+
+    sudo yum install python3-venv
+    # or for newer Fedora:
+    sudo dnf install python3-venv
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
+### For SUSE :
+
+    sudo zypper install python3-venv
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
+### For Alpine Linux :
+
+    sudo apk add python3 py3-pip
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
+## For macOS
+
+Before running Light-Scan, you need to install libpcap:
+
+### Using Homebrew (Recommended):
+
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install libpcap
+
+### Using MacPorts:
+
+    sudo port install libpcap
+
+## macOS Setup
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
+## For FreeBSD / OpenBSD / NetBSD
+
+Before running Light-Scan, install libpcap:
+
+### FreeBSD:
+
+    sudo pkg install libpcap python3
+
+### OpenBSD:
+
+    sudo pkg_add libpcap python3
+
+### NetBSD:
+
+    sudo pkgin install libpcap python3
+
+## BSD Setup
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
+## For Solaris / Illumos
+
+### Solaris 11:
+
+    pkg install libpcap
+
+### Illumos (OpenIndiana, etc.):
+
+    sudo pkg install libpcap
+
+## Solaris Setup
+
+    python3 -m venv venv
+
+    source venv/bin/activate
+
+    pip install -r requirements.txt
+
 ## Guided Auto Setup
 
-    python setup.py 
+    python setup.py
   
 # User Guide : 
 
