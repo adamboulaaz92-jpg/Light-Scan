@@ -15,4 +15,6 @@ filename = f"Lightscan_Output_{time.strftime('%Y-%m-%d_%H-%M-%S', current)}.ligh
 if platform.system() == "Windows":
     cmd = f'powershell -c "{args.C} | tee {filename}"'
     subprocess.run(cmd, shell=True)
-
+elif system in ["Linux", "Darwin", "FreeBSD", "OpenBSD", "NetBSD"]:
+    cmd = f'{args.C} | tee {filename}'
+    subprocess.run(cmd, shell=True)
