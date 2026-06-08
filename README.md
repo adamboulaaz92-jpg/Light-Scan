@@ -323,19 +323,24 @@ Before running Light-Scan, install libpcap:
       -sp SP                Port/s that are going to use by scripts
       --lsse                Use that flag when you want just to performe a script
   
-  ## Speed Presets
-  
-paranoid: 2 thread, 4s timeout
-  
-slow: 30 threads, 3s timeout
-  
-normal: 60 threads, 2.5s timeout
-  
-fast: 120 threads, 2.5s timeout
-  
-insane: 240 threads, 1.25s timeout
-  
-Light-mode: 400 threads, 1.25s timeout
+##  Speed Presets
+
+LightScan offers **six speed presets** to balance performance against network conditions and stealth requirements. Each preset controls two key parameters:
+
+- **Threads** — Number of concurrent scan threads (higher = faster)
+- **Timeout** — Seconds to wait for a response (higher = more reliable)
+
+| Preset | Threads | Timeout | Best For |
+|--------|---------|---------|----------|
+|  **paranoid** | 2 | 4.0s | Stealth scans, IDS/IPS evasion, unstable networks |
+|  **slow** | 30 | 3.0s | Noisy environments, careful reconnaissance |
+|  **normal** | 60 | 2.5s | **Default** — balanced for most scenarios |
+|  **fast** | 120 | 2.5s | Internal networks, trusted environments |
+|  **insane** | 240 | 1.25s | High-speed LAN scans, aggressive timing |
+|  **Light-mode** | 500 | 1.25s | Maximum speed — use on reliable, low-latency networks |
+
+
+
   
 ## Port Specification Examples
   
