@@ -26,7 +26,7 @@ Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIM
 
 Configurable speed presets from Paranoid to Light-mode (400 threads)
 
-Smart host discovery with threaded ICMP/TCP detection
+Smart host discovery with threaded ICMP/TCP/IP/ARP detection
 
 ## Network Range Support
 
