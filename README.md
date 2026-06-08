@@ -436,10 +436,6 @@ Increase retries: --max-retries 3
   
 Check if service is actually running
   
-  ## SYN scan not working
-  
-Try TCP connect scan instead: -st TCP
-  
   ## Host discovery missing hosts
   
 Some hosts block ICMP
