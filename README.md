@@ -396,15 +396,15 @@ Progress indicators for large expansions
 
 LightScan classifies ports into **seven distinct states** based on response analysis:
 
-| State  Meaning | Common Causes |
+| State | Meaning | Common Causes |
 |-------|---------|----------------|
-| **Open**  | Service is actively listening and accessible | Web server, SSH, database, etc. |
-| **Closed**  | Host is up but no service is listening | Unused port, service not running |
-| **Filtered**  | Firewall or filter is blocking access | Stateful firewall, ACL, DROP rules |
-| **Open\|Filtered**  | Unable to determine (no response received) | Common with UDP scans, packet loss |
-| **Defended**  | Firewall detected (FDD scan result) | Port behind active firewall protection |
-| **Undefended**  | No firewall detected (FDD scan result) | Direct port access, no filtering |
-| **Unfiltered**  | Port accessible but not open (ACK scan) | Used in firewall rule mapping |
+| **Open** | Service is actively listening and accessible | Web server, SSH, database, etc. |
+| **Closed** | Host is up but no service is listening | Unused port, service not running |
+| **Filtered** | Firewall or filter is blocking access | Stateful firewall, ACL, DROP rules |
+| **Open\|Filtered** | Unable to determine (no response received) | Common with UDP scans, packet loss |
+| **Defended** | Firewall detected (FDD scan result) | Port behind active firewall protection |
+| **Undefended** | No firewall detected (FDD scan result) | Direct port access, no filtering |
+| **Unfiltered** | Port accessible but not open (ACK scan) | Used in firewall rule mapping |
   
 ## Performance Tips
   
