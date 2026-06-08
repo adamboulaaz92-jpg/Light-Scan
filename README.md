@@ -514,12 +514,29 @@ Educational and research purposes
 by that LightSave save your scan result ,it's obligatory to write the scan command inside ""
 to make sure it going to run well
 
-# FDD Scan
-FDD scan is a new scanning method developed by Light-Scan developper to detect firewall presence by sending a TCP packet with the URGENT flag. 
-## The expected response is
-#### RST or RST-ACK --> Undefended Port
-#### No Response --> Defended Port
-#### ICMP type 3 code 1,2,3,9,10,13 --> Defended Port
+##  FDD Scan — Firewall Detection (Proprietary)
+
+**FDD (Firewall Detection Scan)** is a proprietary scanning technique developed exclusively for LightScan. It sends a TCP packet with the **URGENT (URG) flag** to determine whether a firewall is protecting the target port.
+The URG flag is rarely used in legitimate traffic, making it an excellent probe for firewall detection. By analyzing the response (or lack thereof), LightScan can determine if a firewall is actively filtering the port.
+
+###  Response Interpretation
+
+| Response Type | Classification | Explanation |
+|---------------|----------------|-------------|
+| `RST` or `RST-ACK` |  **Undefended Port** | The port responded directly — no firewall interference |
+| `No Response` |  **Defended Port** | No response suggests a firewall is blocking the probe |
+| `ICMP Type 3, Code 1,2,3,9,10,13` |  **Defended Port** | ICMP error indicates a firewall is actively rejecting the packet |
+
+###  Example Usage
+
+# Run FDD scan on a single port
+    python Lightscan.py -T 192.168.1.1 -p 443 -st FDD
+
+# Scan multiple ports with FDD
+    python Lightscan.py -T 192.168.1.1 -p 22,80,443,8080 -st FDD
+
+# Combined with verbose output
+    python Lightscan.py -T 192.168.1.1 -p 1-1000 -st FDD -v
 
 
 
