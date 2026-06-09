@@ -536,6 +536,8 @@ Educational and research purposes
 
 ## Lightscan GUI (LightPanel.py)
 
+![](image/LightPanel.png)
+
 ## Add a help menu for LSSE 
 
     (.venv) PS C:\Users\Octet Info\Documents\My Project\Light-Scan> python Lightscan.py --lsse-lst
