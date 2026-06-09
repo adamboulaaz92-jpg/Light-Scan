@@ -1,23 +1,3 @@
-# SPDX-FileCopyrightText: 2026 Adam Boulaaz
-# SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-Repository: https://github.com/adamboulaaz92-jpg/Light-Scan
-#
-# Light-Scan - Advanced Port Scanner and Network Reconnaissance Tool
-# Copyright (C) 2026 Adam Boulaaz
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 import socket
 import random
 
@@ -30,7 +10,7 @@ class Banner:
         pass
 
     @staticmethod
-    def banner_grab(target, port, protocol="tcp", timeout=5, verbose=False, print_output=True):
+    def banner_grab(target, port, version, protocol="tcp", timeout=5, verbose=False, print_output=True):
         try:
             if verbose:
                 if print_output == False:
@@ -41,9 +21,9 @@ class Banner:
             payload = Banner.banner_grabing_payloads(target, port, protocol)
 
             if protocol.lower() == "tcp":
-                return Banner._tcp_banner_grab(target, port, payload, timeout, verbose,print_output)
+                return Banner._tcp_banner_grab(target, port, payload, timeout, verbose,print_output,version)
             elif protocol.lower() == "udp":
-                return Banner._udp_banner_grab(target, port, payload, timeout, verbose,print_output)
+                return Banner._udp_banner_grab(target, port, payload, timeout, verbose,print_output,version)
             else:
                 if verbose:
                     if print_output == False:
@@ -61,9 +41,12 @@ class Banner:
             return None
 
     @staticmethod
-    def _tcp_banner_grab(target, port, payload, timeout, verbose,print_output):
+    def _tcp_banner_grab(target, port, payload, timeout, verbose,print_output, version):
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            if version == 6:
+                sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            else:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(timeout)
             sock.connect((target, port))
 
@@ -136,9 +119,12 @@ class Banner:
             return None
 
     @staticmethod
-    def _udp_banner_grab(target, port, payload, timeout, verbose,print_output):
+    def _udp_banner_grab(target, port, payload, timeout, verbose,print_output, version):
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            if version == 6:
+                sock = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+            else:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.settimeout(timeout)
 
             if verbose and payload:
@@ -228,6 +214,15 @@ class Banner:
             ]
             return random.choice(commands)
 
+        elif port == 843:
+            return b"<policy-file-request/>\x00"
+
+        elif port in [6666,666]:
+            return b"\x00"
+
+        elif port == 2030:
+            return b"\x00"
+
         elif port == 22:
             ssh_clients = [
                 "SSH-2.0-OpenSSH_8.9p1",
@@ -272,6 +267,21 @@ class Banner:
                 b"STAT\r\n"
             ]
             return random.choice(commands)
+
+        elif port in [1560, 1561, 1562, 1563]:
+            if Proto == "tcp":
+                return b"\x00\x00\x00\x00"
+            return b"\x00"
+
+        elif port == 5090:
+            if Proto == "tcp":
+                return b"\x04\x00\xfb\xffLAPK"
+            return b"\x04\x00\xfb\xffLAPK"
+
+        elif port in [19812, 19813, 19814]:
+            if Proto == "tcp":
+                return b"\x00\x00\x00\x48\x00\x00\x00\x02"
+            return b"\x00\x00\x00\x48"
 
         elif port == 143:
             if Proto == "tcp":
@@ -336,97 +346,75 @@ class Banner:
                 )
 
         elif port == 5000:
-            # Kubernetes API server
             return b"GET /api/v1/namespaces/default/pods HTTP/1.1\r\nHost: localhost\r\nAuthorization: Bearer test-token\r\n\r\n"
 
         elif port == 5001:
-            # Docker Registry
             return b"GET /v2/_catalog HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 5984:
-            # CouchDB
             return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 5985 or port == 5986:
-            # WinRM
             return bytes.fromhex(
                 "0300000002010000000000000000000000000000000000000000000000000000"
                 "0000000000000000000000000000000000000000000000000000000000000000"
             )
 
         elif port == 7000 or port == 7001:
-            # Cassandra inter-node communication
             return b"\x04\x00\x00\x00\x0a"
 
         elif port == 7199:
-            # Cassandra JMX
             return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9043:
-            # WebSphere administration
             return b"GET /ibm/console/logon.jsp HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 61616:
-            # ActiveMQ
             return bytes.fromhex("0000004f01010000000000000000436f6e6e656374000000000000000100")
 
         elif port == 8161:
-            # ActiveMQ Web Console
             return b"GET /admin/ HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9000:
-            # PHP-FPM / SonarQube
             return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9092:
-            # Kafka
             return bytes.fromhex("0000000000")
 
         elif port == 9093:
-            # Kafka REST Proxy
             return b"GET /topics HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9100:
-            # Node Exporter (Prometheus)
             return b"GET /metrics HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9201:
-            # Elasticsearch alternative port
             return b"GET /_cat/indices HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 9300:
-            # Elasticsearch transport
             return bytes.fromhex("5d000000000000000000000000000000")
 
         elif port == 9418:
-            # Git daemon
             return b"git-upload-pack /\r\n"
 
         elif port == 9999:
-            # Jupyter Notebook / HiveServer2
             return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 10000:
-            # Webmin
             return b"GET /session_login.cgi HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 10050 or port == 10051:
-            # Zabbix agent/server
             if port == 10050:
                 return b"agent.version\n"
             else:
                 return b"ZBXD\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
         elif port == 11214:
-            # Memcached SSL
             return b"stats\r\n"
 
         elif port == 15672:
-            # RabbitMQ management
             return b"GET /api/overview HTTP/1.1\r\nHost: localhost\r\nAuthorization: Basic YWRtaW46YWRtaW4=\r\n\r\n"
 
         elif port == 162:
-            # SNMP trap
             if Proto == "udp":
                 return bytes.fromhex(
                     "302602010104067075626c6963a4190201010201000201003010300e060a2b06010201"
@@ -434,20 +422,16 @@ class Banner:
                 )
 
         elif port == 51413:
-            # BitTorrent
             if Proto == "udp":
                 return b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
         elif port == 27018:
-            # MongoDB alternative port
             return b"\x3a\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00\xd4\x07\x00\x00\x00\x00\x00\x00admin.$cmd\x00\x00\x00\x00\x00\x01\x00\x00\x00\x08ismaster\x00\x00"
 
         elif port == 28017:
-            # MongoDB HTTP interface
             return b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n"
 
         elif port == 3260:
-            # iSCSI
             return bytes.fromhex(
                 "00000000"
                 "00000000"
@@ -460,15 +444,12 @@ class Banner:
             )
 
         elif port == 3690:
-            # SVN (Subversion)
             return b"( success ( 2 2 ( ) ) )\r\n"
 
         elif port == 4369:
-            # Erlang Port Mapper Daemon (EPMD)
             return b"\x00\x01\x6e\x00\x0b\x00\x0b\x00\x00\x05\x00"
 
         elif port == 5353:
-            # mDNS (Bonjour/Avahi)
             if Proto == "udp":
                 return bytes.fromhex(
                     "0000010000010000000000000f5f676f6f676c65636173740c5f746370"
@@ -677,9 +658,14 @@ class Banner:
             )
         else:
             if Proto == "tcp":
-                return b"\r\n"
+                probes = [
+                    b"\r\n",
+                    b"HELP\r\n",
+                    b"STATUS\r\n",
+                    b"INFO\r\n",
+                ]
+                return random.choice(probes)
             else:
-
                 return b"PING\r\n"
 
     @staticmethod
@@ -703,12 +689,14 @@ class Banner:
                 ("dropbear", "ssh")
             ],
             "https": [
-                ("the plain http request was sent to https port","https"),
-                ("you're speaking plain http to an ssl-enabled server port","https"),
+                ("cloudflare", "https-cloudflare"),
+                ("the plain http request was sent to https port", "https"),
+                ("you're speaking plain http to an ssl-enabled server port", "https"),
             ],
             "http": [
+                ("cloudflare", "http-cloudflare"),
                 ("server: simplehttp/0.6", "http"),
-                ("400 bad request","http"),
+                ("400 bad request", "http"),
             ],
             "database": [
                 ("mysql", "mysql"),
@@ -754,14 +742,65 @@ class Banner:
                 ("git", "git"),
                 ("squid", "squid-proxy"),
                 ("haproxy", "haproxy")
-            ]
+            ],
+            "activesync": [
+                ("microsoft activesync", "activesync"),
+                ("citrix activesync", "activesync"),
+            ],
+            "adabas-d": [
+                ("adabas d remote control server", "adabas-d"),
+            ],
+            "adobe-crossdomain": [
+                ("cross-domain-policy", "adobe-crossdomain"),
+                ("allow-access-from", "adobe-crossdomain"),
+                ("site-control permitted-cross-domain-policies", "adobe-crossdomain"),
+            ],
+            "afsmain": [
+                ("welcome to ability ftp server", "afsmain"),
+            ],
+            "airserv-ng": [
+                ("airserv-ng", "airserv-ng"),
+            ],
+            "altiris-agent": [
+                ("altiris", "altiris-agent"),
+                ("connected to", "altiris-agent"),
+            ],
+            "pbx": [
+                ("busy", "aastra-pbx"),
+            ],
+            "acap": [
+                ("* acap (implementation \"communigate pro acap", "acap"),
+            ],
+            "acarsd": [
+                ("acarsd", "acarsd"),
+            ],
+            "acmp": [
+                ("acmp server version", "acmp"),
+            ],
+            "activemq": [
+                ("activemq", "apachemq"),
+                ("openwire", "apachemq"),
+                ("providername\tactivemq", "apachemq"),
+            ],
+            "1c": [
+                ("1c:enterprise", "1c-server"),
+                ("1c enterprise", "1c-server"),
+            ],
+            "3cx": [
+                ("3cx", "3cx-tunnel"),
+                ("tunnel protocol", "3cx-tunnel"),
+            ],
+            "4d": [
+                ("4th dimension", "4d-server"),
+                ("4d server", "4d-server"),
+            ],
         }
 
         detected_service = None
 
         for category, patterns in service_patterns.items():
             for pattern, service_name in patterns:
-                if pattern.lower() in banner_lower:
+                if pattern in banner_lower:
                     detected_service = service_name
                     break
             if detected_service:
@@ -778,8 +817,6 @@ class Banner:
                 if opened_port == port:
                     target_result["opened_ports_services"][i] = detected_service
                     break
-            else:
-                pass
         finally:
             if lock:
                 lock.release()

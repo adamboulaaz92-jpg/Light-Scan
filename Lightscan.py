@@ -1,31 +1,12 @@
-# SPDX-FileCopyrightText: 2026 Adam Boulaaz
-# SPDX-License-Identifier: GPL-3.0-or-later
-# SPDX-Repository: https://github.com/adamboulaaz92-jpg/Light-Scan
-#
-# Light-Scan - Advanced Port Scanner and Network Reconnaissance Tool
-# Copyright (C) 2026 Adam Boulaaz
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 import scapy.all as scapy
 from scapy.config import conf
+from scapy.layers.inet6 import IPv6, ICMPv6DestUnreach, ICMPv6EchoRequest, ICMPv6EchoReply, ICMPv6TimeExceeded
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 import socket
 import argparse
 from Banner_Grabbing import Banner
-from Services import Lightscan_Service_List, top_1000_ports, top_100_ports, top_ports, top_20_tcp_ports, top_20_udp_ports
+from Services import Lightscan_Service_List, top_1000_ports, top_100_ports, top_20_tcp_ports, top_20_udp_ports
 from LightEngine import Payloads
 from Lightscan_OS_Database import DB
 import pyfiglet
@@ -37,6 +18,7 @@ import random
 import platform
 
 red = "\033[31m"
+green = "\033[32m"
 reset = "\033[0m"
 yellow = "\033[33m"
 
@@ -98,7 +80,7 @@ class Lightscan:
         self.saving = None
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.5"
+        self.version = "1.1.6"
         self.dns = None
         self.max_threads = 60
         self.socket_timeout = 0.0
@@ -121,6 +103,14 @@ class Lightscan:
     def initialize_target_results(self, target):
         self.target_results[target] = {
             'open_ports': [],
+            'open_protocols': [],
+            'open_protocols_names':[],
+            'closed_protocols':[],
+            'closed_protocols_names':[],
+            'open_filtered_protocols':[],
+            'open_filtered_protocols_names':[],
+            'filtered_protocols':[],
+            'filtered_protocols_names':[],
             'closed_ports': [],
             'filtered_ports': [],
             'defended_ports': [],
@@ -247,20 +237,22 @@ class Lightscan:
             print("    [?] INCONCLUSIVE: Mixed response patterns\n")
 
     def args_parse(self):
-        self.parser = argparse.ArgumentParser(description="Lightscan Port Scanner")
+        self.parser = argparse.ArgumentParser(description="Light-Scan Port Scanner")
         self.parser.add_argument("-T", "--target", required=False, help="Target IP or Hostname")
+        self.parser.add_argument("-V6", required=False, help="used when the target is an IPv6",action="store_true")
         self.parser.add_argument("-p","--port", required=False, help="Port/s to scan")
         self.parser.add_argument("-pp","--ping-port",help="Port/s to Ping on it")
         self.parser.add_argument("-s", "--speed", required=False, default="normal",
                                  choices=['paranoid', 'slow', 'normal', 'fast', 'insane', 'Light-mode'],
                                  help="Scan speed preset")
         self.parser.add_argument("-v", "--verbose",action="store_true", help="Show verbose output ")
-        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE}")
+        self.parser.add_argument("-st","--scan-type",default="TCP", help="Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE,IPPROTO}")
         self.parser.add_argument('--ftp-bounce', dest='ftp_server',help='FTP server for bounce scan (e.g., 192.168.1.100)')
         self.parser.add_argument("-F",action="store_true",help="Scan The Top 100 ports for fast scanning")
         self.parser.add_argument("-mx","--max-retries",type=int,help="Max number of retries if port show a no response",default=1)
         self.parser.add_argument("-t","--threads",type=int,help="Number of threads to use")
         self.parser.add_argument("-lst",action="store_true",help="List all targets")
+        self.parser.add_argument("--lsse-lst", action="store_true", help="List all LSSE Scripts")
         self.parser.add_argument("-tm","--timeout",type=float,help="Timeout with second")
         self.parser.add_argument("-Rc","--recursively",action="store_true",help="recursively scan host that shown to be down or not responding and disable flags like -v,-Pn,etc ...")
         self.parser.add_argument("-f","--fragmente",action="store_true",help="fragment the sending packet for more stealth ")
@@ -268,7 +260,7 @@ class Lightscan:
         self.parser.add_argument("-b","--banner",action="store_true",help="Banner Grabing")
         self.parser.add_argument("-O","--os",action="store_true",help="OS Fingerprint ")
         self.parser.add_argument("-mac",action="store_true",help="Light-Scan will not be capabelle of getting target mac on Local Networks")
-        self.parser.add_argument("-Pa","--arp-ping",action="store_true",help="ARP Ping on Local Networks")
+        self.parser.add_argument("-Pan","--local-ping",action="store_true",help="Performe an ARP Ping on Local Networks by default or NDP Ping on Local Networks for IPv6 mode")
         self.parser.add_argument("-Pi","--ip-ping",action="store_true",help="IP Protocol Ping")
         self.parser.add_argument("-Pip",type=str,help="For Specefiy The IP Protocols that -Pi is going to use rather then default")
         self.parser.add_argument("-A","--agressive",action="store_true",help="Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and Scan Top 100 Ports")
@@ -284,6 +276,8 @@ class Lightscan:
         self.parser.add_argument("--domain",type=str,help="Domain for http/https and Dns based scripts ")
         self.parser.add_argument("--dns-server",type=str,help="dns server that Light-Scan is going to use (Is Set by Default ")
         self.parser.add_argument("-W","--wordlist",type=str,help="Wordlist for scripts ")
+        self.parser.add_argument("--extensions",type=str,help="Extensions for web based scripts ")
+        self.parser.add_argument("--status-codes",type=str,help="Status Codes for web based scripts ")
         self.parser.add_argument("--redirect",action="store_true",help="Redirect http/https requests for http scripts")
         self.parser.add_argument("--url",type=str,help="Victime URL")
         self.parser.add_argument("--mxp",help="max pages to get")
@@ -419,6 +413,14 @@ class Lightscan:
                     print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
                     exit(1)
 
+            elif "::" in Target:
+                try:
+                    socket.inet_pton(socket.AF_INET6, target)
+                    self.valid.append(target)
+                except socket.error:
+                    print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
+                    exit(1)
+
             elif Target.isalpha():
                 try:
 
@@ -445,60 +447,59 @@ class Lightscan:
                     exit(1)
 
             elif Target.isalnum():
+                     for ext in self.host_ext:
+                         if ext in target:
+                             try:
+                                 socket.gethostbyname(target)
+                                 if self.args.dns_server:
+                                     dns = self.args.dns_server
+                                 else:
+                                     dns = scapy.conf.route.route("0.0.0.0")[2]
 
-                 for ext in self.host_ext:
-                     if ext in target:
-                         try:
-                             socket.gethostbyname(target)
-                             if self.args.dns_server:
-                                 dns = self.args.dns_server
-                             else:
-                                 dns = scapy.conf.route.route("0.0.0.0")[2]
+                                 packet = (scapy.IP(dst=dns, id=random.randint(1, 65535), ttl=random.randint(32, 255),
+                                                    flags="DF") /
+                                           scapy.UDP(dport=53, sport=random.randint(60000, 65535)) /
+                                           scapy.DNS(id=random.randint(1, 65535), rd=1,
+                                                     qd=scapy.DNSQR(qname=target, qtype="A")))
+                                 response = scapy.sr1(packet, timeout=3, verbose=0)
+                                 if response and response.haslayer(scapy.DNS):
+                                     dns_layer = response[scapy.DNS]
+                                     if dns_layer.qr == 1 and dns_layer.ancount > 0:
+                                         for i in range(1):
+                                             if dns_layer.an[i].type == 1:
+                                                 self.valid.append(dns_layer.an[i].rdata)
+                                 else:
+                                     print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
+                             except:
+                                 print(f"{red}\n[!] Invalid Target IP or Hostname {target}{reset}\n")
+                                 exit(1)
 
-                             packet = (scapy.IP(dst=dns, id=random.randint(1, 65535), ttl=random.randint(32, 255),
-                                                flags="DF") /
-                                       scapy.UDP(dport=53, sport=random.randint(60000, 65535)) /
-                                       scapy.DNS(id=random.randint(1, 65535), rd=1,
-                                                 qd=scapy.DNSQR(qname=target, qtype="A")))
-                             response = scapy.sr1(packet, timeout=3, verbose=0)
-                             if response and response.haslayer(scapy.DNS):
-                                 dns_layer = response[scapy.DNS]
-                                 if dns_layer.qr == 1 and dns_layer.ancount > 0:
-                                     for i in range(1):
-                                         if dns_layer.an[i].type == 1:
-                                             self.valid.append(dns_layer.an[i].rdata)
-                             else:
-                                 print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
-                         except:
-                             print(f"{red}\n[!] Invalid Target IP or Hostname {target}{reset}\n")
-                             exit(1)
+                             break
+                         else:
+                             try:
+                                 socket.gethostbyname(target)
+                                 if self.args.dns_server:
+                                     dns = self.args.dns_server
+                                 else:
+                                     dns = scapy.conf.route.route("0.0.0.0")[2]
 
-                         break
-                     else:
-                         try:
-                             socket.gethostbyname(target)
-                             if self.args.dns_server:
-                                 dns = self.args.dns_server
-                             else:
-                                 dns = scapy.conf.route.route("0.0.0.0")[2]
-
-                             packet = (scapy.IP(dst=dns, id=random.randint(1, 65535), ttl=random.randint(32, 255),
-                                                flags="DF") /
-                                       scapy.UDP(dport=53, sport=random.randint(60000, 65535)) /
-                                       scapy.DNS(id=random.randint(1, 65535), rd=1,
-                                                 qd=scapy.DNSQR(qname=target, qtype="A")))
-                             response = scapy.sr1(packet, timeout=3, verbose=0)
-                             if response and response.haslayer(scapy.DNS):
-                                 dns_layer = response[scapy.DNS]
-                                 if dns_layer.qr == 1 and dns_layer.ancount > 0:
-                                     for i in range(1):
-                                         if dns_layer.an[i].type == 1:
-                                             self.valid.append(dns_layer.an[i].rdata)
-                             else:
-                                 print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
-                         except:
-                             print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
-                             exit(1)
+                                 packet = (scapy.IP(dst=dns, id=random.randint(1, 65535), ttl=random.randint(32, 255),
+                                                    flags="DF") /
+                                           scapy.UDP(dport=53, sport=random.randint(60000, 65535)) /
+                                           scapy.DNS(id=random.randint(1, 65535), rd=1,
+                                                     qd=scapy.DNSQR(qname=target, qtype="A")))
+                                 response = scapy.sr1(packet, timeout=3, verbose=0)
+                                 if response and response.haslayer(scapy.DNS):
+                                     dns_layer = response[scapy.DNS]
+                                     if dns_layer.qr == 1 and dns_layer.ancount > 0:
+                                         for i in range(1):
+                                             if dns_layer.an[i].type == 1:
+                                                 self.valid.append(dns_layer.an[i].rdata)
+                                 else:
+                                     print(f"{yellow}\n[!] Failed to resolve ({target}) {reset}")
+                             except:
+                                 print(f"\n{red}[!] Invalid Target IP or Hostname {target}{reset}\n")
+                                 exit(1)
 
             else:
                 print(f"{red}\n[!] Invalid Target IP or Hostname {target}{reset}\n")
@@ -873,19 +874,30 @@ class Lightscan:
     def udp_scan(self, port, target):
         for attempt in range(self.args.max_retries):
             try:
+                if self.args.V6:
+                    version = 6
+                else:
+                    version = 4
+                payloads = ["PING", "URGENT", "!HHHH", "LIGHTSCAN", "UDP", "TCP", "-Pu", "KIWI"]
                 self.Proto = "udp"
                 self.scan_type = "udp"
                 if port == 53:
-                    packet = Payloads.dns_payload_udp(target)
+                    packet = Payloads.dns_payload_udp(target,version)
                 elif port == 22:
-                    packet = Payloads.ssh_payload_udp(target)
+                    packet = Payloads.ssh_payload_udp(target,version)
                 elif port == 21:
-                    packet = Payloads.ftp_payload_udp(target)
+                    packet = Payloads.ftp_payload_udp(target,version)
                 else:
-                    packet = scapy.IP(dst=target,id=random.randint(1, 65535),ttl=random.choice([64, 128, 255]),flags="DF") / scapy.UDP(dport=port, sport=random.randint(60000, 65535))
+                    if self.args.V6:
+                        packet = IPv6(dst=target,nh=17,hlim=random.choice([64, 128, 255])) / scapy.UDP(dport=port, sport=random.randint(60000, 65535))/scapy.Raw(load=random.choice(payloads))
+                    else:
+                        packet = scapy.IP(dst=target,id=random.randint(1, 65535),ttl=random.choice([64, 128, 255]),flags="DF") / scapy.UDP(dport=port, sport=random.randint(60000, 65535))/scapy.Raw(load=random.choice(payloads))
                 if self.args.fragmente:
                     if self.args.recursively:
-                        response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
+                        if version == 6:
+                            response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose,v6=True)
+                        else:
+                            response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
                         if self.args.verbose:
                             print("[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
                     else:
@@ -894,45 +906,119 @@ class Lightscan:
                         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                 else:
                     if self.args.timeout:
+
                         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                     else:
                         response = scapy.sr1(packet, timeout=5, verbose=0)
 
                 service = self.service_detection(port)
-
                 if response is None:
-                    if attempt == self.args.max_retries - 1:
-                        with self.lock:
+                    if version == 6:
+                        s = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
+                        s.settimeout(self.socket_timeout)
+                        if s.connect_ex((target, port)) == 0:
+                            with self.lock:
                                 if target not in self.target_results:
                                     self.initialize_target_results(target)
-                                self.target_results[target]['open_filtered_ports'].append(port)
-                                self.target_results[target]['open_filtered_ports_services'].append(service)
+                                self.target_results[target]['open_ports'].append(port)
+                                self.target_results[target]['opened_ports_services'].append(service)
+
+                            if self.args.banner:
+                                banner = Banner.banner_grab(
+                                    target=target,
+                                    port=port,
+                                    protocol="udp",
+                                    timeout=3,
+                                    verbose=self.args.verbose,
+                                    version=version
+                                )
+
+                                if banner:
+                                    with self.lock:
+                                        self.target_results[target]['banners'].append(banner)
+                                        self.target_results[target]['banners_ports'].append(port)
+
+                                    Banner.analyse_banner(banner, port, self.target_results[target], self.Proto,
+                                                          self.lock)
+                                else:
+                                    pass
+                            break
+                        else:
+                            if attempt == self.args.max_retries - 1:
+                                with self.lock:
+                                    if target not in self.target_results:
+                                        self.initialize_target_results(target)
+                                    self.target_results[target]['open_filtered_ports'].append(port)
+                                    self.target_results[target]['open_filtered_ports_services'].append(service)
+                            else:
+                                if self.args.verbose:
+                                    print(
+                                        f"{yellow}[!] No response from UDP port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
+                                time.sleep(0.1)
+                                continue
                     else:
-                        if self.args.verbose:
-                            print(f"{yellow}[!] No response from UDP port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
-                        time.sleep(0.1)
-                        continue
+                        s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+                        s.settimeout(self.socket_timeout)
+                        response = s.connect_ex((target, port))
 
-                elif response.haslayer(scapy.ICMP):
-                    icmp_type = response.getlayer(scapy.ICMP).type
-                    icmp_code = response.getlayer(scapy.ICMP).code
+                        if response == 0:
 
-                    if icmp_type == 3 and icmp_code == 3:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['open_ports'].append(port)
+                                self.target_results[target]['opened_ports_services'].append(service)
+
+                            if self.args.banner:
+                                banner = Banner.banner_grab(
+                                    target=target,
+                                    port=port,
+                                    protocol="udp",
+                                    timeout=3,
+                                    verbose=self.args.verbose,
+                                    version=version
+                                )
+
+                                if banner:
+                                    with self.lock:
+                                        self.target_results[target]['banners'].append(banner)
+                                        self.target_results[target]['banners_ports'].append(port)
+
+                                    Banner.analyse_banner(banner, port, self.target_results[target], self.Proto,
+                                                          self.lock)
+                                else:
+                                    pass
+                            break
+                        else:
+                            if attempt == self.args.max_retries - 1:
+                                with self.lock:
+                                        if target not in self.target_results:
+                                            self.initialize_target_results(target)
+                                        self.target_results[target]['open_filtered_ports'].append(port)
+                                        self.target_results[target]['open_filtered_ports_services'].append(service)
+                            else:
+                                if self.args.verbose:
+                                    print(f"{yellow}[!] No response from UDP port {port}, retrying... (attempt {attempt + 1}/{self.args.max_retries}){reset}")
+                                time.sleep(0.1)
+                                continue
+
+                elif response.haslayer(ICMPv6DestUnreach):
+                    code = response.getlayer(ICMPv6DestUnreach).code
+                    if code == 4:
                         with self.lock:
                             if target not in self.target_results:
                                 self.initialize_target_results(target)
                             self.target_results[target]['closed_ports'].append(port)
                             self.target_results[target]['closed_ports_services'].append(service)
                         break
+                    elif code == 1:
 
-                    elif icmp_type == 3 and icmp_code in [1,2,9,10,13]:
                         with self.lock:
                                 if target not in self.target_results:
                                     self.initialize_target_results(target)
                                 self.target_results[target]['filtered_ports'].append(port)
                                 self.target_results[target]['filtered_ports_services'].append(service)
                         break
-
                     else:
                         with self.lock:
                                 if target not in self.target_results:
@@ -940,6 +1026,37 @@ class Lightscan:
                                 self.target_results[target]['filtered_ports'].append(port)
                                 self.target_results[target]['filtered_ports_services'].append(service)
                         break
+
+                elif response.haslayer(scapy.ICMP):
+                    if self.args.V6:
+                        pass
+                    else:
+                        icmp_type = response.getlayer(scapy.ICMP).type
+                        icmp_code = response.getlayer(scapy.ICMP).code
+
+                        if icmp_type == 3 and icmp_code == 3:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['closed_ports'].append(port)
+                                self.target_results[target]['closed_ports_services'].append(service)
+                            break
+
+                        elif icmp_type == 3 and icmp_code in [1,2,9,10,13]:
+                            with self.lock:
+                                    if target not in self.target_results:
+                                        self.initialize_target_results(target)
+                                    self.target_results[target]['filtered_ports'].append(port)
+                                    self.target_results[target]['filtered_ports_services'].append(service)
+                            break
+
+                        else:
+                            with self.lock:
+                                    if target not in self.target_results:
+                                        self.initialize_target_results(target)
+                                    self.target_results[target]['filtered_ports'].append(port)
+                                    self.target_results[target]['filtered_ports_services'].append(service)
+                            break
 
 
                 elif response.haslayer(scapy.UDP):
@@ -955,7 +1072,8 @@ class Lightscan:
                             port=port,
                             protocol="udp",
                             timeout=3,
-                            verbose=self.args.verbose
+                            verbose=self.args.verbose,
+                            version=version
                         )
 
                         if banner:
@@ -977,7 +1095,7 @@ class Lightscan:
 
             except Exception as e:
                 if self.args.verbose:
-                    print(f"{red}[!] Error scanning port {port}: {e}{reset}")
+                    print(f"{red}[!] UDP scan failed? That's weird. Heretic fixed this bug?{reset}")
                 if attempt == self.args.max_retries - 1:
                     service = self.service_detection(port)
                     with self.lock:
@@ -1019,18 +1137,33 @@ class Lightscan:
     def tcp_syn_scan(self, port, target):
         for attempt in range(self.args.max_retries):
             try:
+                if self.args.V6:
+                    version = 6
+                else:
+                    version = 4
                 self.Proto = "tcp"
                 self.scan_type = "syn"
 
                 if port == 22:
-                    packet = Payloads.ssh_payload_tcp(target)
+                    packet = Payloads.ssh_payload_tcp(target,version)
                 elif port == 21:
-                    packet = Payloads.ftp_payload_tcp(target)
+                    packet = Payloads.ftp_payload_tcp(target,version)
                 else:
-                    packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),seq=random.randint(1000000000, 4294967295),window=random.choice([5840, 64240, 65535, 29200, 8760]),options=Payloads.Stealth_tcp_options(), flags="S")
+                    if self.args.V6:
+                        packet = IPv6(dst=target, hlim=random.choice([64, 128, 255]),nh=6) / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
+                                                                  seq=random.randint(1000000000, 4294967295),
+                                                                  window=random.choice(
+                                                                      [5840, 64240, 65535, 29200, 8760]),
+                                                                  options=Payloads.Stealth_tcp_options(), flags="S")
+
+                    else :
+                        packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),seq=random.randint(1000000000, 4294967295),window=random.choice([5840, 64240, 65535, 29200, 8760]),options=Payloads.Stealth_tcp_options(), flags="S")
                 if self.args.fragmente:
                     if self.args.recursively:
-                        response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
+                        if version == 6:
+                            response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose,v6=True)
+                        else:
+                            response = Payloads.fragementation(packet, self.Proto, self.scan_type, self.args.verbose)
                         if self.args.verbose:
                             print("[+] Demo Fragementation (if you find an error while using it leave it in our github for future updates)\n")
                     else:
@@ -1071,7 +1204,8 @@ class Lightscan:
                                 port=port,
                                 protocol="tcp",
                                 timeout=3,
-                                verbose=self.args.verbose
+                                verbose=self.args.verbose,
+                                version=version
                             )
 
                             if banner:
@@ -1082,8 +1216,36 @@ class Lightscan:
                             else:
                                 pass
 
-                        scapy.send(scapy.IP(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
+                        if self.args.V6:
+                            scapy.send(IPv6(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
+                        else:
+                            scapy.send(scapy.IP(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
                         break
+
+
+                    elif response.haslayer(ICMPv6DestUnreach):
+                        code = response.getlayer(ICMPv6DestUnreach).code
+                        if code == 4:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['closed_ports'].append(port)
+                                self.target_results[target]['closed_ports_services'].append(service)
+                            break
+                        elif code == 1:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['filtered_ports'].append(port)
+                                self.target_results[target]['filtered_ports_services'].append(service)
+                            break
+                        else:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['filtered_ports'].append(port)
+                                self.target_results[target]['filtered_ports_services'].append(service)
+                            break
 
                     elif flags == 0x14 or flags == 0x04:
                         with self.lock:
@@ -1126,15 +1288,31 @@ class Lightscan:
     def tcp_3_ways_handshake(self, port, target):
         for attempt in range(self.args.max_retries):
             try:
+                if self.args.V6:
+                    version = 6
+                else:
+                    version = 4
                 self.Proto = "tcp"
                 self.scan_type = "tcp"
 
                 if port == 22:
-                    packet = Payloads.ssh_payload_tcp(target)
+                    packet = Payloads.ssh_payload_tcp(target,version)
                 elif port == 21:
-                    packet = Payloads.ftp_payload_tcp(target)
+                    packet = Payloads.ftp_payload_tcp(target,version)
                 else:
-                    packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),seq=random.randint(1000000000, 4294967295),window=random.choice([5840, 64240, 65535, 29200, 8760]),options=Payloads.Stealth_tcp_options(), flags="S")
+                    if self.args.V6:
+                        packet = IPv6(dst=target, nh=6, hlim=random.choice([64, 128, 255])) / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
+                                                                  seq=random.randint(1000000000, 4294967295),
+                                                                  window=random.choice(
+                                                                      [5840, 64240, 65535, 29200, 8760]),
+                                                                  options=Payloads.Stealth_tcp_options(), flags="S")
+                    else:
+                        packet = scapy.IP(dst=target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),
+                                          flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
+                                                                  seq=random.randint(1000000000, 4294967295),
+                                                                  window=random.choice(
+                                                                      [5840, 64240, 65535, 29200, 8760]),
+                                                                  options=Payloads.Stealth_tcp_options(), flags="S")
                 response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
                 service = self.service_detection(port)
 
@@ -1161,12 +1339,22 @@ class Lightscan:
                             self.target_results[target]['open_ports'].append(port)
                             self.target_results[target]['opened_ports_services'].append(service)
 
-                        ack_packet = (scapy.IP(dst=target) /
-                                    scapy.TCP(dport=port, flags="A",
-                                              seq=response[scapy.TCP].ack,
-                                              ack=response[scapy.TCP].seq + 1))
+                        if self.args.V6:
+                            ack_packet = (IPv6(dst=target) /
+                                          scapy.TCP(dport=port, flags="A",
+                                                    seq=response[scapy.TCP].ack,
+                                                    ack=response[scapy.TCP].seq + 1))
+                        else:
+                            ack_packet = (scapy.IP(dst=target) /
+                                        scapy.TCP(dport=port, flags="A",
+                                                  seq=response[scapy.TCP].ack,
+                                                  ack=response[scapy.TCP].seq + 1))
                         if self.args.fragmente:
-                            ack_responses = Payloads.fragementation(ack_packet, self.Proto, self.scan_type, self.args.verbose)
+                            if version == 6:
+                                ack_responses = Payloads.fragementation(ack_packet, self.Proto, self.scan_type,
+                                                                        self.args.verbose,v6=True)
+                            else:
+                                ack_responses = Payloads.fragementation(ack_packet, self.Proto, self.scan_type, self.args.verbose)
 
                             if self.args.verbose:
                                 if ack_responses:
@@ -1183,7 +1371,8 @@ class Lightscan:
                                 port=port,
                                 protocol="tcp",
                                 timeout=3,
-                                verbose=self.args.verbose
+                                verbose=self.args.verbose,
+                                version=version
                             )
 
                             if banner:
@@ -1195,8 +1384,36 @@ class Lightscan:
                             else:
                                 pass
 
-                        scapy.send(scapy.IP(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
+                        if self.args.V6:
+                            scapy.send(IPv6(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
+                        else:
+                            scapy.send(scapy.IP(dst=target) / scapy.TCP(dport=port, flags="R"), verbose=0)
                         break
+
+
+                    elif response.haslayer(ICMPv6DestUnreach):
+                        code = response.getlayer(ICMPv6DestUnreach).code
+                        if code == 4:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['closed_ports'].append(port)
+                                self.target_results[target]['closed_ports_services'].append(service)
+                            break
+                        elif code == 1:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['filtered_ports'].append(port)
+                                self.target_results[target]['filtered_ports_services'].append(service)
+                            break
+                        else:
+                            with self.lock:
+                                if target not in self.target_results:
+                                    self.initialize_target_results(target)
+                                self.target_results[target]['filtered_ports'].append(port)
+                                self.target_results[target]['filtered_ports_services'].append(service)
+                            break
 
                     elif flags == 0x14 or flags == 0x04:
                         with self.lock:
@@ -1257,8 +1474,12 @@ class Lightscan:
 
     def Udp_host_discovery(self,Target,port):
         payloads = ["PING","URGENT","!HHHH","LIGHTSCAN","UDP","TCP","-Pu","KIWI"]
-        packet = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),
-                          flags="DF") / scapy.UDP(dport=port, sport=random.randint(60000, 65535))/scapy.Raw(load=random.choice(payloads))
+        if self.args.V6:
+            packet = IPv6(dst=Target, nh=17, hlim=random.choice([64, 128, 255])) / scapy.UDP(dport=port, sport=random.randint(60000, 65535)) / scapy.Raw(
+                load=random.choice(payloads))
+        else:
+            packet = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),
+                              flags="DF") / scapy.UDP(dport=port, sport=random.randint(60000, 65535))/scapy.Raw(load=random.choice(payloads))
 
         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
         if len(self.targets) == 1:
@@ -1268,19 +1489,38 @@ class Lightscan:
                         if Target not in self.targetss:
                             self.targetss.append(Target)
                         self.target_results[Target]['up'] += 1
+                    elif self.args.V6:
+                        if response.haslayer(ICMPv6DestUnreach):
+                            code = response.getlayer(ICMPv6DestUnreach).code
+                            if code == 4:
+                                print(f"[UDP] Host {Target}:{port} is up! ")
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
+                                self.target_results[Target]['up'] += 1
+
+                            elif code == 1:
+                                print(f"[UDP] Host {Target}:{port} is up! ")
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
+                                self.target_results[Target]['up'] += 1
+
+                            else:
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
+                                self.target_results[Target]['up'] += 1
                     elif response.haslayer(scapy.ICMP):
                         print(f"[UDP] Host {Target}:{port} is up! ")
                         if Target not in self.targetss:
                             self.targetss.append(Target)
                         self.target_results[Target]['up'] += 1
+
                     else:
                         print(f"[UDP] Host {Target}:{port} is up! ")
                         if Target not in self.targetss:
                             self.targetss.append(Target)
                         self.target_results[Target]['up'] += 1
             else:
-                if Target not in self.targetss:
-                    self.targetss.append(Target)
+                pass
         else:
             if response:
                     if response.haslayer(scapy.UDP):
@@ -1288,16 +1528,31 @@ class Lightscan:
                         if Target not in self.targetss:
                             self.targetss.append(Target)
                         self.target_results[Target]['up'] += 1
+                    elif self.args.V6:
+                        if response.haslayer(ICMPv6DestUnreach):
+                            code = response.getlayer(ICMPv6DestUnreach).code
+                            if code == 4:
+                                print(f"[UDP] Host {Target}:{port} is up! ")
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
+                                self.target_results[Target]['up'] += 1
+
+                            elif code == 1:
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
+
+                            else:
+                                if Target not in self.targetss:
+                                    self.targetss.append(Target)
                     elif response.haslayer(scapy.ICMP):
                         print(f"[UDP] Host {Target}:{port} is up! ")
                         if Target not in self.targetss:
                             self.targetss.append(Target)
                         self.target_results[Target]['up'] += 1
                     else:
-                        print(f"[UDP] Host {Target}:{port} is up! ")
                         if Target not in self.targetss:
                             self.targetss.append(Target)
-                        self.target_results[Target]['up'] += 1
+
             else:
                 pass
 
@@ -1353,14 +1608,21 @@ class Lightscan:
 
     def Syn_host_discovery(self,Target, port):
         self.Proto = "tcp"
-        packet = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),
-                              flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
+        if self.args.V6:
+            packet = IPv6(dst=Target, nh=6, hlim=random.choice([64, 128, 255])) / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
                                                       seq=random.randint(1000000000, 4294967295),
                                                       window=random.choice([5840, 64240, 65535, 29200, 8760]),
                                                       options=Payloads.Stealth_tcp_options(), flags="S")
+        else:
+            packet = scapy.IP(dst=Target, id=random.randint(1, 65535), ttl=random.choice([64, 128, 255]),
+                                  flags="DF") / scapy.TCP(dport=port, sport=random.randint(60000, 65535),
+                                                          seq=random.randint(1000000000, 4294967295),
+                                                          window=random.choice([5840, 64240, 65535, 29200, 8760]),
+                                                          options=Payloads.Stealth_tcp_options(), flags="S")
         response = scapy.sr1(packet, timeout=self.socket_timeout, verbose=0)
         if len(self.targets) == 1:
-            if response:
+            if response != None:
+
                     if response.haslayer(scapy.TCP):
                         flags = response.getlayer(scapy.TCP).flags
 
@@ -1381,7 +1643,7 @@ class Lightscan:
                 if Target not in self.targetss:
                     self.targetss.append(Target)
         else:
-            if response:
+            if response != None:
                 if response.haslayer(scapy.TCP):
                     flags = response.getlayer(scapy.TCP).flags
 
@@ -1449,7 +1711,10 @@ class Lightscan:
 
     def Tcp_host_discovery(self,Target,port):
         self.Proto = "tcp"
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if self.args.V6:
+            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(self.socket_timeout)
         result = s.connect_ex((Target, port))
         if self.args.recursively:
@@ -1755,6 +2020,141 @@ class Lightscan:
                             pass
             self.targetss = list(set(self.targetss))
 
+    def host_discovery_ipv6(self, Target):
+        Echo = IPv6(dst=Target) / ICMPv6EchoRequest()
+        response = scapy.sr1(Echo, timeout=self.socket_timeout, verbose=0)
+        if self.args.recursively:
+            if len(self.targets) == 1:
+                if response is None:
+                    print(
+                        f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                    self.targetss.append(Target)
+                elif response.haslayer(ICMPv6EchoReply):
+                    print(f"[ECHOv6] Host {Target} is up! ")
+                    self.targetss.append(Target)
+                elif response.haslayer(ICMPv6TimeExceeded):
+                    print(f"[ECHOv6] Host {Target} is up! ")
+                    self.targetss.append(Target)
+                elif response.haslayer(ICMPv6DestUnreach):
+                    code = response[ICMPv6DestUnreach].code
+                    if code == 4:
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.targetss.append(Target)
+                else:
+                    print(
+                        f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                    self.Tcp_host_discovery(Target)
+            else:
+                if self.args.verbose:
+                    if response is None:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6EchoReply):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6TimeExceeded):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6DestUnreach):
+                        code = response[ICMPv6DestUnreach].code
+                        if code == 4:
+                            print(f"[ECHOv6] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(
+                                f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                            self.targetss.append(Target)
+                    else:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding, <Swithch to TCP Host Discovery>")
+                        self.Tcp_host_discovery(Target)
+                else:
+                        if response is None:
+                            self.targetss.append(Target)
+                        elif response.haslayer(ICMPv6EchoReply):
+                            print(f"[ECHOv6] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        elif response.haslayer(ICMPv6TimeExceeded):
+                            print(f"[ECHOv6] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        elif response.haslayer(ICMPv6DestUnreach):
+                            code = response[ICMPv6DestUnreach].code
+                            if code == 4:
+                                print(f"[ECHOv6] Host {Target} is up! ")
+                                self.targetss.append(Target)
+                            else:
+                                self.targetss.append(Target)
+                        else:
+                            self.Tcp_host_discovery(Target)
+        else:
+            if len(self.targets) == 1:
+                if response is None:
+                    print(
+                        f"[ECHOv6] Host {Target} is shown to be down or not responding")
+                elif response.haslayer(ICMPv6EchoReply):
+                    print(f"[ECHOv6] Host {Target} is up! ")
+                    self.targetss.append(Target)
+                elif response.haslayer(ICMPv6TimeExceeded):
+                    print(f"[ECHOv6] Host {Target} is up! ")
+                    self.targetss.append(Target)
+                elif response.haslayer(ICMPv6DestUnreach):
+                    code = response[ICMPv6DestUnreach].code
+                    if code == 4:
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    else:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding")
+                else:
+                    print(
+                        f"[ECHOv6] Host {Target} is shown to be down or not responding")
+            else:
+                if self.args.verbose:
+                    if response is None:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding,")
+                    elif response.haslayer(ICMPv6EchoReply):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6TimeExceeded):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6DestUnreach):
+                        code = response[ICMPv6DestUnreach].code
+                        if code == 4:
+                            print(f"[ECHOv6] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            print(
+                                f"[ECHOv6] Host {Target} is shown to be down or not responding")
+                    else:
+                        print(
+                            f"[ECHOv6] Host {Target} is shown to be down or not responding")
+                else:
+                    if response is None:
+                        pass
+                    elif response.haslayer(ICMPv6EchoReply):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6TimeExceeded):
+                        print(f"[ECHOv6] Host {Target} is up! ")
+                        self.targetss.append(Target)
+                    elif response.haslayer(ICMPv6DestUnreach):
+                        code = response[ICMPv6DestUnreach].code
+                        if code == 4:
+                            print(f"[ECHOv6] Host {Target} is up! ")
+                            self.targetss.append(Target)
+                        else:
+                            pass
+                    else:
+                        pass
+        self.targetss = list(set(self.targetss))
+
     def host_discovery(self, Target):
             icmp_id = random.randint(1, 65535)
             icmp_seq = random.randint(1, 65535)
@@ -1825,6 +2225,27 @@ class Lightscan:
                     except Exception as e:
                         if self.args.verbose:
                             print(f"{red}[!] ICMP ECHO ping error: {e}{reset}")
+
+    def threaded_host_discovery_ipv6(self):
+        if self.max_threads == 1:
+            for Target in self.targets:
+                self.host_discovery_ipv6(Target)
+        else:
+            with ThreadPoolExecutor(max_workers=self.max_threads) as executor:
+                futures = []
+                for target in self.targets:
+                        future = executor.submit(
+                            self.host_discovery_ipv6,target
+                        )
+                        time.sleep(0.02)
+                        futures.append(future)
+
+                for future in as_completed(futures):
+                    try:
+                        future.result()
+                    except Exception as e:
+                        if self.args.verbose:
+                            print(f"{red}[!] ICMPv6 ECHO ping error: {e}{reset}")
 
     def threaded_host_discovery_1(self):
         if self.max_threads == 1:
@@ -1959,7 +2380,6 @@ class Lightscan:
     def Scan_details(self):
         duration = self.end_time - self.start_time
 
-
         for target in self.targetss:
             if target in self.target_results:
                 self._sync_and_deduplicate_ports(target)
@@ -1970,195 +2390,328 @@ class Lightscan:
 
             if target not in self.target_results:
                 print(f"\n[-] No results for target: {target}")
+                continue
 
             ip_status = Payloads.is_private_ip(target)
+            Mac = None
+
             if ip_status == "Local":
-                if self.args.mac:
-                    pass
-                else:
-                    Mac = Payloads.ARP_Scan(target)
-            elif ip_status == "Public":
-                pass
+                if not self.args.mac:
+                    if self.args.V6:
+                        Mac = Payloads.NDP_Get_MAC(target)
+                    else:
+                        Mac = Payloads.ARP_Scan(target)
 
             results = self.target_results[target]
+
             print(f"\n{'=' * 60}")
             print(f"[+] Scan result for : {target}")
             print(f"[+] Scan Type: {self.scan_type.upper()} | Protocol: {self.Proto.upper()}")
             if ip_status == "Local":
                 print(f"[+] IP Status: {ip_status}")
-                if self.args.mac:
-                    pass
-                else:
+                if not self.args.mac and Mac:
                     print(f"[+] Mac Address: {Mac}")
             elif ip_status == "Public":
                 print(f"[+] IP Status: {ip_status}")
             print(f"{'=' * 60}")
 
-            if self.scan_type == "null":
-                pass
-            elif self.scan_type == "fin":
-                pass
-            elif self.scan_type == "ack":
-                pass
-            elif self.scan_type == "xmas":
-                pass
-            elif self.scan_type == "maimon":
-                pass
-            elif self.scan_type == "fdd":
-                pass
-            else:
-                print(f"\n[+] Open Ports: {len(results['open_ports'])}")
-                if len(results['open_ports']) >= 21:
-                    for i in range(len(results['open_ports'][:20])):
-                        print(
-                            f"     Port {results['open_ports'][i]} {results['opened_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['open_ports']) > 0:
-                    for i in range(len(results['open_ports'])):
-                        print(
-                            f"     Port {results['open_ports'][i]} {results['opened_ports_services'][i].lower()}\\{self.Proto}")
-            if self.scan_type == "ack":
-                print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
-                if len(results['filtered_ports']) <= 10 and len(results['filtered_ports']) != 0:
-                    for i in range(len(results['filtered_ports'])):
-                        print(
-                            f"     Port {results['filtered_ports'][i]} {results['filtered_ports_services'][i].lower()}\\{self.Proto}")
-                elif self.args.verbose:
-                    for i in range(len(results['filtered_ports'])):
-                        print(
-                            f"     Port {results['filtered_ports'][i]} {results['filtered_ports_services'][i].lower()}\\{self.Proto}")
+            if self.scan_type == "ipproto":
 
-                print(f"\n[+] Unfiltered Ports: {len(results['unfiltered_ports'])}")
-                if len(results['unfiltered_ports']) >= 21:
-                    for i in range(len(results['unfiltered_ports'][:20])):
-                        print(
-                            f"     Port {results['filtered_ports'][i]} {results['unfiltered_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['unfiltered_ports']) > 0:
-                    for i in range(len(results['unfiltered_ports'])):
-                        print(
-                            f"     Port {results['unfiltered_ports'][i]} {results['unfiltered_ports_services'][i].lower()}\\{self.Proto}")
-            elif self.scan_type == "fdd":
-                print(f"\n[+] Defended Ports: {len(results['defended_ports'])}")
-                if len(results['defended_ports']) <= 10 and len(results['defended_ports']) != 0:
-                    for i in range(len(results['defended_ports'])):
-                        print(
-                            f"     Port {results['defended_ports'][i]} {results['defended_ports_services'][i].lower()}\\{self.Proto}")
-                elif self.args.verbose:
-                    for i in range(len(results['defended_ports'])):
-                        print(
-                            f"     Port {results['defended_ports'][i]} {results['defended_ports_services'][i].lower()}\\{self.Proto}")
+                    proto_names = {
+                    0: "HOPOPT",
+                    1: "ICMP", 2: "IGMP", 3: "GGP", 4: "IPv4", 5: "ST", 6: "TCP", 7: "CBT", 8: "EGP", 9: "IGP",
+                    10: "BBN-RCC-MON", 11: "NVP-II", 12: "PUP", 13: "ARGUS", 14: "EMCON", 15: "XNET", 16: "CHAOS",
+                    17: "UDP", 18: "MUX", 19: "DCN-MEAS", 20: "HMP", 21: "PRM", 22: "XNS-IDP", 23: "TRUNK-1",
+                    24: "TRUNK-2", 25: "LEAF-1", 26: "LEAF-2", 27: "RDP", 28: "IRTP", 29: "ISO-TP4",
+                    30: "NETBLT", 31: "MFE-NSP", 32: "MERIT-INP", 33: "DCCP", 34: "3PC", 35: "IDPR",
+                    36: "XTP", 37: "DDP", 38: "IDPR-CMTP", 39: "TP++", 40: "IL", 41: "IPv6", 42: "SDRP",
+                    43: "IPv6-Route", 44: "IPv6-Frag", 45: "IDRP", 46: "RSVP", 47: "GRE", 48: "DSR",
+                    49: "BNA", 50: "ESP", 51: "AH", 52: "I-NLSP", 53: "SWIPE", 54: "NARP", 55: "MOBILE",
+                    56: "TLSP", 57: "SKIP", 58: "ICMPv6", 59: "IPv6-NoNxt", 60: "IPv6-Opts", 61: "AnyHost",
+                    62: "CFTP", 63: "AnyLocal", 64: "SAT-EXPAK", 65: "KRYPTOLAN", 66: "RVD", 67: "IPPC",
+                    68: "AnyDistFS", 69: "SAT-MON", 70: "VISA", 71: "IPCV", 72: "CPNX", 73: "CPHB", 74: "WSN",
+                    75: "PVP", 76: "BR-SAT-MON", 77: "SUN-ND", 78: "WB-MON", 79: "WB-EXPAK", 80: "ISO-IP",
+                    81: "VMTP", 82: "SECURE-VMTP", 83: "VINES", 84: "TTP", 85: "NSFNET-IGP", 86: "DGP",
+                    87: "TCF", 88: "EIGRP", 89: "OSPF", 90: "Sprite-RPC", 91: "LARP", 92: "MTP", 93: "AX.25",
+                    94: "IPIP", 95: "MICP", 96: "SCC-SP", 97: "ETHERIP", 98: "ENCAP", 99: "AnyPrivate",
+                    100: "GMTP", 101: "IFMP", 102: "PNNI", 103: "PIM", 104: "ARIS", 105: "SCPS", 106: "QNX",
+                    107: "A/N", 108: "IPComp", 109: "SNP", 110: "Compaq-Peer", 111: "IPX-in-IP", 112: "VRRP",
+                    113: "PGM", 114: "Any0-hop", 115: "L2TP", 116: "DDX", 117: "IATP", 118: "STP", 119: "SRP",
+                    120: "UTI", 121: "SMP", 122: "SM", 123: "PTP", 124: "ISIS-over-IPv4", 125: "FIRE",
+                    126: "CRTP", 127: "CRUDP", 128: "SSCOPMCE", 129: "IPLT", 130: "SPS", 131: "PIPE",
+                    132: "SCTP", 133: "FC", 134: "RSVP-E2E-IGNORE", 135: "Mobility-Header", 136: "UDPLite",
+                    137: "MPLS-in-IP", 138: "manet", 139: "HIP", 140: "Shim6", 141: "WESP", 142: "ROHC",
+                    143: "Ethernet", 144: "AGGFRAG", 145: "NSH", 146: "unassigned", 147: "unassigned",
+                    148: "unassigned", 149: "unassigned", 150: "unassigned", 151: "unassigned", 152: "unassigned",
+                    153: "unassigned", 154: "unassigned", 155: "unassigned", 156: "unassigned", 157: "unassigned",
+                    158: "unassigned", 159: "unassigned", 160: "unassigned", 161: "unassigned", 162: "unassigned",
+                    163: "unassigned", 164: "unassigned", 165: "unassigned", 166: "unassigned", 167: "unassigned",
+                    168: "unassigned", 169: "unassigned", 170: "unassigned", 171: "unassigned", 172: "unassigned",
+                    173: "unassigned", 174: "unassigned", 175: "unassigned", 176: "unassigned", 177: "unassigned",
+                    178: "unassigned", 179: "unassigned", 180: "unassigned", 181: "unassigned", 182: "unassigned",
+                    183: "unassigned", 184: "unassigned", 185: "unassigned", 186: "unassigned", 187: "unassigned",
+                    188: "unassigned", 189: "unassigned", 190: "unassigned", 191: "unassigned", 192: "unassigned",
+                    193: "unassigned", 194: "unassigned", 195: "unassigned", 196: "unassigned", 197: "unassigned",
+                    198: "unassigned", 199: "unassigned", 200: "unassigned", 201: "unassigned", 202: "unassigned",
+                    203: "unassigned", 204: "unassigned", 205: "unassigned", 206: "unassigned", 207: "unassigned",
+                    208: "unassigned", 209: "unassigned", 210: "unassigned", 211: "unassigned", 212: "unassigned",
+                    213: "unassigned", 214: "unassigned", 215: "unassigned", 216: "unassigned", 217: "unassigned",
+                    218: "unassigned", 219: "unassigned", 220: "unassigned", 221: "unassigned", 222: "unassigned",
+                    223: "unassigned", 224: "unassigned", 225: "unassigned", 226: "unassigned", 227: "unassigned",
+                    228: "unassigned", 229: "unassigned", 230: "unassigned", 231: "unassigned", 232: "unassigned",
+                    233: "unassigned", 234: "unassigned", 235: "unassigned", 236: "unassigned", 237: "unassigned",
+                    238: "unassigned", 239: "unassigned", 240: "unassigned", 241: "unassigned", 242: "unassigned",
+                    243: "unassigned", 244: "unassigned", 245: "unassigned", 246: "unassigned", 247: "unassigned",
+                    248: "unassigned", 249: "unassigned", 250: "unassigned", 251: "unassigned", 252: "unassigned",
+                    253: "unassigned", 254: "unassigned", 255: "RAW"
+                }
 
-                print(f"\n[+] Undefended Ports: {len(results['undefended_ports'])}")
-                if len(results['undefended_ports']) >= 21:
-                    for i in range(len(results['undefended_ports'][:20])):
-                        print(
-                            f"     Port {results['undefended_ports'][i]} {results['undefended_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['undefended_ports']) > 0:
-                    for i in range(len(results['undefended_ports'])):
-                        print(
-                            f"     Port {results['undefended_ports'][i]} {results['undefended_ports_services'][i].lower()}\\{self.Proto}")
-            else:
+                    print(f"\n[+] OPEN Protocols: {len(results.get('open_protocols', []))}")
+                    for i, proto in enumerate(results['open_protocols'][:20]):
+                        proto_name = proto_names.get(proto, f"Proto{proto}")
+                        print(f"     Protocol {proto:3} ({proto_name:12}) : OPEN")
+                    if len(results['open_protocols']) > 20:
+                        print(f"     ... and {len(results['open_protocols']) - 20} more")
+
+
+                    print(f"\n[+] CLOSED Protocols: {len(results.get('closed_protocols', []))}")
+                    if results.get('closed_protocols'):
+                        for i, proto in enumerate(results['closed_protocols'][:20]):
+                            proto_name = proto_names.get(proto, f"Proto{proto}")
+                            print(f"     Protocol {proto:3} ({proto_name:12}) : CLOSED")
+                        if len(results['closed_protocols']) > 20:
+                            print(f"     ... and {len(results['closed_protocols']) - 20} more")
+
+                    print(f"\n[+] FILTERED Protocols: {len(results.get('filtered_protocols', []))}")
+                    if results.get('filtered_protocols'):
+                        for i, proto in enumerate(results['filtered_protocols'][:20]):
+                            proto_name = proto_names.get(proto, f"Proto{proto}")
+                            print(f"     Protocol {proto:3} ({proto_name:12}) : FILTERED")
+                        if len(results['filtered_protocols']) > 20:
+                            print(f"     ... and {len(results['filtered_protocols']) - 20} more")
+
+                    print(f"\n[+] OPEN|FILTERED Protocols: {len(results.get('open_filtered_protocols', []))}")
+                    if results.get('open_filtered_protocols'):
+                        for i, proto in enumerate(results['open_filtered_protocols'][:20]):
+                            proto_name = proto_names.get(proto, f"Proto{proto}")
+                            print(f"     Protocol {proto:3} ({proto_name:12}) : OPEN|FILTERED")
+                        if len(results['open_filtered_protocols']) > 20:
+                            print(f"     ... and {len(results['open_filtered_protocols']) - 20} more")
+
+            elif self.scan_type in ["tcp", "syn", "udp"]:
+                    print(f"\n[+] Open Ports: {len(results['open_ports'])}")
+                    display_ports = results['open_ports'][:20]
+                    for i in range(len(display_ports)):
+                        service = results['opened_ports_services'][i].lower() if i < len(
+                            results['opened_ports_services']) else "unknown"
+                        print(f"     Port {display_ports[i]} {service}\\{self.Proto}")
+                    if len(results['open_ports']) > 20:
+                        print(f"     ... and {len(results['open_ports']) - 20} more")
+
+                    print(f"\n[+] Closed Ports: {len(results['closed_ports'])}")
+                    if results.get('closed_ports'):
+                        for i in range(min(len(results['closed_ports']), 20)):
+                            service = results['closed_ports_services'][i].lower() if i < len(
+                                results['closed_ports_services']) else "unknown"
+                            print(f"     Port {results['closed_ports'][i]} {service}\\{self.Proto}")
+
+                    print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
+                    if results.get('filtered_ports'):
+                        for i in range(min(len(results['filtered_ports']), 20)):
+                            service = results['filtered_ports_services'][i].lower() if i < len(
+                                results['filtered_ports_services']) else "unknown"
+                            print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+
+            if self.scan_type in ["syn", "udp"]:
+                    print(f"\n[+] Open|Filtered Ports: {len(results.get('open_filtered_ports', []))}")
+                    if results.get('open_filtered_ports') and self.args.verbose:
+                        for i in range(min(len(results['open_filtered_ports']), 20)):
+                            service = results['open_filtered_ports_services'][i].lower() if i < len(
+                                results['open_filtered_ports_services']) else "unknown"
+                            print(f"     Port {results['open_filtered_ports'][i]} {service}\\{self.Proto}")
+
+            elif self.scan_type == "null":
                 print(f"\n[+] Closed Ports: {len(results['closed_ports'])}")
-                if len(results['closed_ports']) <= 10 and len(results['closed_ports']) != 0:
-                    for i in range(len(results['closed_ports'])):
-                        print(
-                            f"     Port {results['closed_ports'][i]} {results['closed_ports_services'][i].lower()}\\{self.Proto}")
-                elif self.args.verbose:
-                    for i in range(len(results['closed_ports'])):
-                        print(
-                            f"     Port {results['closed_ports'][i]} {results['closed_ports_services'][i].lower()}\\{self.Proto}")
+                if results.get('closed_ports'):
+                    for i in range(min(len(results['closed_ports']), 20)):
+                        service = results['closed_ports_services'][i].lower() if i < len(
+                            results['closed_ports_services']) else "unknown"
+                        print(f"     Port {results['closed_ports'][i]} {service}\\{self.Proto}")
 
                 print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
-                if len(results['filtered_ports']) <= 10 and len(results['filtered_ports']) != 0:
-                    for i in range(len(results['filtered_ports'])):
-                        print(
-                            f"     Port {results['filtered_ports'][i]} {results['filtered_ports_services'][i].lower()}\\{self.Proto}")
-                elif self.args.verbose:
-                    for i in range(len(results['filtered_ports'])):
-                        print(
-                            f"     Port {results['filtered_ports'][i]} {results['filtered_ports_services'][i].lower()}\\{self.Proto}")
+                if results.get('filtered_ports'):
+                    for i in range(min(len(results['filtered_ports']), 20)):
+                        service = results['filtered_ports_services'][i].lower() if i < len(
+                            results['filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+                print(f"\n[+] (NULL Scan) Open|Filtered Ports: {len(results.get('null_ports', []))}")
+                if results.get('null_ports'):
+                    for i in range(min(len(results['null_ports']), 20)):
+                        service = results['null_ports_services'][i].lower() if i < len(
+                            results['null_ports_services']) else "unknown"
+                        print(f"     Port {results['null_ports'][i]} {service}\\{self.Proto}")
 
-            if self.scan_type == "syn" or self.scan_type == "udp" or self.scan_type == "maimon":
-                print(f"\n[+] Open | Filtered Ports: {len(results['open_filtered_ports'])}")
-                if len(results['open_filtered_ports']) <= 10 and len(results['open_filtered_ports']) != 0:
-                    for i in range(len(results['open_filtered_ports'])):
-                        print(
-                            f"     Port {results['open_filtered_ports'][i]} {results['open_filtered_ports_services'][i].lower()}\\{self.Proto}")
-                elif self.args.verbose:
-                    for i in range(len(results['open_filtered_ports'])):
-                        print(
-                            f"     Port {results['open_filtered_ports'][i]} {results['open_filtered_ports_services'][i].lower()}\\{self.Proto}")
-            if self.scan_type == "null":
-                print(f"\n[+] (NULL Scan) Open | Filtered Ports: {len(results['null_ports'])}")
-                if len(results['null_ports']) >= 21:
-                    for i in range(len(results['null_ports'][:20])):
-                        print(
-                            f"     Port {results['null_ports'][i]} {results['null_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['null_ports']) <= 20 and len(results['null_ports']) > 0:
-                    for i in range(len(results['null_ports'])):
-                        print(
-                            f"     Port {results['null_ports'][i]} {results['null_ports_services'][i].lower()}\\{self.Proto}")
             elif self.scan_type == "fin":
-                print(f"\n[+] (FIN Scan) Open | Filtered Ports: {len(results['fin_ports'])}")
-                if len(results['fin_ports']) >= 21:
-                    for i in range(len(results['fin_ports'][:20])):
-                        print(
-                            f"     Port {results['fin_ports'][i]} {results['fin_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['fin_ports']) <= 20 and len(results['fin_ports']) > 0:
-                    for i in range(len(results['fin_ports'])):
-                        print(
-                            f"     Port {results['fin_ports'][i]} {results['fin_ports_services'][i].lower()}\\{self.Proto}")
+                print(f"\n[+] Closed Ports: {len(results['closed_ports'])}")
+                if results.get('closed_ports'):
+                    for i in range(min(len(results['closed_ports']), 20)):
+                        service = results['closed_ports_services'][i].lower() if i < len(
+                            results['closed_ports_services']) else "unknown"
+                        print(f"     Port {results['closed_ports'][i]} {service}\\{self.Proto}")
+
+                print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
+                if results.get('filtered_ports'):
+                    for i in range(min(len(results['filtered_ports']), 20)):
+                        service = results['filtered_ports_services'][i].lower() if i < len(
+                            results['filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+                print(f"\n[+] (FIN Scan) Open|Filtered Ports: {len(results.get('fin_ports', []))}")
+                if results.get('fin_ports'):
+                    for i in range(min(len(results['fin_ports']), 20)):
+                        service = results['fin_ports_services'][i].lower() if i < len(
+                            results['fin_ports_services']) else "unknown"
+                        print(f"     Port {results['fin_ports'][i]} {service}\\{self.Proto}")
+
             elif self.scan_type == "xmas":
-                print(f"\n[+] (XMAS Scan) Open | Filtered Ports: {len(results['open_filtered_ports'])}")
-                if len(results['open_filtered_ports']) >= 21:
-                    for i in range(len(results['open_filtered_ports'][:20])):
-                        print(
-                            f"     Port {results['open_filtered_ports'][i]} {results['open_filtered_ports_services'][i].lower()}\\{self.Proto}")
-                elif len(results['open_filtered_ports']) <= 20 and len(results['open_filtered_ports']) > 0:
-                    for i in range(len(results['open_filtered_ports'])):
-                        print(
-                            f"     Port {results['open_filtered_ports'][i]} {results['open_filtered_ports_services'][i].lower()}\\{self.Proto}")
+                print(f"\n[+] Closed Ports: {len(results['closed_ports'])}")
+                if results.get('closed_ports'):
+                    for i in range(min(len(results['closed_ports']), 20)):
+                        service = results['closed_ports_services'][i].lower() if i < len(
+                            results['closed_ports_services']) else "unknown"
+                        print(f"     Port {results['closed_ports'][i]} {service}\\{self.Proto}")
+
+                print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
+                if results.get('filtered_ports'):
+                    for i in range(min(len(results['filtered_ports']), 20)):
+                        service = results['filtered_ports_services'][i].lower() if i < len(
+                            results['filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+                print(f"\n[+] (XMAS Scan) Open|Filtered Ports: {len(results.get('open_filtered_ports', []))}")
+                if results.get('open_filtered_ports'):
+                    for i in range(min(len(results['open_filtered_ports']), 20)):
+                        service = results['open_filtered_ports_services'][i].lower() if i < len(
+                            results['open_filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['open_filtered_ports'][i]} {service}\\{self.Proto}")
+
+            elif self.scan_type == "ack":
+                print(f"\n[+] Filtered Ports: {len(results.get('filtered_ports', []))}")
+                if results.get('filtered_ports') and self.args.verbose:
+                    for i in range(min(len(results['filtered_ports']), 20)):
+                        service = results['filtered_ports_services'][i].lower() if i < len(
+                            results['filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+
+                print(f"\n[+] Unfiltered Ports: {len(results.get('unfiltered_ports', []))}")
+                if results.get('unfiltered_ports'):
+                    for i in range(min(len(results['unfiltered_ports']), 20)):
+                        service = results['unfiltered_ports_services'][i].lower() if i < len(
+                            results['unfiltered_ports_services']) else "unknown"
+                        print(f"     Port {results['unfiltered_ports'][i]} {service}\\{self.Proto}")
+
+            elif self.scan_type == "maimon":
+                print(f"\n[+] Closed Ports: {len(results['closed_ports'])}")
+                if results.get('closed_ports'):
+                    for i in range(min(len(results['closed_ports']), 20)):
+                        service = results['closed_ports_services'][i].lower() if i < len(
+                            results['closed_ports_services']) else "unknown"
+                        print(f"     Port {results['closed_ports'][i]} {service}\\{self.Proto}")
+
+                print(f"\n[+] Filtered Ports: {len(results['filtered_ports'])}")
+                if results.get('filtered_ports'):
+                    for i in range(min(len(results['filtered_ports']), 20)):
+                        service = results['filtered_ports_services'][i].lower() if i < len(
+                            results['filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['filtered_ports'][i]} {service}\\{self.Proto}")
+                print(f"\n[+] (MAIMON Scan) Open|Filtered Ports: {len(results.get('open_filtered_ports', []))}")
+                if results.get('open_filtered_ports') and self.args.verbose:
+                    for i in range(min(len(results['open_filtered_ports']), 20)):
+                        service = results['open_filtered_ports_services'][i].lower() if i < len(
+                            results['open_filtered_ports_services']) else "unknown"
+                        print(f"     Port {results['open_filtered_ports'][i]} {service}\\{self.Proto}")
+
+            elif self.scan_type == "fdd":
+                print(f"\n[+] Defended Ports: {len(results.get('defended_ports', []))}")
+                if results.get('defended_ports') and self.args.verbose:
+                    for i in range(min(len(results['defended_ports']), 20)):
+                        service = results['defended_ports_services'][i].lower() if i < len(
+                            results['defended_ports_services']) else "unknown"
+                        print(f"     Port {results['defended_ports'][i]} {service}\\{self.Proto}")
+
+                print(f"\n[+] Undefended Ports: {len(results.get('undefended_ports', []))}")
+                if results.get('undefended_ports'):
+                    for i in range(min(len(results['undefended_ports']), 20)):
+                        service = results['undefended_ports_services'][i].lower() if i < len(
+                            results['undefended_ports_services']) else "unknown"
+                        print(f"     Port {results['undefended_ports'][i]} {service}\\{self.Proto}")
+
+            elif self.scan_type == "ftp-bounce" or self.scan_type == "FTP-BOUNCE":
+                    print(f"\n[+] FTP Bounce Scan Results:")
+                    print(f"    FTP Server: {self.args.ftp_server if hasattr(self.args, 'ftp_server') else 'Unknown'}")
+                    print(f"    Target: {target}")
+
+                    print(f"\n[+] Open Ports (via FTP bounce): {len(results.get('open_ports', []))}")
+                    if results.get('open_ports'):
+                        for i in range(min(len(results['open_ports']), 20)):
+                            service = results['opened_ports_services'][i].lower() if i < len(
+                                results['opened_ports_services']) else "unknown"
+                            print(f"     Port {results['open_ports'][i]} {service}\\{self.Proto}")
+                        if len(results['open_ports']) > 20:
+                            print(f"     ... and {len(results['open_ports']) - 20} more")
+
+                    if self.args.verbose:
+                        print(f"\n[+] Closed Ports: {len(results.get('closed_ports', []))}")
+                        print(f"[+] Filtered Ports: {len(results.get('filtered_ports', []))}")
+
             self.Firewall_detection(target, results)
 
-            if self.args.banner:
+            if self.args.banner and results.get('banners'):
                 print(f"\n[+] Captured Banner/s: {len(results['banners'])}\n")
                 for i in range(len(results['banners'])):
                     print(f"     [*] Banner from Port {results['banners_ports'][i]}:\n ")
-                    print("="*60)
+                    print("=" * 60)
                     print(f"     {results['banners'][i]}")
-                    print("="*60)
+                    print("=" * 60)
                     print()
 
             if self.args.os:
                 try:
-                    if self.args.verbose:
-                        DB.OS_fingerprint(target, results['open_ports'] ,results['banners'],results['opened_ports_services'],results['window_scan_os'],True,True)
-                    else:
-                        DB.OS_fingerprint(target, results['open_ports'] ,results['banners'],results['opened_ports_services'],results['window_scan_os'],verbose=False,print_output=True)
+                    DB.OS_fingerprint(
+                        target, results.get('open_ports', []),
+                        results.get('banners', []),
+                        results.get('opened_ports_services', []),
+                        results.get('window_scan_os', []),
+                        verbose=self.args.verbose,
+                        print_output=True,
+                        version=self.version
+                    )
                 except Exception as e:
                     print(f"\n[+] OS Detection Error: {e}")
 
             if self.args.script:
-
                 from LSSE import lsse
                 try:
-                    if self.args.script == "dns-subdomain-fuzzing":
-                        print(f"\n[+] LSSE Response for {self.args.domain}: ")
-                    elif self.args.script == "spider":
-                        print(f"\n[+] LSSE Response for {self.args.url}: ")
-                    elif self.args.script == "script":
-                        print(f"\n[+] LSSE Response for {self.args.url}: ")
+                    if self.args.script in ["dns-subdomain-fuzzing", "spider", "script", "http-dir"]:
+                        print(f"\n[+] LSSE Response for {self.args.url or self.args.domain}: ")
                     else:
                         self.script_port_parse()
                         print(f"[+] LSSE Response for {self.args.domain}: ")
-                    lsse.Lsse.script_list(self.args.script, ports=self.lsse_ports_to_scan,
-                                          redirect=self.args.redirect, domain=self.args.domain,
-                                          dns=self.args.dns_server,wordlist=self.args.wordlist,url=self.args.url,
-                                          max_pages=self.args.mxp,max_depth=self.args.mxd)
+
+                    lsse.Lsse.script_list(
+                        self.args.script,
+                        ports=self.lsse_ports_to_scan,
+                        redirect=self.args.redirect,
+                        domain=self.args.domain,
+                        dns=self.args.dns_server,
+                        wordlist=self.args.wordlist,
+                        url=self.args.url,
+                        max_pages=self.args.mxp,
+                        max_depth=self.args.mxd,
+                        extensions=self.args.extensions,
+                        status_codes=self.args.status_codes
+                    )
                     print(f"\n[+] LSSE run successfully\n")
                 except Exception as e:
                     print(f"\n{red}[+] Script Error with {self.args.script} : {e}{reset}")
-
-
 
         print(f"\n[+] Lightscan scanned {len(self.targetss)} target(s) successfully\n")
 
@@ -2168,6 +2721,58 @@ class Lightscan:
             print()
         else:
             self.Banner()
+        if self.args.lsse_lst:
+            print(f"""
+{green}[+] LSSE Scripts (LightScan Scripting Engine){reset}
+{'-' * 50}
+
+{yellow}[1] spider{reset}
+    Required:   --url
+    Optional:   --mxd, --mxp
+    Category:   safe/discovery/http_https
+    Description: Recursively crawls websites for links, forms, and resources
+
+{yellow}[2] http-robots{reset}
+    Required:   --domain, -sp
+    Optional:   None
+    Category:   safe/discovery/http_https
+    Description: Fetches and parses robots.txt for hidden paths
+
+{yellow}[3] http-cert{reset}
+    Required:   --domain, -sp
+    Optional:   None
+    Category:   safe/analysis/https
+    Description: Grabs SSL/TLS certificate information
+
+{yellow}[4] script{reset}
+    Required:   --url
+    Optional:   None
+    Category:   safe/discovery/http_https
+    Description: Detects Script tags in HTML pages
+
+{yellow}[5] http-title{reset}
+    Required:   --domain, -sp
+    Optional:   --redirect
+    Category:   safe/discovery/http_https
+    Description: Extracts webpage titles
+
+{yellow}[6] http-dir{reset}
+    Required:   --url
+    Optional:   --wordlist, --status-codes, --extensions
+    Category:   medium/discovery/http_https
+    Description: Brute forces directories and files
+
+{yellow}[7] dns-subdomain-fuzzing{reset}
+    Required:   --domain
+    Optional:   --wordlist, --dns-server
+    Category:   medium/discovery/dns
+    Description: Brute forces subdomains using wordlist
+
+{'-' * 50}
+{green}[+] Usage: Lightscan --lsse --script <name> {reset}
+        """)
+            sys.exit(0)
+
         if self.args.lsse:
             from LSSE import lsse
             try:
@@ -2177,11 +2782,13 @@ class Lightscan:
                     print(f"\n[+] LSSE Response for {self.args.url}: ")
                 elif self.args.script == "script":
                     print(f"\n[+] LSSE Response for {self.args.url}: ")
+                elif self.args.script == "http-dir":
+                    print(f"\n[+] LSSE Response for {self.args.url}: ")
                 else:
                     self.script_port_parse()
                     print(f"[+] LSSE Response for {self.args.domain}: ")
                 lsse.Lsse.script_list(self.args.script, ports=self.lsse_ports_to_scan,redirect=self.args.redirect,domain=self.args.domain,dns=self.args.dns_server,wordlist=self.args.wordlist,url=self.args.url,
-                                          max_pages=self.args.mxp,max_depth=self.args.mxd)
+                                          max_pages=self.args.mxp,max_depth=self.args.mxd,extensions=self.args.extensions,status_codes=self.args.status_codes)
                 print(f"\n[+] LSSE run successfully\n")
             except Exception as e:
                 print(f"\n{red}[+] Script Error with {self.args.script} : {e}{reset}")
@@ -2215,6 +2822,13 @@ class Lightscan:
             for target in self.targets:
                 self.initialize_target_results(target)
 
+            self.version = 4
+
+            if self.args.V6:
+                self.version = 6
+            else:
+                self.version = 4
+
             if self.args.no_ping:
                 if self.args.verbose:
                     if self.args.recursively:
@@ -2242,7 +2856,7 @@ class Lightscan:
                         print(f"\n{red}[!] Error while TCP Ping <skip>{reset}\n")
                 elif self.args.ack_ping:
                     try:
-                        Payloads.threaded_ack_ping(self.max_threads,self.targets,self.args.ping_port,self.pp,self.target_results,self.socket_timeout,self.targetss,self.args.verbose,len(self.targets))
+                        Payloads.threaded_ack_ping(self.max_threads,self.targets,self.args.ping_port,self.pp,self.target_results,self.socket_timeout,self.targetss,self.args.verbose,len(self.targets),self.version)
                     except:
                         print(f"\n{red}[!] Error while ACK Ping <skip>{reset}\n")
                 elif self.args.udp_ping:
@@ -2270,20 +2884,26 @@ class Lightscan:
                         self.threded_Syn_host_discovery()
                     except:
                         print(f"\n{red}[!] Error while SYN Ping <skip>{reset}\n")
-                elif self.args.arp_ping:
+                elif self.args.local_ping:
                     try:
-                        Payloads.threaded_arp_scan(self.max_threads, self.targets ,self.args.verbose,self.targetss,len(self.targets))
+                        if self.args.V6:
+                            Payloads.threaded_ndp_scan(self.max_threads, self.targets ,self.args.verbose,self.targetss,len(self.targets))
+                        else:
+                            Payloads.threaded_arp_scan(self.max_threads, self.targets ,self.args.verbose,self.targetss,len(self.targets))
                     except Exception as e:
-                        print(f"{red}[!] ARP Ping error: {e}{reset}")
+                        print(f"{red}[!] ARP/NDP Ping error: {e}{reset}")
                 elif self.args.ip_ping:
                     try:
                         self.ip_ping_protocols()
-                        Payloads.threaded_ip_ping(self.max_threads,self.args.verbose,self.socket_timeout,self.targets,self.targetss,self.protocols,self.target_results)
+                        Payloads.threaded_ip_ping(self.max_threads,self.args.verbose,self.socket_timeout,self.targets,self.targetss,self.protocols,self.target_results,self.args.V6)
                     except Exception as e:
                         print(f"\n{red}[!] IP Ping Error <skip>{e}{reset}\n")
                 else:
                     try:
-                        self.threaded_host_discovery()
+                        if self.args.V6:
+                            self.threaded_host_discovery_ipv6()
+                        else:
+                            self.threaded_host_discovery()
                     except:
                         print(f"\n{red}[!] Error while ICMP Ping <skip>{reset}\n")
 
@@ -2298,7 +2918,32 @@ class Lightscan:
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "null"
-                Payloads.threaded_null_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_null_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
+                self.end_time = time.perf_counter()
+            elif self.args.scan_type == "IPPROTO":
+                self.Proto = "ip"
+                self.scan_type = "ipproto"
+                if not self.args.Pip:
+                    self.protocols = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255]
+                else:
+                    self.ip_ping_protocols()
+                self.start_time = time.perf_counter()
+                Payloads.threaded_ip_scan(
+                    max_retries=self.args.max_retries,
+                    lock=self.lock,
+                    verbose=self.args.verbose,
+                    fragmente=self.args.fragmente,
+                    recursively=self.args.recursively,
+                    socket_timeout=self.socket_timeout,
+                    target_results=self.target_results,
+                    banner_option=self.args.banner,
+                    max_threads=self.max_threads,
+                    targetss=self.targetss,
+                    protocols_to_scan=self.protocols,
+                    initialize_target_results=self.initialize_target_results,
+                    service_detection=self.service_detection,
+                    version=self.version
+                )
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == 'FTP-BOUNCE':
                 if not self.args.ftp_server:
@@ -2307,7 +2952,7 @@ class Lightscan:
                 self.start_time = time.perf_counter()
 
                 Payloads.FTPBounceScan(
-                    target=target,
+                    target=self.args.target,
                     ftpserver=self.args.ftp_server,
                     ftp_port=21,
                     port_range=self.ports_to_scan,
@@ -2317,20 +2962,21 @@ class Lightscan:
                     lock=self.lock,
                     target_results=self.target_results,
                     initialize_target_results=self.initialize_target_results,
-                    service_detection=self.service_detection
+                    service_detection=self.service_detection,
+                    version=6 if self.args.V6 else 4
                 )
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "FIN":
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "fin"
-                Payloads.threaded_fin_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_fin_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "ACK":
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "ack"
-                Payloads.threaded_ack_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_ack_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "WINDOW":
                 self.start_time = time.perf_counter()
@@ -2339,25 +2985,25 @@ class Lightscan:
                 Payloads.threaded_window_scan(self.args.max_retries, self.lock, self.args.verbose, self.args.fragmente,
                                             self.args.recursively, self.socket_timeout, self.target_results,
                                             self.args.banner, self.max_threads, self.targetss, self.ports_to_scan,
-                                            self.initialize_target_results, self.service_detection)
+                                            self.initialize_target_results, self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "XMAS":
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "xmas"
-                Payloads.threaded_xmas_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_xmas_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "MAIMON":
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "maimon"
-                Payloads.threaded_maimon_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_maimon_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "FDD":
                 self.start_time = time.perf_counter()
                 self.Proto = "tcp"
                 self.scan_type = "fdd"
-                Payloads.threaded_fdd_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection)
+                Payloads.threaded_fdd_scan(self.args.max_retries,self.lock,self.args.verbose,self.args.fragmente,self.args.recursively,self.socket_timeout,self.target_results,self.args.banner,self.max_threads,self.targetss,self.ports_to_scan,self.initialize_target_results,self.service_detection,self.version)
                 self.end_time = time.perf_counter()
             elif self.args.scan_type == "UDP":
                 self.threaded_udp_scan()
@@ -2374,4 +3020,3 @@ if __name__ == "__main__":
         print(f"\n{yellow}[!] Scan interrupted by user{reset}")
     except Exception as e:
         print(f"\n{red}[!] Unexpected error: {e}{reset}")
-
