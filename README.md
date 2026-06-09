@@ -536,7 +536,7 @@ Educational and research purposes
 
 ## Lightscan GUI (LightPanel.py)
 
-![](image/LightPanel.png)
+![LightPanel](/image/LightPanel.png)
 
 ## Add a help menu for LSSE 
 
