@@ -15,18 +15,18 @@ Unlike traditional scanners that sacrifice one for the other, LightScan combines
 
 
 
-# Light-Scan Version 1.1.5 (Current Version)
+# Light-Scan Version 1.1.6 (Current Version)
 
 # Features
 
 ## High-Performance Scanning
 
 Multi-threaded architecture for fast scans
-Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIMON, FDD, XMAS, FTP-BOUNCE
+Multiple scan types: TCP Connect, SYN Stealth, UDP, NULL, FIN, ACK, WINDOW, MAIMON, FDD, XMAS, FTP-BOUNCE,IPPROTO
 
-Configurable speed presets from Paranoid to Light-mode (400 threads)
+Configurable speed presets from Paranoid to Light-mode (500 threads)
 
-Smart host discovery with threaded ICMP/TCP/IP/ARP detection
+Smart host discovery with threaded ICMP/ICMPv6/TCP/IP/ARP/NDP detection
 
 ## Network Range Support
 
@@ -44,7 +44,7 @@ Service detection with custom and system service databases
 
 Firewall detection with detailed analysis
 
-Port state classification: Open, Closed, Filtered, Open|Filtered, Defended, Undefended
+Port state classification: Open, Closed, Filtered, Unfiltered, Open|Filtered, Defended, Undefended
 
 Retry mechanism for unreliable networks
 
@@ -258,17 +258,20 @@ Before running Light-Scan, install libpcap:
   
 ## Command Line Options
   
-    usage: Lightscan.py [-h] [-T TARGET] [-p PORT] [-pp PING_PORT] [-s {paranoid,slow,normal,fast,insane,Light-mode}] [-v]
-                        [-st SCAN_TYPE] [--ftp-bounce FTP_SERVER] [-F] [-mx MAX_RETRIES] [-t THREADS] [-lst] [-tm TIMEOUT]
-                        [-Rc] [-f] [-Pn] [-b] [-O] [-mac] [-Pa] [-Pi] [-Pip PIP] [-A] [-Pt] [-Ps] [-Pk] [-Pu] [-PIt] [-PA]
-                        [-Pin] [-q] [--script SCRIPT] [--domain DOMAIN] [--dns-server DNS_SERVER] [-W WORDLIST]
-                        [--redirect] [--url URL] [--mxp MXP] [--mxd MXD] [-sp SP] [--lsse]
+    usage: Lightscan.py [-h] [-T TARGET] [-V6] [-p PORT] [-pp PING_PORT]
+                        [-s {paranoid,slow,normal,fast,insane,Light-mode}] [-v] [-st SCAN_TYPE] [--ftp-bounce FTP_SERVER]
+                        [-F] [-mx MAX_RETRIES] [-t THREADS] [-lst] [--lsse-lst] [-tm TIMEOUT] [-Rc] [-f] [-Pn] [-b] [-O]
+                        [-mac] [-Pan] [-Pi] [-Pip PIP] [-A] [-Pt] [-Ps] [-Pk] [-Pu] [-PIt] [-PA] [-Pin] [-q]
+                        [--script SCRIPT] [--domain DOMAIN] [--dns-server DNS_SERVER] [-W WORDLIST]
+                        [--extensions EXTENSIONS] [--status-codes STATUS_CODES] [--redirect] [--url URL] [--mxp MXP]
+                        [--mxd MXD] [-sp SP] [--lsse]
     
-    Lightscan Port Scanner
+    Light-Scan Port Scanner
     
     options:
       -h, --help            show this help message and exit
       -T, --target TARGET   Target IP or Hostname
+      -V6                   used when the target is an IPv6
       -p, --port PORT       Port/s to scan
       -pp, --ping-port PING_PORT
                             Port/s to Ping on it
@@ -276,7 +279,7 @@ Before running Light-Scan, install libpcap:
                             Scan speed preset
       -v, --verbose         Show verbose output
       -st, --scan-type SCAN_TYPE
-                            Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE}
+                            Scan types {TCP,SYN,UDP,NULL,FIN,ACK,XMAS,WINDOW,MAIMON,FDD,FTP-BOUNCE,IPPROTO}
       --ftp-bounce FTP_SERVER
                             FTP server for bounce scan (e.g., 192.168.1.100)
       -F                    Scan The Top 100 ports for fast scanning
@@ -285,6 +288,7 @@ Before running Light-Scan, install libpcap:
       -t, --threads THREADS
                             Number of threads to use
       -lst                  List all targets
+      --lsse-lst            List all LSSE Scripts
       -tm, --timeout TIMEOUT
                             Timeout with second
       -Rc, --recursively    recursively scan host that shown to be down or not responding and disable flags like
@@ -294,7 +298,7 @@ Before running Light-Scan, install libpcap:
       -b, --banner          Banner Grabing
       -O, --os              OS Fingerprint
       -mac                  Light-Scan will not be capabelle of getting target mac on Local Networks
-      -Pa, --arp-ping       ARP Ping on Local Networks
+      -Pan, --local-ping    Performe an ARP Ping on Local Networks by default or NDP Ping on Local Networks for IPv6 mode
       -Pi, --ip-ping        IP Protocol Ping
       -Pip PIP              For Specefiy The IP Protocols that -Pi is going to use rather then default
       -A, --agressive       Agressive scan activate all of OS Fingerprints, Banner Grabing, Insane Speed , SYN Scan and
@@ -316,6 +320,10 @@ Before running Light-Scan, install libpcap:
                             dns server that Light-Scan is going to use (Is Set by Default
       -W, --wordlist WORDLIST
                             Wordlist for scripts
+      --extensions EXTENSIONS
+                            Extensions for web based scripts
+      --status-codes STATUS_CODES
+                            Status Codes for web based scripts
       --redirect            Redirect http/https requests for http scripts
       --url URL             Victime URL
       --mxp MXP             max pages to get
@@ -459,13 +467,13 @@ Educational and research purposes
   
   Contributions are welcome! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-# Light-Scan 1.1.5 :
+# Light-Scan 1.1.6 :
 
 ## Fixing Multiple bugs
 
 ## Extend Lightscan Services Data-Base
 
-## Add a new legacy scaning technique FTP-BOUNCE Scan
+## Add a new scaning technique IP-PROTO Scan
 
 ## Upgrading LSSE with a new plugin "script" 
 
@@ -476,7 +484,7 @@ Educational and research purposes
     /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/
             /____/
     
-    Version : 1.1.5
+    Version : 1.1.6
     Platform : Windows
     
     
@@ -502,20 +510,110 @@ Educational and research purposes
     
     [+] LSSE run successfully
 
-## Updating the setup script for more reliability 
+## Adding a dedicated packet sniffer LighSniff
 
-## LightSave for save the scans result as a text fil for analyse
-
-    usage: LightSave.py [-h] -C C
-
-    LightSave : Lightscan Scans Saving Tool
+    usage: LightSniff.py [-h] [-i INTERFACE] [-f FILTER] [-c COUNT] [-w WRITE] [-v] [--no-promisc] [-q] [--eth] [--vlan]
+                         [--arp] [--mac MAC]
+    
+    LightSniff - Light-Scan Packet Capture Tool
     
     options:
-      -h, --help  show this help message and exit
-      -C C        Lightscan command
+      -h, --help            show this help message and exit
+      -i, --interface INTERFACE
+                            Network interface (e.g., eth0, Wi-Fi, wlan0)
+      -f, --filter FILTER   BPF filter (e.g., 'tcp port 80', 'icmp', 'arp')
+      -c, --count COUNT     Number of packets to capture (0 = infinite)
+      -w, --write WRITE     Save to PCAP file
+      -v, --verbose         Show detailed packet info
+      --no-promisc          Disable promiscuous mode
+      -q, --quiet           Quiet mode (no banner)
+      --eth                 Show Ethernet frame info (MAC addresses, frame type)
+      --vlan                Show VLAN tags (802.1Q)
+      --arp                 Show only ARP packets
+      --mac MAC             Filter by source or destination MAC address (e.g., aa:bb:cc:dd:ee:ff)
+    
+    Examples: LightSniff -i eth0 | LightSniff -i eth0 -f 'tcp port 80' -w http.pcap | LightSniff -i Wi-Fi -c 100 -v
+
+## Lightscan GUI (LightPanel.py)
+
+## Add a help menu for LSSE 
+
+    (.venv) PS C:\Users\Octet Info\Documents\My Project\Light-Scan> python Lightscan.py --lsse-lst
+        __    _       __    __                      
+       / /   (_)___ _/ /_  / /_______________ _____ 
+      / /   / / __ `/ __ \/ __/ ___/ ___/ __ `/ __ \
+     / /___/ / /_/ / / / / /_(__  ) /__/ /_/ / / / /
+    /_____/_/\__, /_/ /_/\__/____/\___/\__,_/_/ /_/ 
+            /____/                                  
+    
+    Version : 1.1.6
+    Platform : Windows 
+    
+    
+    [+] LSSE Scripts (LightScan Scripting Engine)
+    --------------------------------------------------
+    
+    [1] spider
+        Required:   --url
+        Optional:   --mxd, --mxp
+        Category:   safe/discovery/http_https
+        Description: Recursively crawls websites for links, forms, and resources
+    
+    [2] http-robots
+        Required:   --domain, -sp
+        Optional:   None
+        Category:   safe/discovery/http_https
+        Description: Fetches and parses robots.txt for hidden paths
+    
+    [3] http-cert
+        Required:   --domain, -sp
+        Optional:   None
+        Category:   safe/analysis/https
+        Description: Grabs SSL/TLS certificate information
+    
+    [4] script
+        Required:   --url
+        Optional:   None
+        Category:   safe/discovery/http_https
+        Description: Detects Script tags in HTML pages
+    
+    [5] http-title
+        Required:   --domain, -sp
+        Optional:   --redirect
+        Category:   safe/discovery/http_https
+        Description: Extracts webpage titles
+    
+    [6] http-dir
+        Required:   --url
+        Optional:   --wordlist, --status-codes, --extensions
+        Category:   medium/discovery/http_https
+        Description: Brute forces directories and files
+    
+    [7] dns-subdomain-fuzzing
+        Required:   --domain
+        Optional:   --wordlist, --dns-server
+        Category:   medium/discovery/dns
+        Description: Brute forces subdomains using wordlist
+    
+    --------------------------------------------------
+    [+] Usage: Lightscan --lsse --script <name>
+
+## Full IPv6 support with new NDP and ICMPv6 Host Discovery
+
+## Extend LightSave with 5 new saving formats
+
+    usage: LightSave.py [-h] -C C [-S {txt,light,html,xml,csv,json}]
+    
+    LightSave : Light-Scan Scans Saving Tool
+    
+    options:
+      -h, --help            show this help message and exit
+      -C C                  Lightscan command
+      -S {txt,light,html,xml,csv,json}
+                            Saving Format (txt,light,html,xml,csv,json)
       
 ### Exemple of LightSave
-    python LightSave.py -C "python Lightscan.py -T 127.0.0.1 -F -st UDP"
+    python LightSave.py -C "python Lightscan.py -T 127.0.0.1 -F -st UDP" -S xml
 by that LightSave save your scan result ,it's obligatory to write the scan command inside ""
 to make sure it going to run well
 
