@@ -659,4 +659,18 @@ The URG flag is rarely used in legitimate traffic, making it an excellent probe 
 -  The entire cybersecurity community — For pushing the boundaries of what's possible
 
 
-        
+## Light-Scan Pro — Premium Services
+
+Light-Scan Pro is the commercial service tier designed for organizations that require dedicated support, early access, and enterprise‑grade reliability. Subscribers benefit from 24/7 technical support, bug fixes, on‑demand feature development, and exclusive early access to new releases two weeks before the general public — giving them a critical edge in fast‑paced security environments. Light-Scan Pro is available for $399/year per node, with a clear commitment to transparency and fairness: while we reserve the right to adjust pricing in the future, any price changes will not apply to existing enterprise customers or to any users who subscribed prior to the change. This ensures that early adopters and long‑term partners are protected and can continue to rely on Light‑Scan Pro at the terms they originally agreed to. For enterprises, a Pro subscription is mandatory to ensure compliance and dedicated support; however, individuals, freelancers, and small businesses operating up to 15 machines are not obligated to purchase a Pro subscription and can continue using the full power of Light‑Scan for free under the GPLv2 license.
+
+## Enterprise Obligations
+
+For enterprise‑scale deployments, a Light‑Scan Pro subscription is mandatory. This requirement ensures that large organizations receive the dedicated support, compliance reporting, and security patching they need to operate Light‑Scan in regulated or mission‑critical environments. Enterprises often face strict audit requirements, and Light‑Scan Pro delivers the necessary documentation, SLAs, and compliance frameworks (SOC2, HIPAA, FIPS, DISA‑STIG) to meet those obligations.
+
+## Flexibility for Individuals and Small Teams
+
+For individual users, open‑source contributors, freelancers, and small businesses, a Pro subscription is entirely optional. If your organization operates 15 machines or fewer, you can run Light‑Scan on all of them without any obligation to purchase a Pro subscription. This threshold is designed to give small teams and startups full access to Light‑Scan’s powerful capabilities at zero cost, aligning with our philosophy that security tools should be accessible to everyone, regardless of budget. Whether you're a student, a pentester, or a small business owner, the full power of Light‑Scan remains free for you to use, study, and modify under the GPLv2 license.
+
+## Why the Model Works
+
+This hybrid approach — free software combined with paid enterprise services — mirrors the successful models of companies like Canonical (Ubuntu Pro) and Red Hat. It ensures that Light‑Scan remains open and community‑driven while also being financially sustainable. The revenue from Pro subscriptions directly funds ongoing development, security research, and the infrastructure needed to keep Light‑Scan at the forefront of network reconnaissance. In short: the toolkit is free for everyone, but those who need more can pay for the peace of mind, speed, and customization that only Light‑Scan Pro can deliver.
