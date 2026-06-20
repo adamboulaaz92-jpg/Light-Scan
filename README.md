@@ -646,5 +646,17 @@ The URG flag is rarely used in legitimate traffic, making it an excellent probe 
     python Lightscan.py -T 192.168.1.1 -p 1-1000 -st FDD -v
 
 
+## 🙏 Acknowledgments
+
+### Light-Scan Toolkit is built on the shoulders of giants. We thank the open‑source community, especially the contributors to:
+
+-  Scapy — The packet manipulation library that powers Light-Scan
+
+-  Python — The language that makes it all possible
+
+-  Nmap — For setting the standard in network scanning
+
+-  The entire cybersecurity community — For pushing the boundaries of what's possible
+
 
         
