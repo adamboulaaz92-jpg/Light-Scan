@@ -648,7 +648,7 @@ The URG flag is rarely used in legitimate traffic, making it an excellent probe 
 
 ## 🙏 Acknowledgments
 
-### Light-Scan Toolkit is built on the shoulders of giants. We thank the open‑source community, especially the contributors to:
+### Light-Scan is built on the shoulders of giants. We thank the open‑source community, especially to:
 
 -  Scapy — The packet manipulation library that powers Light-Scan
 
