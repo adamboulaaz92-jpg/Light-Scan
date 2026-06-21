@@ -667,7 +667,7 @@ For all inquiries regarding Light-Scan Pro subscriptions, enterprise licensing, 
 
 ## Enterprise Obligations
 
-For enterprise‑scale deployments, a Light‑Scan Pro subscription is mandatory. This requirement ensures that large organizations receive the dedicated support, compliance reporting, and security patching they need to operate Light‑Scan in regulated or mission‑critical environments. Enterprises often face strict audit requirements, and Light‑Scan Pro delivers the necessary documentation, SLAs, and compliance frameworks (SOC2, HIPAA, FIPS, DISA‑STIG) to meet those obligations.
+For enterprise‑scale deployments, a Light‑Scan Pro subscription is mandatory. This requirement ensures that large organizations receive the dedicated support, compliance reporting, and security patching they need to operate Light‑Scan in regulated or mission‑critical environments. Enterprises often face strict audit requirements, and Light‑Scan Pro delivers the necessary documentations and support for all functionalities that the toolkit provide with more advantages like setup the perfect environment to use Light-Scan and SALs.
 
 ## Flexibility for Individuals and Small Teams
 
