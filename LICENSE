@@ -1,0 +1,156 @@
+---
+
+LIGHT GENERAL LICENSE (LGL)
+
+Version 1.0, June 2026
+
+---
+
+PREAMBLE
+
+The Light General License (LGL) is designed to promote open-source innovation while protecting the project's sustainability. It allows free use, modification, and distribution for non-commercial purposes, while requiring commercial users to obtain a paid license. This ensures the project remains actively developed and maintained.
+
+This license is inspired by the GNU GPL but adds explicit commercial use restrictions to fund ongoing development.
+
+---
+
+TERMS AND CONDITIONS
+
+1. DEFINITIONS
+
+"Software" means the Light-Scan toolkit, including all source code, documentation, and associated files.
+
+"You" means the individual or entity exercising permissions granted by this License.
+
+"Modification" means any alteration, addition, or deletion to the Software.
+
+"Derivative Work" means any work based on or derived from the Software, including modifications and customizations.
+
+"Commercial Use" means any use of the Software in connection with:
+
+· Revenue generation
+· Business operations
+· Commercial services
+· Profit-making activities
+
+"Distribution" means sharing, publishing, or making the Software available to third parties.
+
+"Commercial License" means a paid license granting commercial rights under Section 5.
+
+---
+
+2. OPEN SOURCE RIGHTS
+
+You are granted the following rights free of charge:
+
+2.1. Use - You may use the Software for any purpose, including internal business use.
+
+2.2. Modification - You may modify the Software to suit your needs.
+
+2.3. Customization - You may customize the Software for personal or organizational use.
+
+2.4. Distribution for Non-Commercial Purposes - You may distribute the Software or Derivative Works for non-commercial purposes, provided that:
+
+· (a) You include this License with the distribution
+· (b) You make the source code available
+· (c) You preserve all copyright notices
+· (d) Any Derivative Work is also licensed under the LGL
+
+2.5. Personal Use - You may use the Software for personal projects, education, and research.
+
+---
+
+3. OPEN SOURCE OBLIGATIONS
+
+3.1. Copyleft Requirement - Any Derivative Work or Modified Version distributed under this License must:
+
+· (a) Be distributed under the LGL
+· (b) Include full source code
+· (c) Retain all copyright notices
+· (d) Attribute the original authors
+
+3.2. Source Code Availability - If you distribute a Modified Version, you must make the source code publicly available at no cost.
+
+3.3. Attribution - You must clearly state that your work is based on Light-Scan and include the original copyright notice.
+
+---
+
+4. RESTRICTIONS
+
+4.1. Commercial Use Restriction - Commercial Use of the Software, Derivative Works, or Modified Versions is prohibited without obtaining a Commercial License.
+
+4.2. Commercial Distribution - Distributing the Software or Derivative Works for commercial purposes (including as part of a commercial product or service) requires a Commercial License.
+
+4.3. Commercial Integration - Integrating the Software into a commercial product or service requires a Commercial License.
+
+4.4. Commercial Services - Offering the Software as a service (SaaS), providing commercial support, or using it for commercial consulting requires a Commercial License.
+
+4.5. No Removal of Notices - You may not remove or alter any copyright, trademark, or license notices in the Software.
+
+---
+
+5. COMMERCIAL LICENSE
+
+5.1. Requirement - Commercial Use is permitted only after obtaining a Commercial License from the copyright holder.
+
+5.2. Pricing - Commercial Licenses are available at:
+
+License Type Duration Price Coverage
+Monthly Commercial 1 Month $49 All machines in organization
+Yearly Commercial 12 Months $399 All machines in organization
+Enterprise Lifetime Perpetual $2,999 All machines in organization
+
+5.3. What the Commercial License Grants:
+
+· Commercial use rights
+· Distribution rights
+· Integration rights
+· Full commercial support
+· Priority bug fixes
+· Early access to new features
+
+5.4. How to Obtain - Email the copyright holder at: adamboulaaz92@gmail.com
+
+5.5. Existing Customers - Price changes will not affect customers who subscribed before the price change.
+
+---
+
+6. EXCEPTIONS
+
+6.1. Small Business Exception - Organizations with 15 or fewer machines using Light-Scan are exempt from the Commercial License requirement, provided:
+
+· (a) They are not reselling the Software
+· (b) They are not offering it as a service
+· (c) They are not integrating it into commercial products
+
+6.2. Open Source Contributions - Contributions to the official Light-Scan repository are exempt from commercial restrictions.
+
+6.3. Academic Use - Educational institutions and researchers are exempt from commercial restrictions for academic purposes.
+
+---
+
+7. WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+---
+
+8. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE.
+
+---
+
+9. TERMINATION
+
+9.1. Automatic Termination - This License terminates automatically if you violate any term.
+
+9.2. Effect of Termination - Upon termination, you must cease all use and distribution of the Software.
+
+9.3. Survival - Sections 7, 8, 9, and 11 survive termination.
+
+--
+
+10. ENTIRE AGREEMENT
+
+This License constitutes the entire agreement between you and the copyright holder regarding the Software.
