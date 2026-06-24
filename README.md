@@ -621,7 +621,7 @@ Educational and research purposes
 by that LightSave save your scan result ,it's obligatory to write the scan command inside ""
 to make sure it going to run well
 
-##  FDD Scan — Firewall Detection (Proprietary)
+##  FDD Scan — Firewall Detection
 
 **FDD (Firewall Detection Scan)** is a proprietary scanning technique developed exclusively for LightScan. It sends a TCP packet with the **URGENT (URG) flag** to determine whether a firewall is protecting the target port.
 The URG flag is rarely used in legitimate traffic, making it an excellent probe for firewall detection. By analyzing the response (or lack thereof), LightScan can determine if a firewall is actively filtering the port.
