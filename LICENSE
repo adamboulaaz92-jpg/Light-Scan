@@ -63,7 +63,13 @@ For clarity, using the Software to support your internal IT operations, data ana
 · (c) You preserve all copyright notices
 · (d) Any Derivative Work is also licensed under the LGL
 
-2.5. Personal Use - You may use the Software for personal projects, education, and research.
+2.5. Personal and Academic Use – You may use the Software for:
+· (a) Personal projects and hobbies
+· (b) Teaching and coursework at educational institutions
+· (c) Academic research (published or unpublished)
+· (d) Non-funded student projects
+
+Research funded by commercial entities, or conducted under commercial contracts, requires a Commercial License.
 
 ---
 
@@ -76,7 +82,7 @@ For clarity, using the Software to support your internal IT operations, data ana
 · (c) Retain all copyright notices
 · (d) Attribute the original authors
 
-3.2. Source Code Availability - If you distribute a Modified Version, you must make the source code publicly available at no cost.
+3.2. If you distribute a Modified Version for non-commercial purposes under Section 2.4, you must make the source code publicly available at no cost. Commercial License holders who distribute the Software commercially must also make source code available to their recipients, but may charge a reasonable fee for distribution.
 
 3.3. Attribution - You must clearly state that your work is based on Light-Scan and include the original copyright notice.
 
@@ -108,9 +114,13 @@ For clarity, using the Software to support your internal IT operations, data ana
 
 5.2. Pricing - Commercial Licenses are available at:
 
-License Type Duration Price Coverage
-Monthly Commercial 1 Month €99 All machines in organization
-Yearly Commercial 12 Months €999 All machines in organization
+Monthly Commercial for 1 month is €39 and Up to 5 machines
+Monthly Commercial for 1 Month is €99 and Up to 15 machines
+Monthly Commercial Pro for 1 Month is €199 and Up to 50 machines  
+Yearly Commercial for 12 Months is €999 and Up to 50 machines
+Yearly Commercial Enterprise for 12 Months is €1,999 and Unlimited machines
+
+For coverage beyond 50 machines, please contact us for custom pricing.
 
 5.3. What the Commercial License Grants:
 
@@ -123,21 +133,23 @@ Yearly Commercial 12 Months €999 All machines in organization
 
 5.4. How to Obtain - Email the copyright holder at: adamboulaaz92@gmail.com
 
-5.5. Existing Customers - Price changes will not affect customers who subscribed before the price change.
+5.5. Existing Customers - Customers who subscribed before a price change
+will maintain their current rate for 12 months following the change, after
+which the new rate applies. Customers will receive at least 60 days' notice
+before any price increase.
 
 ---
 
 6. EXCEPTIONS
 
-6.1. Small Business Exception - Organizations with 15 or fewer machines using Light-Scan are exempt from the Commercial License requirement, provided:
+6.1. Small Business Exception - Organizations with 15 or fewer machines using Light-Scan internally are exempt from the Commercial License requirement for internal business operations only, provided:
 
-· (a) They are not reselling the Software
-· (b) They are not offering it as a service
-· (c) They are not integrating it into commercial products
+· (a) They are not distributing the Software to third parties
+· (b) They are not offering it as a service to external customers
+· (c) They are not integrating it into products sold to external customers
+· (d) They are not using it for paid consulting or professional services
 
-6.2. Open Source Contributions - Contributions to the official Light-Scan repository are exempt from commercial restrictions.
-
-6.3. Academic Use - Educational institutions and researchers are exempt from commercial restrictions for academic purposes.
+Any of the activities in (a)-(d) require a Commercial License regardless of machine count.
 
 ---
 
