@@ -1,183 +1,339 @@
----
-
-Light General License (LGL)
+Light-Scan Commercial License Agreement
 
 Version 1.0, June 2026
 
----
+Copyright © 2026 Adam Boulaaz. All Rights Reserved.
+IMPORTANT NOTICE
 
-PREAMBLE
+THIS IS NOT OPEN SOURCE SOFTWARE.
 
-The Light General License (LGL) is designed to promote open-source innovation while protecting the project's sustainability. It allows free use, modification, and distribution for non-commercial purposes, while requiring commercial users to obtain a paid license. This ensures the project remains actively developed and maintained.
-
-This license is inspired by the GNU GPL but adds explicit commercial use restrictions to fund ongoing development.
-
----
-
-TERMS AND CONDITIONS
+By downloading, installing, copying, accessing, or using the Software, you agree to be bound by the terms of this License Agreement. If you do not agree to these terms, do not download, install, copy, access, or use the Software.
 
 1. DEFINITIONS
 
-"Software" means the Light-Scan toolkit, including all source code, documentation, and associated files.
+"Software" means the Light-Scan toolkit, including all source code, object code, documentation, scripts, configuration files, and associated materials, in any form or medium.
 
-"You" means the individual or entity exercising permissions granted by this License.
+"You" or "Your" means the individual or legal entity exercising rights under this License.
 
-"Modification" means any alteration, addition, or deletion to the Software.
+"Machine" means any physical or virtual computing instance, including but not limited to servers, workstations, containers, virtual machines, and cloud instances, on which the Software is installed or executed.
 
-"Derivative Work" means any work based on or derived from the Software, including modifications and customizations.
+"Internal Business Operations" means using the Software solely within Your organization for Your own business purposes, not for the benefit of any third party.
 
-"Machine" means any physical or virtual computing instance, including but not limited to servers, workstations, containers, and cloud instances, that runs or executes the Software.
+"Commercial Distribution" means:
 
-"Commercial Use" means any use of the Software in connection with:
+    (a) Selling, reselling, or sublicensing the Software
 
-· Revenue generation
-· Business operations
-· Commercial services
-· Profit-making activities
+    (b) Offering the Software as a hosted or managed service (SaaS)
 
-"Distribution" means sharing, publishing, or making the Software available to third parties.
+    (c) Integrating the Software into a product or service provided to external customers
 
-"Commercial License" means a paid license granting commercial rights under Section 5.
+    (d) Distributing the Software as part of a commercial offering
 
----
+    (e) Using the Software to provide paid consulting or professional services
 
-2. OPEN SOURCE RIGHTS
+"Commercial License" means a paid license granting rights beyond those in Section 2.
 
-You are granted the following rights free of charge:
+"Source Code" means the preferred form of the Software for making modifications, including all source files, build scripts, and documentation needed to build and install the Software.
 
-2.1. Non-Commercial Use - You may use the Software for internal business operations without a Commercial License, provided such use does not:
-· Generate revenue directly from the Software
-· Form part of a product or service offered to external customers
-· Serve as the primary mechanism for profit-making activities
+2. FREE EVALUATION LICENSE
 
-For clarity, using the Software to support your internal IT operations, data analysis, or security monitoring is permitted without a Commercial License.
+2.1 Grant
 
-2.2. Modification - You may modify the Software to suit your needs.
+You are granted a non-exclusive, non-transferable, revocable license to:
 
-2.3. Customization - You may customize the Software for personal or organizational use.
+    (a) Download the Software from GitHub or other distribution channels
 
-2.4. Distribution for Non-Commercial Purposes - You may distribute the Software or Derivative Works for non-commercial purposes, provided that:
+    (b) Install the Software on Your Machines
 
-· (a) You include this License with the distribution
-· (b) You make the source code available
-· (c) You preserve all copyright notices
-· (d) Any Derivative Work is also licensed under the LGL
+    (c) Use the Software for evaluation, testing, and Internal Business Operations
 
-2.5. Personal and Academic Use – You may use the Software for:
-· (a) Personal projects and hobbies
-· (b) Teaching and coursework at educational institutions
-· (c) Academic research (published or unpublished)
-· (d) Non-funded student projects
+    (d) Modify the Software for Your internal use only
 
-Research funded by commercial entities, or conducted under commercial contracts, requires a Commercial License.
+    (e) Install required dependencies (third-party libraries, packages, etc.) needed for the Software to function
 
----
+2.2 Limitations
 
-3. OPEN SOURCE OBLIGATIONS
+The free license is subject to the following limitations:
 
-3.1. Copyleft Requirement - Any Derivative Work or Modified Version distributed under this License must:
+    (a) Machine Limit: You may use the Software on up to 5 Machines
 
-· (a) Be distributed under the LGL
-· (b) Include full source code
-· (c) Retain all copyright notices
-· (d) Attribute the original authors
+    (b) No Commercial Distribution: You may not distribute the Software to any third party
 
-3.2. If you distribute a Modified Version for non-commercial purposes under Section 2.4, you must make the source code publicly available at no cost. Commercial License holders who distribute the Software commercially must also make source code available to their recipients, but may charge a reasonable fee for distribution.
+    (c) No SaaS: You may not offer the Software as a service to external users
 
-3.3. Attribution - You must clearly state that your work is based on Light-Scan and include the original copyright notice.
+    (d) No Commercial Integration: You may not integrate the Software into products sold to customers
 
----
+    (e) No Paid Consulting: You may not use the Software to provide paid consulting services
+
+2.3 Internal Use Exception
+
+Using the Software for Internal Business Operations is permitted without a Commercial License, provided:
+
+    (a) The Software runs on 5 or fewer Machines
+
+    (b) The Software is not provided to external users
+
+    (c) The Software is not used to generate revenue directly
+
+3. COMMERCIAL LICENSE
+
+3.1 Requirement
+
+You must obtain a Commercial License if You:
+
+    (a) Exceed the 5-Machine limit in Section 2.2(a)
+
+    (b) Engage in Commercial Distribution as defined in Section 1
+
+    (c) Integrate the Software into commercial products or services
+
+    (d) Offer the Software as a service (SaaS)
+
+    (e) Use the Software for paid consulting or professional services
+
+3.2 Pricing
+
+Commercial Licenses are available at:
+Plan	Duration	Price	Machines
+Basic	Monthly (1 month)	€39	Up to 5
+Standard	Monthly (1 month)	€99	Up to 15
+Professional	Monthly (1 month)	€199	Up to 50
+Enterprise	Yearly (12 months)	€999	Up to 50
+Unlimited	Yearly (12 months)	€1,999	Unlimited
+
+For coverage beyond 50 machines, contact us at adamboulaaz92@gmail.com for custom pricing.
+
+3.3 What the Commercial License Grants
+
+    - Commercial use rights (including all uses listed in Section 1)
+
+    - Distribution rights (internal and external)
+
+    - Integration rights into commercial products
+
+    - Full commercial support
+
+    - Priority bug fixes
+
+    - Early access to new features
+
+    - Ability to exceed the 5-Machine limit
+
+3.4 How to Obtain
+
+Email the copyright holder at: adamboulaaz92@gmail.com
+
+3.5 Price Changes
+
+Customers who subscribed before a price change will maintain their current rate for 12 months following the change, after which the new rate applies. Customers will receive at least 60 days' notice before any price increase.
 
 4. RESTRICTIONS
 
-4.1. Commercial Use Restriction - Commercial Use (as defined in Section 1) of the Software is prohibited without a Commercial License. The following activities specifically require a Commercial License:
+4.1 Prohibited Activities
 
-· (a) Selling, reselling, or sublicensing the Software
-· (b) Offering the Software as a hosted service (SaaS)
-· (c) Integrating the Software into a product or service sold to external customers
-· (d) Using the Software to provide paid consulting or professional services
-· (e) Distributing the Software as part of a commercial offering
+You may NOT:
 
-4.2. Internal Business Use - Internal use that does not involve any of the activities in 4.1(a)-(e) is permitted without a Commercial License, subject to the Small Business Exception in Section 6.1.
+    (a) Remove or alter any copyright, trademark, or proprietary notices
 
-4.3. Commercial Integration - Integrating the Software into a commercial product or service requires a Commercial License.
+    (b) Redistribute the Software without a Commercial License
 
-4.4. Commercial Services - Offering the Software as a service (SaaS), providing commercial support, or using it for commercial consulting requires a Commercial License.
+    (c) Sublicense the Software to any third party
 
-4.5. No Removal of Notices - You may not remove or alter any copyright, trademark, or license notices in the Software.
+    (d) Reverse engineer, decompile, or disassemble the Software (except as permitted by law)
 
----
+    (e) Use the Software in any unlawful manner or for any unlawful purpose
 
-5. COMMERCIAL LICENSE
+    (f) Claim ownership of the Software
 
-5.1. Requirement - Commercial Use is permitted only after obtaining a Commercial License from the copyright holder.
+    (g) Represent that the Software is open source
 
-5.2. Pricing - Commercial Licenses are available at:
+4.2 No Implied Rights
 
-Monthly Commercial for 1 month is €39 and Up to 5 machines
-Monthly Commercial for 1 Month is €99 and Up to 15 machines
-Monthly Commercial Pro for 1 Month is €199 and Up to 50 machines  
-Yearly Commercial for 12 Months is €999 and Up to 50 machines
-Yearly Commercial Enterprise for 12 Months is €1,999 and Unlimited machines
+This License grants only the rights expressly stated herein. All other rights are reserved by the copyright holder.
 
-For coverage beyond 50 machines, please contact us for custom pricing.
+5. DEPENDENCIES AND THIRD-PARTY COMPONENTS
 
-5.3. What the Commercial License Grants:
+5.1 Installation of Dependencies
 
-· Commercial use rights
-· Distribution rights
-· Integration rights
-· Full commercial support
-· Priority bug fixes
-· Early access to new features
+You are responsible for installing all required dependencies, third-party libraries, and packages needed for the Software to function. The Software may rely on open-source components that are subject to their own licenses.
 
-5.4. How to Obtain - Email the copyright holder at: adamboulaaz92@gmail.com
+5.2 Third-Party Licenses
 
-5.5. Existing Customers - Customers who subscribed before a price change
-will maintain their current rate for 12 months following the change, after
-which the new rate applies. Customers will receive at least 60 days' notice
-before any price increase.
+Some components of the Software may be licensed under open-source licenses (such as GPL, MIT, Apache, etc.). Those components are governed by their respective licenses, and nothing in this License supersedes or modifies those licenses.
 
----
+5.3 User Responsibility
 
-6. EXCEPTIONS
+It is Your responsibility to:
 
-6.1. Small Business Exception - Organizations with 15 or fewer machines using Light-Scan internally are exempt from the Commercial License requirement for internal business operations only, provided:
+    (a) Review and comply with all third-party license terms
 
-· (a) They are not distributing the Software to third parties
-· (b) They are not offering it as a service to external customers
-· (c) They are not integrating it into products sold to external customers
-· (d) They are not using it for paid consulting or professional services
+    (b) Install dependencies correctly
 
-Any of the activities in (a)-(d) require a Commercial License regardless of machine count.
+    (c) Ensure compatibility with Your systems
 
----
+    (d) Maintain dependency versions
 
-7. WARRANTY DISCLAIMER
+6. DISTRIBUTION
+
+6.1 Source-Available Model
+
+The Software is made available on GitHub for visibility and transparency. This does NOT make it open source or free software. The terms of this License apply regardless of where You obtained the Software.
+
+6.2 No Redistribution Without License
+
+You may NOT:
+
+    (a) Upload the Software to other repositories
+
+    (b) Share the Software with third parties
+
+    (c) Include the Software in other distributions
+
+    (d) Fork the repository and distribute the forked version publicly
+
+Exception: You may fork the repository for personal, internal use, but must keep the fork private and not distribute it.
+
+6.3 Internal Forking
+
+You may create private forks for:
+
+    (a) Internal modifications and customizations
+
+    (b) Personal development
+
+    (c) Testing and evaluation
+
+Private forks must remain private and not be made public.
+
+7. OWNERSHIP
+
+7.1 Copyright
+
+The Software is owned by Adam Boulaaz and is protected by copyright laws and international treaty provisions.
+
+7.2 No Transfer of Ownership
+
+This License does not transfer ownership of the Software. You are granted a license to use the Software, not ownership.
+
+7.3 Feedback
+
+If You provide feedback, suggestions, or bug reports, You grant the copyright holder a perpetual, irrevocable, worldwide, royalty-free license to use and incorporate such feedback into the Software.
+
+8. WARRANTY DISCLAIMER
 
 THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
 
----
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR, OR CORRECTION.
 
-8. LIMITATION OF LIABILITY
+9. LIMITATION OF LIABILITY
 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE.
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
----
+THIS INCLUDES, BUT IS NOT LIMITED TO:
 
-9. TERMINATION
+    (a) Loss of data
 
-9.1. Automatic Termination - This License terminates automatically if you violate any term.
+    (b) Loss of profits
 
-9.2. Effect of Termination - Upon termination, you must cease all use and distribution of the Software.
+    (c) Business interruption
 
-9.3. Survival - Sections 7, 8, 9, and 10 survive termination.
+    (d) Damage to systems
 
---
+    (e) Security breaches
 
-10. ENTIRE AGREEMENT
+    (f) Any indirect, incidental, or consequential damages
 
-This License constitutes the entire agreement between you and the copyright holder regarding the Software.
+10. TERMINATION
+
+10.1 Automatic Termination
+
+This License terminates automatically if You violate any term.
+
+10.2 Effect of Termination
+
+Upon termination:
+
+    (a) All rights granted under this License immediately cease
+
+    (b) You must cease all use of the Software
+
+    (c) You must delete all copies of the Software
+
+    (d) You must destroy all derivative works
+
+10.3 Survival
+
+Sections 7, 8, 9, 10, and 11 survive termination.
+
+10.4 Refund Policy
+
+If Your License is terminated due to Your violation, no refunds will be provided.
+
+11. GENERAL PROVISIONS
+
+11.1 Entire Agreement
+
+This License constitutes the entire agreement between You and the copyright holder regarding the Software.
+
+11.2 Severability
+
+If any provision of this License is held to be invalid or unenforceable, the remaining provisions shall remain in full force and effect.
+
+11.3 Governing Law
+
+This License shall be governed by and construed in accordance with the laws of [Your Country/State], without regard to conflict of law principles.
+
+11.4 No Waiver
+
+Failure to enforce any provision of this License shall not constitute a waiver of such provision.
+
+11.5 Assignment
+
+You may not assign or transfer this License without the prior written consent of the copyright holder.
+
+11.6 Contact
+
+For licensing inquiries: adamboulaaz92@gmail.com
+
+12. HOW TO INSTALL
+
+12.1 User Responsibility
+
+You are solely responsible for:
+
+    Installing dependencies (Python packages, libraries, system tools)
+
+    Configuring the Software for your environment
+
+    Managing updates and version compatibility
+
+    Securing your installation
+
+    Backing up your data
+
+12.2 Documentation
+
+Please refer to the README.md file for installation instructions and dependency requirements.
+
+12.3 Support
+
+Free support is provided via GitHub Issues on a best-effort basis. Commercial License holders receive priority support.
+
+13. ACKNOWLEDGMENT
+
+BY DOWNLOADING, INSTALLING, COPYING, OR USING THE SOFTWARE, YOU ACKNOWLEDGE THAT:
+
+    (a) You have read and understand this License
+
+    (b) You agree to be bound by all terms and conditions
+
+    (c) You understand this is NOT open source software
+
+    (d) You will comply with all applicable laws and regulations
+
+    (e) You are responsible for installing dependencies
+
+    (f) You accept the Software "AS IS" without warranties
 
 
 Copyright © 2026 Adam Boulaaz. All Rights Reserved.
