@@ -1,5 +1,8 @@
 ![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)
 ![OS](https://img.shields.io/badge/Platform-Linux%20|%20Windows%20|%20macOS%20|%20BSD-2d2d2d?style=for-the-badge&logo=linux&logoColor=white)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg?logo=gnu)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-green)](https://opensource.org/)
+[![OSI Approved](https://img.shields.io/badge/OSI-Approved-3c9f3c?logo=opensourceinitiative)](https://opensource.org/licenses/gpl-2.0.php)
 
 ![](image/Light-Scan-Logo.png)
 
