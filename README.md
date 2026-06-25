@@ -5,9 +5,29 @@
 
 ![](image/Light-Scan-Logo.png)
 
+#  LICENSE NOTICE
+
+**Light-Scan is NOT open source software.**
+
+## What You CAN Do For Free (No License Required)
+
+✅ Use Light-Scan for ANY purpose, including commercial use  
+✅ Use Light-Scan to run your business and make money  
+✅ Use Light-Scan on any number of machines  
+✅ Modify Light-Scan for internal use  
+✅ Use Light-Scan for internal IT, security, and data analysis  
+✅ Use Light-Scan for personal and academic projects  
+
+## What Requires a Commercial License
+
+❌ Distributing Light-Scan to third parties  
+❌ Offering Light-Scan as a service (SaaS)  
+❌ Integrating Light-Scan into products sold to customers  
+
+📄 **Full License:** [LGL](LICENSE)  
+📧 **Commercial Licensing:** adamboulaaz92@gmail.com
+
 # Lightscan - Advanced Port Scanner
-
-
 
 LightScan is a powerful, multi-threaded port scanner built with Python and Scapy, designed for security professionals and network administrators who demand both speed and accuracy.
 
