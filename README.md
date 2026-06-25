@@ -3,27 +3,6 @@
 
 ![](image/Light-Scan-Logo.png)
 
-#  LICENSE NOTICE
-
-**Light-Scan is NOT open source software.**
-
-## What You CAN Do For Free (No License Required)
-
-✅ Use Light-Scan for ANY purpose, including commercial use  
-✅ Use Light-Scan to run your business and make money  
-✅ Use Light-Scan on any number of machines  
-✅ Modify Light-Scan for internal use  
-✅ Use Light-Scan for internal IT, security, and data analysis  
-✅ Use Light-Scan for personal and academic projects  
-
-## What Requires a Commercial License
-
-❌ Distributing Light-Scan to third parties  
-❌ Offering Light-Scan as a service (SaaS)  
-❌ Integrating Light-Scan into products sold to customers  
-
-📄 **Full License:** [LGL](LICENSE)  
-📧 **Commercial Licensing:** adamboulaaz92@gmail.com
 
 # Lightscan - Advanced Port Scanner
 
@@ -676,13 +655,13 @@ The URG flag is rarely used in legitimate traffic, making it an excellent probe 
 
 -  The entire cybersecurity community — For pushing the boundaries of what's possible
 
-## 💎 Light-Scan Pro
+##  Light-Scan Pro Service
 
 **Enterprise-Grade Support & Services**
 
 Light-Scan Pro is the commercial service tier designed for organizations that require dedicated support, early access, and enterprise-grade reliability. While the Light-Scan toolkit itself is completely free for any use — including commercial use, on any number of machines, and for profit-making activities — Light-Scan Pro provides the professional services that mission-critical deployments demand. Subscribers benefit from 24/7 direct technical support from the developer, priority bug fixes, on-demand custom feature development, custom LSSE script creation, proactive security advisories, compliance assistance, and exclusive early access to new releases up to one month or more before the general public — giving them a critical edge in fast-paced security environments.
 
-Light-Scan Pro is available for **€999/year** for up to 50 machine, or **€99/month** for up to 15 machine (covering all machines and users under a single subscription), with a clear commitment to transparency and fairness. While we reserve the right to adjust pricing in the future, any price changes will not apply to existing enterprise customers or to any users who subscribed prior to the change. This ensures that early adopters and long-term partners are protected and can continue to rely on Light-Scan Pro at the terms they originally agreed to. Additionally, Light-Scan Pro includes full commercial distribution rights, SaaS hosting rights, and integration rights — meaning you can distribute Light-Scan, offer it as a service, or integrate it into your commercial products without any legal concerns.
+Light-Scan Pro is available for **€999/year** for up to 50 machine, or **€99/month** for up to 15 machine, or **€39/month** for uo to 5 machines (covering all machines and users under a single subscription), with a clear commitment to transparency and fairness. While we reserve the right to adjust pricing in the future, any price changes will not apply to existing enterprise customers or to any users who subscribed prior to the change. This ensures that early adopters and long-term partners are protected and can continue to rely on Light-Scan Pro at the terms they originally agreed to. Additionally, Light-Scan Pro includes full commercial distribution rights, SaaS hosting rights, and integration rights — meaning you can distribute Light-Scan, offer it as a service, or integrate it into your commercial products without any legal concerns.
 
 For all inquiries regarding Light-Scan Pro subscriptions, enterprise licensing, custom script development, or managed scanning services, please reach out directly to me at **adamboulaaz92@gmail.com**. As a solo developer, I personally handle all communications, support requests, and custom development projects — ensuring you get direct, fast, and high-quality responses without any layers of bureaucracy. I aim to respond to all inquiries within 24 hours, with priority response times for Pro subscribers. This hybrid approach — free software combined with paid enterprise services — mirrors the successful models of companies like Canonical (Ubuntu Pro) and Red Hat, ensuring that Light-Scan remains widely available and community-driven while also being financially sustainable. The revenue from Pro subscriptions directly funds ongoing development, security research, and the infrastructure needed to keep Light-Scan at the forefront of network reconnaissance. In short: the toolkit is free for everyone, but those who need more can pay for the peace of mind, speed, and customization that only Light-Scan Pro can deliver.
 
