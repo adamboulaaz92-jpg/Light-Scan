@@ -1,219 +1,228 @@
 Light General License (LGL)
+
 Version 1.0, June 2026
-
----
-
 IMPORTANT: THIS IS NOT OPEN SOURCE SOFTWARE.
 
-This software is source-available under the Light General License (LGL). 
-Free use is permitted for Internal Business Operations on up to 5 Machines. 
-Commercial distribution, integration, and use as a service require a 
-Commercial License.
-
----
-
+This software is source-available under the Light General License (LGL).
+Free use is permitted for any purpose, including commercial use, on any
+number of Machines. Commercial distribution, integration into commercial
+products, and use as a service require a Commercial License.
 PREAMBLE
 
-The Light General License (LGL) is designed to allow free use of the Software 
-for internal business operations while protecting the project's sustainability. 
-It permits free use, modification, and internal business use, while requiring 
-a Commercial License for distribution, integration into commercial products, 
-or use as a service. This ensures the project remains actively developed and 
-maintained.
-
----
-
+The Light General License (LGL) is designed to allow free use of the Software
+for any purpose - including commercial use - while protecting the project's
+sustainability. It permits free use, modification, and commercial use, while
+requiring a Commercial License for distribution, integration into commercial
+products, or use as a service. This ensures the project remains actively
+developed and maintained.
 TERMS AND CONDITIONS
-
 1. DEFINITIONS
 
-"Software" means the Light-Scan toolkit, including all source code, documentation, 
+"Software" means the Light-Scan toolkit, including all source code, documentation,
 and associated files.
 
 "You" means the individual or entity exercising permissions granted by this License.
 
 "Modification" means any alteration, addition, or deletion to the Software.
 
-"Derivative Work" means any work based on or derived from the Software, including 
+"Derivative Work" means any work based on or derived from the Software, including
 modifications and customizations.
 
-"Machine" means any physical or virtual computing instance, including but not 
-limited to servers, workstations, containers, and cloud instances, that runs or 
+"Machine" means any physical or virtual computing instance, including but not
+limited to servers, workstations, containers, and cloud instances, that runs or
 executes the Software.
 
-"Internal Business Use" means using the Software solely within your organization 
-for your own business operations, NOT including any of the activities in 
-"Commercial Distribution" below.
+"Permitted Use" means any use of the Software that does not involve Commercial
+Distribution as defined below.
 
 "Commercial Distribution" means:
-(a) Selling, reselling, or sublicensing the Software to third parties
-(b) Offering the Software as a hosted or managed service (SaaS) to external customers
-(c) Integrating the Software into a product or service sold to external customers
-(d) Distributing the Software as part of a commercial offering
-(e) Using the Software to provide paid consulting or professional services to 
-    external clients
 
-"Distribution" means sharing, publishing, or making the Software available to 
+    (a) Selling, reselling, or sublicensing the Software to third parties
+
+    (b) Offering the Software as a hosted or managed service (SaaS) to external customers
+
+    (c) Integrating the Software into a product or service sold to external customers
+
+    (d) Distributing the Software as part of a commercial offering
+
+    (e) Using the Software to provide paid consulting or professional services to
+    external clients where the Software is the primary tool being used
+
+"Distribution" means sharing, publishing, or making the Software available to
 third parties.
 
-"Commercial License" means a paid license granting Commercial Distribution rights 
+"Commercial License" means a paid license granting Commercial Distribution rights
 under Section 5.
-
----
-
 2. FREE USE RIGHTS
 
 You are granted the following rights free of charge:
+2.1. Unlimited Free Use
 
-2.1. Internal Business Use - You may use the Software for Internal Business 
-Operations without a Commercial License, subject to the following conditions:
+You may use the Software for any purpose without a Commercial License,
+including but not limited to:
 
-(a) You are using the Software on 5 or fewer Machines
-(b) You are not distributing the Software to any third party
-(c) You are not offering the Software as a service to external customers
-(d) You are not using the Software for paid consulting services
-(e) You are not integrating the Software into products sold to customers
+    ✅ Internal business operations
 
-For clarity, the following are permitted without a Commercial License:
-· Using the Software for internal IT operations
-· Using the Software for internal data analysis
-· Using the Software for internal security monitoring
-· Using the Software for internal development and testing
-· Using the Software to support your core business operations
+    ✅ Commercial use and profit-making activities
 
-2.2. Modification - You may modify the Software for your internal use only.
+    ✅ Earning money while using the Software
 
-2.3. Customization - You may customize the Software for personal or organizational use.
+    ✅ Supporting your core business operations
 
-2.4. Personal and Academic Use – You may use the Software for:
-(a) Personal projects and hobbies
-(b) Teaching and coursework at educational institutions
-(c) Academic research (published or unpublished)
-(d) Non-funded student projects
+    ✅ Internal IT operations and security monitoring
 
-Research funded by commercial entities, or conducted under commercial contracts, 
-requires a Commercial License.
+    ✅ Internal data analysis and development
 
----
+    ✅ Personal projects and hobbies
+
+    ✅ Academic research and teaching
+
+    ✅ Student projects
+
+    ✅ Any other lawful purpose
+
+There is no machine limit. You may use the Software on any number of Machines.
+2.2. Modification
+
+You may modify the Software for your internal use only.
+2.3. Customization
+
+You may customize the Software for personal or organizational use.
+2.4. Commercial Use
+
+You may use the Software to:
+
+    (a) Run your business
+
+    (b) Generate revenue
+
+    (c) Provide services to your customers (as long as you are not distributing the Software itself)
+
+    (d) Make money in any way that does not involve Commercial Distribution
 
 3. RESTRICTIONS
 
-3.1. Distribution and Commercial Integration Restrictions - The following 
-activities are prohibited without a Commercial License:
+The following activities are prohibited without a Commercial License:
+3.1. No Distribution
 
-(a) Selling, reselling, or sublicensing the Software
-(b) Offering the Software as a hosted service (SaaS) to external customers
-(c) Integrating the Software into a product or service sold to external customers
-(d) Distributing the Software as part of a commercial offering
-(e) Using the Software to provide paid consulting or professional services
+You may NOT distribute, sell, resell, or sublicense the Software to any third party.
+3.2. No SaaS
 
-3.2. Machine Limit - Free use is limited to 5 Machines. Using the Software 
-on more than 5 Machines requires a Commercial License.
+You may NOT offer the Software as a hosted or managed service (SaaS) to external customers.
+3.3. No Commercial Integration
 
-3.3. No Removal of Notices - You may not remove or alter any copyright, 
-trademark, or license notices in the Software.
+You may NOT integrate the Software into a product or service sold to external customers.
+3.4. No Paid Consulting as Primary Tool
 
-3.4. No Open Source Representation - You may not represent or imply that the 
-Software is open source software.
+You may NOT use the Software as the primary tool for paid consulting or professional services provided to external clients.
 
----
+Exception: You may use the Software to provide consulting services if the Software is incidental to your service (e.g., you use it for network scanning as part of a larger security assessment), but you cannot charge specifically for the use of the Software itself.
+3.5. No Removal of Notices
 
+You may not remove or alter any copyright, trademark, or license notices in the Software.
+3.6. No Open Source Representation
+
+You may not represent or imply that the Software is open source software.
 4. DISTRIBUTION
+4.1. No Distribution Without License
 
-4.1. No Distribution Without License - You may NOT distribute the Software 
-or Derivative Works to any third party without a Commercial License.
+You may NOT distribute the Software or Derivative Works to any third party without a Commercial License.
+4.2. Source-Available
 
-4.2. Source-Available - The Software is made available on GitHub for visibility 
-and transparency. This does NOT make it open source or free software.
+The Software is made available on GitHub for visibility and transparency. This does NOT make it open source or free software.
+4.3. Private Forks
 
-4.3. Private Forks - You may create private forks for internal modifications 
-and testing. Private forks must remain private and not be made public.
+You may create private forks for internal modifications and testing. Private forks must remain private and not be made public.
+4.4. Commercial Distribution Exception
 
----
-
+If you have a Commercial License, you may distribute the Software under the terms of that license.
 5. COMMERCIAL LICENSE
+5.1. Requirement
 
-5.1. Requirement - You must obtain a Commercial License if You:
-(a) Use the Software on more than 5 Machines
-(b) Engage in Commercial Distribution as defined in Section 1
-(c) Integrate the Software into commercial products or services
-(d) Offer the Software as a service (SaaS)
-(e) Use the Software for paid consulting or professional services
+You must obtain a Commercial License if You:
 
-5.2. Pricing - Commercial Licenses are available at:
+    (a) Distribute the Software to third parties
 
-| Basic | Monthly | €39 | Up to 5 |
-| Standard | Monthly | €99 | Up to 15 |
-| Professional | Monthly | €199 | Up to 50 |
-| Enterprise | Yearly | €999 | Up to 50 |
-| Unlimited | Yearly | €1,999 | Unlimited |
+    (b) Offer the Software as a service (SaaS) to external customers
+
+    (c) Integrate the Software into products sold to external customers
+
+    (d) Use the Software as the primary tool for paid consulting services
+
+You do NOT need a Commercial License if you are just using the Software to run your business, make money, or support your operations.
+5.2. Pricing
+
+Commercial Licenses are available at:
+Plan	      Duration	 Price	     Machines
+Basic	      Monthly	 €39	     Up to 5
+Standard	  Monthly	 €99	     Up to 15
+Professional  Monthly	 €199	     Up to 50
+Enterprise	  Yearly	 €999	     Up to 50
+Unlimited	  Yearly	 €1,999	     Unlimited
 
 For coverage beyond 50 machines, contact: adamboulaaz92@gmail.com
+5.3. What the Commercial License Grants
 
-5.3. What the Commercial License Grants:
-· Commercial distribution rights
-· Integration rights
-· Ability to exceed the 5-Machine limit
-· Full commercial support
-· Priority bug fixes
-· Early access to new features
+    - Commercial distribution rights
 
-5.4. How to Obtain - Email: adamboulaaz92@gmail.com
+    - Integration rights into commercial products
 
----
+    - SaaS hosting rights
 
+    - Right to use the Software as a primary consulting tool
+
+    - Full commercial support
+
+    - Priority bug fixes
+
+    - Early access to new features
+
+5.4. How to Obtain
+
+Email: adamboulaaz92@gmail.com
 6. DEPENDENCIES AND INSTALLATION
+6.1. User Responsibility
 
-6.1. User Responsibility - You are solely responsible for:
-(a) Installing all required dependencies, third-party libraries, and packages
-(b) Configuring the Software for your environment
-(c) Managing updates and version compatibility
-(d) Securing your installation
-(e) Backing up your data
+You are solely responsible for:
 
-6.2. Third-Party Components - The Software may rely on open-source components 
-that are subject to their own licenses. Those components are governed by their 
-respective licenses, and nothing in this License supersedes or modifies those 
-licenses.
+    (a) Installing all required dependencies, third-party libraries, and packages
 
-6.3. No Support for Dependencies - The copyright holder does not provide support 
-for third-party dependencies. You must resolve dependency issues yourself or 
-purchase a Commercial License for priority support.
+    (b) Configuring the Software for your environment
 
----
+    (c) Managing updates and version compatibility
 
+    (d) Securing your installation
+
+    (e) Backing up your data
+
+6.2. Third-Party Components
+
+The Software may rely on open-source components that are subject to their own licenses. Those components are governed by their respective licenses, and nothing in this License supersedes or modifies those licenses.
+6.3. No Support for Dependencies
+
+The copyright holder does not provide support for third-party dependencies. You must resolve dependency issues yourself or purchase a Commercial License for priority support.
 7. WARRANTY DISCLAIMER
 
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
-
----
-
 8. LIMITATION OF LIABILITY
 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR 
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR
 OTHER LIABILITY, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE.
-
----
-
 9. TERMINATION
+9.1. Automatic Termination
 
-9.1. Automatic Termination - This License terminates automatically if you 
-violate any term.
+This License terminates automatically if you violate any term.
+9.2. Effect of Termination
 
-9.2. Effect of Termination - Upon termination, you must cease all use and 
-distribution of the Software.
+Upon termination, you must cease all use and distribution of the Software.
+9.3. Survival
 
-9.3. Survival - Sections 7, 8, 9, and 10 survive termination.
-
----
-
+Sections 7, 8, 9, and 10 survive termination.
 10. ENTIRE AGREEMENT
 
-This License constitutes the entire agreement between you and the copyright 
+This License constitutes the entire agreement between you and the copyright
 holder regarding the Software.
-
----
 
 Copyright © 2026 Adam Boulaaz. All Rights Reserved.
