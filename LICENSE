@@ -26,6 +26,8 @@ TERMS AND CONDITIONS
 
 "Derivative Work" means any work based on or derived from the Software, including modifications and customizations.
 
+"Machine" means any physical or virtual computing instance, including but not limited to servers, workstations, containers, and cloud instances, that runs or executes the Software.
+
 "Commercial Use" means any use of the Software in connection with:
 
 · Revenue generation
@@ -43,7 +45,12 @@ TERMS AND CONDITIONS
 
 You are granted the following rights free of charge:
 
-2.1. Use - You may use the Software for any purpose, including internal business use.
+2.1. Non-Commercial Use - You may use the Software for internal business operations without a Commercial License, provided such use does not:
+· Generate revenue directly from the Software
+· Form part of a product or service offered to external customers
+· Serve as the primary mechanism for profit-making activities
+
+For clarity, using the Software to support your internal IT operations, data analysis, or security monitoring is permitted without a Commercial License.
 
 2.2. Modification - You may modify the Software to suit your needs.
 
@@ -77,9 +84,15 @@ You are granted the following rights free of charge:
 
 4. RESTRICTIONS
 
-4.1. Commercial Use Restriction - Commercial Use of the Software, Derivative Works, or Modified Versions is prohibited without obtaining a Commercial License.
+4.1. Commercial Use Restriction - Commercial Use (as defined in Section 1) of the Software is prohibited without a Commercial License. The following activities specifically require a Commercial License:
 
-4.2. Commercial Distribution - Distributing the Software or Derivative Works for commercial purposes (including as part of a commercial product or service) requires a Commercial License.
+· (a) Selling, reselling, or sublicensing the Software
+· (b) Offering the Software as a hosted service (SaaS)
+· (c) Integrating the Software into a product or service sold to external customers
+· (d) Using the Software to provide paid consulting or professional services
+· (e) Distributing the Software as part of a commercial offering
+
+4.2. Internal Business Use - Internal use that does not involve any of the activities in 4.1(a)-(e) is permitted without a Commercial License, subject to the Small Business Exception in Section 6.1.
 
 4.3. Commercial Integration - Integrating the Software into a commercial product or service requires a Commercial License.
 
