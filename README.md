@@ -1,7 +1,5 @@
 ![Python](https://img.shields.io/badge/python-3.13-blue?logo=python&logoColor=white)
 ![OS](https://img.shields.io/badge/Platform-Linux%20|%20Windows%20|%20macOS%20|%20BSD-2d2d2d?style=for-the-badge&logo=linux&logoColor=white)
-![License](https://img.shields.io/badge/license-GNU-green?logo=gnu)
-![Open Source](https://img.shields.io/badge/Open%20Source-✓-brightgreen?logo=github)
 
 ![](image/Light-Scan-Logo.png)
 
