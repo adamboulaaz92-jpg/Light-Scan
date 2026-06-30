@@ -8,3 +8,6 @@ pyopenssl
 getmac
 customtkinter
 CTkMessagebox
+dnspython
+reportlab
+pyyaml

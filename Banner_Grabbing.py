@@ -1,5 +1,9 @@
 import socket
+import ssl
 import random
+import struct
+import binascii
+from VersionParser import VersionParser
 
 red = "\033[31m"
 reset = "\033[0m"
@@ -19,9 +23,13 @@ class Banner:
                     print(f"\n[+] Banner grab: {target}: Port {port} ({protocol.upper()})")
 
             payload = Banner.banner_grabing_payloads(target, port, protocol)
-
             if protocol.lower() == "tcp":
-                return Banner._tcp_banner_grab(target, port, payload, timeout, verbose,print_output,version)
+                if port in [135]:
+                    return Banner.grab_msrpc_hex(target,port,timeout)
+                elif port in [139]:
+                    return Banner.grab_netbios_hex(target,port,timeout)
+                else:
+                    return Banner._tcp_banner_grab(target, port, payload, timeout, verbose,print_output,version)
             elif protocol.lower() == "udp":
                 return Banner._udp_banner_grab(target, port, payload, timeout, verbose,print_output,version)
             else:
@@ -40,20 +48,108 @@ class Banner:
                     print(f"\n{red}[!] Banner grab error: {e}{reset}")
             return None
 
+
     @staticmethod
-    def _tcp_banner_grab(target, port, payload, timeout, verbose,print_output, version):
+    def grab_msrpc_hex(target, port=135, timeout=5):
+        probe = bytes.fromhex(
+            "05000b03100000004800000001000000b810b810000001a000000000c000000000000046"
+            "0000000001000000000000000100000001000000000000000000000000000000000000"
+            "0000000000000000000000000000000000000000000000000000000000000000000000"
+        )
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(timeout)
+            sock.connect((target, port))
+
+            sock.send(probe)
+
+            response = sock.recv(4096)
+            sock.close()
+
+            if response:
+                hex_banner = binascii.hexlify(response).decode('utf-8')
+                formatted_hex = ' '.join(hex_banner[i:i + 2] for i in range(0, len(hex_banner), 2))
+
+
+                return formatted_hex
+            return None
+
+        except Exception as e:
+            return e
+
+    @staticmethod
+    def grab_netbios_hex(target, port=139, timeout=5):
+        try:
+            smb_header = bytearray()
+            smb_header.extend(b'\xff\x53\x4d\x42')
+            smb_header.extend(b'\x72')
+            smb_header.extend(b'\x00\x00\x00\x00')
+            smb_header.extend(b'\x18')
+            smb_header.extend(b'\x00\x00')
+            smb_header.extend(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+            smb_header.extend(b'\x00\x00')
+            smb_header.extend(b'\x00\x00')
+            smb_header.extend(b'\x00\x00')
+            smb_header.extend(b'\x00\x00')
+
+            smb_params = b'\x00\x00'
+
+            smb_data = bytearray()
+            smb_data.extend(b'\x02\x00')
+            smb_data.extend(b'PC NETWORK PROGRAM 1.0\x00')
+            smb_data.extend(b'MICROSOFT NETWORKS 1.03\x00')
+
+            total_len = len(smb_header) + len(smb_params) + len(smb_data)
+            netbios_header = struct.pack('>I', total_len)[1:4]
+
+            packet = bytearray()
+            packet.append(0x00)
+            packet.extend(netbios_header)
+            packet.extend(smb_header)
+            packet.extend(smb_params)
+            packet.extend(smb_data)
+
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(timeout)
+            sock.connect((target, port))
+            sock.send(packet)
+
+            response = sock.recv(4096)
+            sock.close()
+
+            if response:
+                hex_banner = binascii.hexlify(response).decode('utf-8')
+                formatted_hex = ' '.join(hex_banner[i:i + 2] for i in range(0, len(hex_banner), 2))
+                return formatted_hex
+
+            return None
+
+        except Exception as e:
+            return None
+
+    @staticmethod
+    def _tcp_banner_grab(target, port, payload, timeout, verbose, print_output, version):
+        ssl_ports = [443, 465, 993, 995, 8443, 4643]
         try:
             if version == 6:
                 sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
             else:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
             sock.settimeout(timeout)
             sock.connect((target, port))
+
+            if port in ssl_ports:
+                context = ssl.create_default_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+                ssl_sock = context.wrap_socket(sock, server_hostname=target)
+                sock = ssl_sock
 
             banner = b""
             try:
                 sock.settimeout(2)
-                banner = sock.recv(1024)
+                banner = sock.recv(4096)
             except socket.timeout:
                 banner = b""
             except Exception as e:
@@ -74,7 +170,7 @@ class Banner:
                 sock.send(payload)
 
                 try:
-                    banner = sock.recv(2048)
+                    banner = sock.recv(4096)
                 except socket.timeout:
                     banner = b""
 
@@ -87,6 +183,7 @@ class Banner:
                         pass
                     else:
                         print(f"\n[+] Received TCP banner: {len(decoded_banner)} chars")
+
                 return decoded_banner
             else:
                 if verbose:
@@ -137,7 +234,7 @@ class Banner:
                 sock.sendto(payload, (target, port))
 
             try:
-                response, addr = sock.recvfrom(2048)
+                response, addr = sock.recvfrom(4096)
                 sock.close()
 
                 if response and response.strip():
@@ -147,6 +244,7 @@ class Banner:
                             pass
                         else:
                             print(f"\n[+] Received UDP banner: {len(decoded_banner)} chars")
+
                     return decoded_banner
                 else:
                     if verbose:
@@ -205,6 +303,13 @@ class Banner:
                            f"Connection: close\r\n\r\n").encode()
             return payload
 
+        elif port == 135:
+            if Proto == "tcp":
+                return bytes.fromhex(
+                    "05000b03100000004800000001000000b810b810000001a000000000c000000000000046"
+                    "0000000001000000000000000100000001000000000000000000000000000000000000"
+                    "0000000000000000000000000000000000000000000000000000000000000000000000"
+                )
         elif port == 21:
             commands = [
                 b"USER anonymous\r\n",
@@ -688,15 +793,19 @@ class Banner:
                 ("openssh", "ssh"),
                 ("dropbear", "ssh")
             ],
+            "msrpc": [
+                ("05 00 0d 03 10 00 00 00 18 00 00 00 01 00 00 00 00 00 01 05 00 00 00 00", "msrpc"),
+            ],
             "https": [
                 ("cloudflare", "https-cloudflare"),
                 ("the plain http request was sent to https port", "https"),
                 ("you're speaking plain http to an ssl-enabled server port", "https"),
+
             ],
             "http": [
                 ("cloudflare", "http-cloudflare"),
-                ("server: simplehttp/0.6", "http"),
-                ("400 bad request", "http"),
+                ("server: simplehttp/0.6", "http-simplehttp/0.6"),
+                ("microsoft-httpapi/2.0", "http-microsoft-httpapi/2.0"),
             ],
             "database": [
                 ("mysql", "mysql"),

@@ -8,19 +8,39 @@ import datetime
 import sys
 import json
 import csv
+import os
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 import io
+import yaml
 
-Version = "1.0.1"
+Version = "1.0.2"
 
 parser = argparse.ArgumentParser(description="LightSave : Light-Scan Scans Saving Tool")
 parser.add_argument("-C", required=True, help="Lightscan command")
-parser.add_argument("-S", default="txt", choices=["txt", "light", "html", "xml", "csv", "json"],
-                    help="Saving Format (txt,light,html,xml,csv,json)")
+parser.add_argument("-S", default="txt", choices=["txt", "light", "html", "xml", "csv", "json","pdf","yaml"],
+                    help="Saving Format (txt,light,html,xml,csv,json,pdf,yaml)")
 args = parser.parse_args()
 
 current = time.localtime()
 filename = f"Lightscan_Output_{time.strftime('%Y-%m-%d_%H-%M-%S', current)}.{args.S.lower()}"
-
+try:
+    if platform.system() == "Windows":
+        font_path = "C:/Windows/Fonts/consola.ttf"
+        if os.path.exists(font_path):
+            pdfmetrics.registerFont(TTFont('Consolas', font_path))
+    elif platform.system() == "Linux":
+        font_paths = [
+            "/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf"
+        ]
+        for path in font_paths:
+            if os.path.exists(path):
+                pdfmetrics.registerFont(TTFont('MonoFont', path))
+                break
+except:
+    pass
 
 def parse_scan_output(output):
     results = {
@@ -104,7 +124,7 @@ def parse_scan_output(output):
             })
 
     firewall_section = re.search(
-        r'\[\!\] Firewall Analysis for .+?:\s*(.*?)(?=\[\+\] Captured Banner/s:|\[\+\] OS Fingerprint Results:|\[\+\] Lightscan scanned|$)',
+        r'\[\!\] Firewall Analysis for .+?:\s*(.*?)(?=\[\+\] Captured Banner/s:|\[\+\] OS Fingerprint Results|\[\+\] Lightscan scanned|$)',
         output, re.DOTALL)
     if firewall_section:
         firewall_text = firewall_section.group(1)
@@ -137,6 +157,385 @@ def parse_scan_output(output):
 
     return results
 
+def generate_pdf(data, raw_output):
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=72,
+        leftMargin=72,
+        topMargin=72,
+        bottomMargin=72,
+        title=f"LightScan Report - {data.get('target', 'Unknown')}",
+        author="LightSave",
+        subject="Network Security Assessment"
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#00cc44'),
+        alignment=TA_CENTER,
+        spaceAfter=30,
+        fontName='Helvetica-Bold'
+    )
+
+    heading1_style = ParagraphStyle(
+        'CustomHeading1',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.HexColor('#00cc44'),
+        spaceAfter=12,
+        spaceBefore=20,
+        fontName='Helvetica-Bold'
+    )
+
+    heading2_style = ParagraphStyle(
+        'CustomHeading2',
+        parent=styles['Heading2'],
+        fontSize=14,
+        textColor=colors.HexColor('#00cc44'),
+        spaceAfter=8,
+        spaceBefore=15,
+        fontName='Helvetica-Bold'
+    )
+
+    info_style = ParagraphStyle(
+        'InfoStyle',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=colors.black,
+        spaceAfter=6,
+        fontName='Helvetica'
+    )
+
+    mono_style = ParagraphStyle(
+        'MonoStyle',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#333333'),
+        fontName='Courier',
+        spaceAfter=4,
+        leading=12
+    )
+
+    story = []
+
+    story.append(Paragraph("[+] Light-Scan", title_style))
+    story.append(Paragraph("Professional Security Assessment Report",
+                           ParagraphStyle('Subtitle', parent=styles['Normal'], fontSize=16,
+                                          textColor=colors.grey, alignment=TA_CENTER, spaceAfter=30)))
+
+    target_info = f"""
+    <b>Target:</b> {data.get('target', 'Unknown')}<br/>
+    <b>Scan Type:</b> {data.get('scan_type', 'Unknown')}<br/>
+    <b>Scan Date:</b> {data.get('scan_date', datetime.datetime.now().isoformat())}<br/>
+    <b>Duration:</b> {data.get('scan_time', 'N/A')} seconds<br/>
+    <b>LightScan Version:</b> {data.get('version', 'Unknown')}
+    """
+    story.append(Paragraph(target_info, info_style))
+    story.append(Spacer(0, 0.5 * inch))
+    story.append(Paragraph("Executive Summary", heading1_style))
+
+    total = len(data.get('open_ports', [])) + data.get('closed_ports_count', 0) + data.get('filtered_ports_count', 0)
+    open_pct = round((len(data.get('open_ports', [])) / max(1, total)) * 100, 1)
+
+    summary_text = f"""
+    <b>Host Status:</b> {data.get('host_status', 'Unknown').upper()}<br/>
+    <b>Total Ports Scanned:</b> {total}<br/>
+    <b>Open Ports:</b> {len(data.get('open_ports', []))} ({open_pct}%)<br/>
+    <b>Closed Ports:</b> {data.get('closed_ports_count', 0)}<br/>
+    <b>Filtered Ports:</b> {data.get('filtered_ports_count', 0)}
+    """
+    if data.get('firewall_status'):
+        firewall_icon = "" if data.get('firewall_detected') == 'STRONG' else "" if data.get(
+            'firewall_detected') == 'NONE' else "️"
+        story.append(Paragraph(f"{firewall_icon} <b>Firewall Status:</b> {data['firewall_status']}", info_style))
+
+    if data.get('os_fingerprint'):
+        story.append(Paragraph(f" <b>Detected OS:</b> {data['os_fingerprint'].get('os', 'Unknown')} "
+                               f"({data['os_fingerprint'].get('confidence', '0')}% confidence)", info_style))
+    story.append(Paragraph(summary_text, info_style))
+
+
+    total = len(data.get('open_ports', [])) + data.get('closed_ports_count', 0) + data.get('filtered_ports_count', 0)
+    open_pct = round((len(data.get('open_ports', [])) / max(1, total)) * 100, 1)
+
+    story.append(PageBreak())
+    story.append(Paragraph("Open Ports", heading1_style))
+
+    if data.get('open_ports'):
+        table_data = [['Port', 'Service', 'Status', 'Banner']]
+        for port in data.get('open_ports', []):
+            banner = next((b['content'][:50] + '...' if len(b['content']) > 50 else b['content']
+                           for b in data.get('banners', []) if str(b['port']) == str(port['port'])), '')
+            clean_banner = banner.replace('\n', ' ').replace('\r', '')[:100]
+            table_data.append([
+                str(port['port']),
+                port['service'],
+                'OPEN',
+                clean_banner if clean_banner else '-'
+            ])
+
+        table = Table(table_data, colWidths=[0.8 * inch, 2.25 * inch, 1 * inch, 3.5 * inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#00cc44')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5f5f5')),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ]))
+        story.append(table)
+    else:
+        story.append(Paragraph("No open ports found.", info_style))
+
+    if data.get('banners'):
+        story.append(Spacer(1, 0.3 * inch))
+        story.append(Paragraph("Banner Capture", heading2_style))
+
+        for banner in data['banners']:
+            banner_text = f"<b>Port {banner['port']}:</b><br/>{banner['content'][:500]}"
+            if len(banner['content']) > 500:
+                banner_text += "... (truncated)"
+            story.append(Paragraph(banner_text, mono_style))
+            story.append(Spacer(1, 0.1 * inch))
+
+    if data.get('firewall_status'):
+        story.append(PageBreak())
+        story.append(Paragraph("Firewall Analysis", heading1_style))
+
+        firewall_color = "#00cc44" if data.get('firewall_detected') == 'NONE' else "#ffaa00" if data.get(
+            'firewall_detected') == 'WEAK' else "#ff4444"
+        firewall_text = f"""
+        <b>Status:</b> {data['firewall_status']}<br/>
+        <b>Classification:</b> {data.get('firewall_detected', 'UNKNOWN')}
+        """
+        story.append(Paragraph(firewall_text, info_style))
+
+        stats_data = [
+            ['Metric', 'Value'],
+            ['Open Ports', str(len(data.get('open_ports', [])))],
+            ['Closed Ports', str(data.get('closed_ports_count', 0))],
+            ['Filtered Ports', str(data.get('filtered_ports_count', 0))]
+        ]
+        stats_table = Table(stats_data, colWidths=[2 * inch, 2 * inch])
+        stats_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#00cc44')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#cccccc')),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f5f5f5')),
+        ]))
+        story.append(stats_table)
+
+    if data.get('os_fingerprint') and data['os_fingerprint'].get('os'):
+        story.append(Spacer(1, 0.3 * inch))
+        story.append(Paragraph("Operating System Fingerprint", heading2_style))
+        story.append(Paragraph(f"<b>Detected OS:</b> {data['os_fingerprint'].get('os', 'Unknown')}", info_style))
+        story.append(Paragraph(f"<b>Confidence:</b> {data['os_fingerprint'].get('confidence', '0')}%", info_style))
+
+    if data.get('lsse_response') or data.get('lsse_scripts_detected'):
+        story.append(PageBreak())
+        story.append(Paragraph("LSSE Script Engine Results", heading1_style))
+
+        if data.get('lsse_response'):
+            story.append(Paragraph(f"<b>Target URL:</b> {data['lsse_response']}", info_style))
+
+        if data.get('lsse_scripts_detected'):
+            story.append(Spacer(1, 0.2 * inch))
+            story.append(Paragraph("Detected Scripts:", heading2_style))
+            for idx, script in enumerate(data['lsse_scripts_detected'][:10], 1):
+                clean_script = script[:200].replace('\n', ' ').replace('\r', '')
+                story.append(Paragraph(f"{idx}. {clean_script}", mono_style))
+            if len(data['lsse_scripts_detected']) > 10:
+                story.append(Paragraph(f"... and {len(data['lsse_scripts_detected']) - 10} more", info_style))
+
+        for script in data.get('lsse_scripts', []):
+            if script.get('type') == 'subdomain':
+                story.append(Spacer(1, 0.2 * inch))
+                story.append(Paragraph(f" Subdomain: {script.get('name', 'Unknown')} → {script.get('ip', 'Unknown')}",
+                                       info_style))
+            elif script.get('type') == 'ssl_cert':
+                story.append(Spacer(1, 0.2 * inch))
+                story.append(Paragraph(" SSL/TLS Certificate:", heading2_style))
+                for key, value in script.get('data', {}).items():
+                    if key.lower() in ['notbefore', 'notafter', 'subject', 'issuer']:
+                        story.append(Paragraph(f"<b>{key}:</b> {value}", info_style))
+
+    story.append(PageBreak())
+    story.append(Paragraph("Raw Scan Output", heading1_style))
+
+    output_lines = raw_output.split('\n')
+
+    for line in output_lines:
+        if line.strip():
+            story.append(Paragraph(html.escape(line), mono_style))
+
+    story.append(Spacer(0, 0.1 * inch))
+    story.append(Paragraph(
+        f"Report generated by LightSave v{Version} on {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        ParagraphStyle('Footer', parent=styles['Normal'], fontSize=9,
+                       textColor=colors.grey, alignment=TA_CENTER)))
+    story.append(Paragraph("For authorized security testing only.",
+                           ParagraphStyle('Footer2', parent=styles['Normal'], fontSize=8,
+                                          textColor=colors.grey, alignment=TA_CENTER)))
+
+    doc.build(story)
+
+    pdf_data = buffer.getvalue()
+    buffer.close()
+
+    return pdf_data
+
+def generate_yaml(data, raw_output):
+    """
+    Generate YAML format report from scan data.
+
+    Args:
+        data (dict): Parsed scan data
+        raw_output (str): Raw output from LightScan
+
+    Returns:
+        str: YAML formatted string
+    """
+
+    # Process LSSE scripts for clean YAML structure
+    lsse_scripts_processed = []
+    for script in data.get('lsse_scripts', []):
+        if script.get('type') == 'subdomain':
+            lsse_scripts_processed.append({
+                'type': 'subdomain',
+                'subdomain': script.get('name'),
+                'ip': script.get('ip')
+            })
+        elif script.get('type') == 'ssl_cert':
+            lsse_scripts_processed.append({
+                'type': 'ssl_certificate',
+                'certificate_data': script.get('data', {})
+            })
+        elif script.get('type') == 'http_title':
+            lsse_scripts_processed.append({
+                'type': 'http_titles',
+                'titles': script.get('titles', [])
+            })
+        elif script.get('type') == 'robots':
+            lsse_scripts_processed.append({
+                'type': 'robots_txt',
+                'disallowed_paths': script.get('disallowed', []),
+                'sitemaps': script.get('sitemaps', [])
+            })
+        elif script.get('type') == 'cert_info':
+            lsse_scripts_processed.append({
+                'type': 'certificate_info',
+                'details': script.get('data', {})
+            })
+        elif script.get('type') == 'http_dir':
+            lsse_scripts_processed.append({
+                'type': 'directory_bruteforce',
+                'found_directories': script.get('directories', []),
+                'wordlist_used': script.get('wordlist'),
+                'total_tested': script.get('total_tested', 0)
+            })
+
+    # Enrich open ports with banner information
+    open_ports_enriched = []
+    for port in data.get('open_ports', []):
+        port_num = port.get('port')
+        banner_info = next((b for b in data.get('banners', [])
+                            if str(b.get('port')) == str(port_num)), None)
+
+        open_ports_enriched.append({
+            'port': port_num,
+            'service': port.get('service'),
+            'status': 'OPEN',
+            'banner': banner_info.get('content') if banner_info else None,
+            'banner_length': len(banner_info.get('content', '')) if banner_info else 0
+        })
+
+    # Calculate statistics
+    total_ports = len(data.get('open_ports', [])) + data.get('closed_ports_count', 0) + data.get('filtered_ports_count',
+                                                                                                 0)
+    open_pct = round((len(data.get('open_ports', [])) / max(1, total_ports)) * 100, 2)
+
+    # Build the YAML structure
+    yaml_data = {
+        'metadata': {
+            'report_generated': datetime.datetime.now().isoformat(),
+            'tool_version': Version,
+            'lightscan_version': data.get('version'),
+            'scan_date': data.get('scan_date'),
+            'target': data.get('target'),
+            'scan_type': data.get('scan_type'),
+            'scan_time_seconds': float(data.get('scan_time', 0)) if data.get('scan_time') else None,
+            'host_status': data.get('host_status'),
+            'ip_status': data.get('ip_status'),
+            'mac_address': data.get('mac_address')
+        },
+        'summary': {
+            'total_ports_scanned': total_ports,
+            'open_ports_count': len(data.get('open_ports', [])),
+            'closed_ports_count': data.get('closed_ports_count', 0),
+            'filtered_ports_count': data.get('filtered_ports_count', 0),
+            'open_ports_percentage': open_pct,
+            'banners_found': len(data.get('banners', [])),
+            'has_firewall': data.get('firewall_status') is not None and
+                            'NO FIREWALL DETECTED' not in data.get('firewall_status', ''),
+            'os_identified': data.get('os_fingerprint') is not None
+        },
+        'firewall_analysis': {
+            'status': data.get('firewall_status'),
+            'detection_method': data.get('firewall_detected')
+        } if data.get('firewall_status') else None,
+        'os_fingerprint': data.get('os_fingerprint'),
+        'open_ports': open_ports_enriched,
+        'closed_ports': data.get('closed_ports', []) if data.get('closed_ports') else None,
+        'filtered_ports': data.get('filtered_ports', []) if data.get('filtered_ports') else None,
+        'banners_captured': data.get('banners', []) if data.get('banners') else None,
+        'lsse_results': {
+            'target_url': data.get('lsse_response'),
+            'scripts_detected_count': len(data.get('lsse_scripts_detected', [])),
+            'scripts_detected': data.get('lsse_scripts_detected', []),
+            'script_results': lsse_scripts_processed
+        } if data.get('lsse_response') or lsse_scripts_processed else None,
+        'raw_output': raw_output
+    }
+
+    # Clean None values for cleaner YAML
+    def clean_none(obj):
+        if isinstance(obj, dict):
+            return {k: clean_none(v) for k, v in obj.items() if v is not None}
+        elif isinstance(obj, list):
+            return [clean_none(item) for item in obj if item is not None]
+        else:
+            return obj
+
+    yaml_data = clean_none(yaml_data)
+
+    # Generate YAML with proper formatting
+    return yaml.dump(
+        yaml_data,
+        default_flow_style=False,
+        allow_unicode=True,
+        sort_keys=False,
+        indent=2,
+        line_break='\n'
+    )
 
 def generate_csv(data, raw_output):
     output = io.StringIO()
@@ -427,13 +826,13 @@ def generate_html(data, raw_output):
     if data['banners']:
         banners_html = f'''
         <div class="ports-section">
-            <h2 class="section-title">📡 Captured Banners ({len(data['banners'])})</h2>
+            <h2 class="section-title"> Captured Banners ({len(data['banners'])})</h2>
             <div class="banners-grid">
         '''
         for banner in data['banners']:
             banners_html += f'''
                 <div class="banner-card">
-                    <h3>🔌 Port {banner['port']}</h3>
+                    <h3> Port {banner['port']}</h3>
                     <div class="banner-content">
                         <pre>{html.escape(banner['content'])}</pre>
                     </div>
@@ -791,6 +1190,22 @@ if platform.system() == "Windows":
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write(json_content)
             print(f"[+] JSON report saved to {filename}")
+
+        elif args.S.lower() == "pdf":
+            print(f"\n[+] Generating PDF report...")
+            parsed_data = parse_scan_output(output)
+            pdf_content = generate_pdf(parsed_data, output)
+            with open(filename, 'wb') as f:
+                f.write(pdf_content)
+            print(f"[+] PDF report saved to {filename}")
+
+        elif args.S.lower() == "yaml":
+            print(f"\n[+] Generating YAML report...")
+            parsed_data = parse_scan_output(output)
+            yaml_content = generate_yaml(parsed_data, output)
+            with open(filename, 'w', encoding='utf-8') as f:
+                f.write(yaml_content)
+            print(f"[+] YAML report saved to {filename}")
 
     except Exception as e:
         print(f"\n[-] Error: {e}")

@@ -177,7 +177,7 @@ class OS_DB:
 
     def OS_fingerprint(self, target, open_ports, banner, Services, window_scan_os, verbose=False, print_output=True,
                        version=4):
-        os_that_have_versions_detection = ['BSD', 'Android']
+        os_that_have_versions_detection = ['BSD', 'Android','Windows']
         os_list = {
             'Linux': 0,
             'Windows': 0,
@@ -194,10 +194,13 @@ class OS_DB:
                 print(f"\n{yellow}[!] Lightscan need at least 1 open port for OS detection{reset}")
             return
 
-        for port in open_ports[:5]:
+        Resp = None
+
+        for port in open_ports:
             try:
                 probe = self.craft_probe(target, port, version)
                 resp = self.send_probe(probe, timeout=2, version=version)
+                Resp = resp
 
                 if resp and resp.haslayer(TCP if version == 4 else TCP6) and resp.haslayer(
                         IPv6 if version == 6 else IP):
@@ -255,6 +258,18 @@ class OS_DB:
                                     bsd = self.detect_freebsd_version(b)
                                     if bsd:
                                         print(f"         --> [-] {bsd}")
+                            if os_type == "Windows":
+                                versions = set()
+                                if banner == []:
+                                    win = self.detect_windows_version(banner, resp, version)
+                                    versions.add(win)
+                                else:
+                                    for b in banner:
+                                        win = self.detect_windows_version(b, resp, version)
+                                        versions.add(win)
+
+                                for ver in versions:
+                                    print(f"         --> [-] {ver}")
                     else:
                         if verbose:
                             print(f"    [+] {os_type:12} : {percentage:5.1f}% (score: {score:.1f})")
@@ -265,6 +280,285 @@ class OS_DB:
         else:
             if print_output:
                 print(f"\n[!] No conclusive OS fingerprint detected (IPv{version})")
+
+    def detect_windows_version(self, banner, resp, version):
+        if resp and resp.haslayer(TCP):
+            tcp_layer = resp.getlayer(TCP if version == 4 else TCP6)
+            ip_layer = resp.getlayer(IPv6 if version == 6 else IP)
+            window = tcp_layer.window
+            options = tcp_layer.options
+            option_order = [opt[0] for opt in options if opt[0] not in ['NOP', 'EOL']]
+
+            if version == 6:
+                hlim = ip_layer.hlim
+                ttl = hlim
+            else:
+                ttl = ip_layer.ttl
+                hlim = ttl
+
+            mss = None
+            wscale = None
+            timestamp_present = False
+            sack_present = False
+
+            for opt_name, opt_value in options:
+                if opt_name == 'MSS':
+                    mss = opt_value
+                elif opt_name == 'WScale':
+                    wscale = opt_value
+                elif opt_name == 'Timestamp':
+                    timestamp_present = True
+                elif opt_name == 'SAckOK':
+                    sack_present = True
+
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows 11 (build 22000+)"
+                elif option_order == ['MSS', 'WScale', 'NOP', 'NOP', 'SAckOK', 'NOP', 'NOP']:
+                    return "Windows 11 (build 22621+) / Windows Server 2022"
+                elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'SAckOK', 'NOP', 'Timestamp']:
+                    return "Windows 11 (build 22631+)"
+                elif option_order == ['MSS', 'SAckOK', 'Timestamp', 'WScale']:
+                    return "Windows 11 (build 22000-22621)"
+
+            if window == 5840 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows 11 (build 22H2+ - 22621)"
+
+
+            if wscale == 0 and window == 64000:
+                return "Windows 10 (build 19045 - 22H2)"
+
+            if mss == 65495 and ttl == 128 and wscale == 8:
+                if window == 65535:
+                    if option_order == ['MSS', 'WScale', 'SAckOK']:
+                        return "Windows 10 (build +17000)"
+                    elif option_order == ['MSS', 'SAckOK', 'Timestamp', 'WScale']:
+                        return "Windows 10 (build 1511 - 10586) / Windows 10 (build 1607 - 14393)"
+                    elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK']:
+                        return "Windows 10 (build 1709 - 16299) / Windows 10 (build 1803 - 17134)"
+                    elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'SAckOK', 'NOP', 'Timestamp']:
+                        return "Windows 10 (build 1903 - 18362) / Windows 10 (build 1909 - 18363)"
+                    elif option_order == ['MSS', 'NOP', 'WScale', 'Timestamp', 'SAckOK']:
+                        return "Windows 10 (build 1703 - 15063)"
+                    elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'SAckOK']:
+                        return "Windows 10 (build 1809 - 17763)"
+                    elif timestamp_present and option_order == ['MSS', 'WScale', 'Timestamp', 'SAckOK']:
+                        return "Windows 10 (build 2004 - 19041)"
+                    else:
+                        return "Windows 10 (build 1607 or earlier - 14393)"
+
+                elif window == 64240:
+                    if option_order == ['MSS', 'WScale', 'SAckOK']:
+                        return "Windows 10 (build 10240-10586)"
+                    elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK']:
+                        return "Windows 10 (build 15063+)"
+                    else:
+                        return "Windows 10 (build 1507-1607)"
+
+                elif window == 5840:
+                    return "Windows 10 (build 22H2+ - 19045)"
+
+            if window == 8192 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows 8 (build 9200)"
+
+            if window == 16384 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows 8.1 (build 9600)"
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'WScale', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows 8.1 (build 9600 - Update 1)"
+
+            if window == 64240 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'WScale', 'SAckOK']:
+                    return "Windows 8 (build 9200 - initial)"
+
+            if window == 8192 and ttl == 128 and wscale == 8 and mss == 1460:
+                return "Windows 8 / Windows 8.1 (non-default MSS)"
+
+            if window == 65535 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'SAckOK', 'Timestamp']:
+                    return "Windows 7 (build 7600 - RTM)"
+                elif option_order == ['MSS', 'NOP', 'SAckOK', 'Timestamp']:
+                    return "Windows 7 (build 7601 - SP1)"
+                elif not timestamp_present and sack_present:
+                    return "Windows 7 (build 7601 - SP1, no timestamp)"
+
+            if window == 8192 and ttl == 128 and wscale is None and mss == 1460:
+                return "Windows 7 (build 7600 - RTM, small window)"
+
+            if window == 65535 and ttl == 128 and wscale == 2 and mss == 1460:
+                return "Windows 7 (build 7601 - SP1, wscale enabled)"
+
+            if window == 65535 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'NOP', 'SAckOK', 'NOP', 'Timestamp']:
+                    return "Windows Vista (build 6000 - RTM)"
+                elif option_order == ['MSS', 'SAckOK', 'NOP', 'NOP', 'Timestamp']:
+                    return "Windows Vista (build 6001 - SP1)"
+                elif option_order == ['MSS', 'NOP', 'SAckOK', 'NOP', 'NOP', 'Timestamp']:
+                    return "Windows Vista (build 6002 - SP2)"
+
+            if window == 16384 and ttl == 128 and wscale is None and mss == 1460:
+                return "Windows Vista (build 6000 - RTM, default window)"
+
+            if window == 65535 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'NOP', 'SAckOK']:
+                    return "Windows XP (build 2600 - RTM)"
+                elif option_order == ['MSS', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows XP (build 2600 - SP1)"
+                elif option_order == ['MSS', 'NOP', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows XP (build 2600 - SP2)"
+                elif option_order == ['MSS', 'NOP', 'SAckOK', 'NOP', 'Timestamp']:
+                    return "Windows XP (build 2600 - SP3)"
+
+            if window == 16384 and ttl == 128 and wscale is None and mss == 1460:
+                return "Windows XP (build 2600 - SP1/SP2, non-default window)"
+
+            if window == 65535 and ttl == 128 and wscale == 2 and mss == 1460:
+                return "Windows XP (build 2600 - with TCP window scaling patch)"
+
+
+            if window == 16384 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'NOP', 'SAckOK']:
+                    return "Windows 2000 (build 2195 - RTM)"
+                elif option_order == ['MSS', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows 2000 (build 2195 - SP1+)"
+
+            if window == 65535 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows 2000 (build 2195 - with large window)"
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'WScale', 'NOP', 'NOP', 'SAckOK', 'NOP', 'NOP']:
+                    return "Windows Server 2022 (build 20348)"
+                elif option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows Server 2022 (build 20348 - Datacenter)"
+
+            if window == 8192 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows Server 2019 (build 17763)"
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'NOP', 'WScale', 'NOP', 'SAckOK', 'NOP', 'Timestamp']:
+                    return "Windows Server 2019 (build 17763 - Update)"
+
+            if window == 16384 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows Server 2016 (build 14393)"
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'SAckOK', 'Timestamp', 'WScale']:
+                    return "Windows Server 2016 (build 14393 - Update)"
+
+            if window == 16384 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows Server 2012 R2 (build 9600)"
+
+            if window == 8192 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'WScale', 'SAckOK']:
+                    return "Windows Server 2012 R2 (build 9600 - Essentials)"
+
+            if window == 8192 and ttl == 128 and wscale == 8 and mss == 65495:
+                return "Windows Server 2012 (build 9200)"
+
+            if window == 65535 and ttl == 128 and wscale == 8 and mss == 65495:
+                if option_order == ['MSS', 'WScale', 'SAckOK']:
+                    return "Windows Server 2012 (build 9200 - Datacenter)"
+
+            if window == 8192 and ttl == 128 and wscale is None and mss == 1460:
+                return "Windows Server 2008 R2 (build 7601)"
+
+            if window == 65535 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'SAckOK', 'Timestamp']:
+                    return "Windows Server 2008 R2 (build 7601 - SP1)"
+
+            if window == 8192 and ttl == 128 and wscale is None and mss == 1460:
+                if option_order == ['MSS', 'NOP', 'SAckOK']:
+                    return "Windows Server 2008 (build 6001 - SP1)"
+                elif option_order == ['MSS', 'NOP', 'NOP', 'SAckOK']:
+                    return "Windows Server 2008 (build 6002 - SP2)"
+
+            if banner and "Microsoft-HTTPAPI/2.0" in banner:
+                if "Bad Request" in banner:
+                    return "Windows 8/10/11/Server 2012+ (HTTPAPI 2.0)"
+
+            if banner and ("SMB" in banner or "microsoft-ds" in str(banner).lower()):
+                if "SMB 3.1.1" in banner:
+                    return "Windows 10/11/Server 2016+ (SMB 3.1.1)"
+                elif "SMB 3.0" in banner or "SMB 3." in banner:
+                    return "Windows 8/Server 2012+ (SMB 3.0)"
+                elif "SMB 2.1" in banner:
+                    return "Windows 7/Server 2008 R2 (SMB 2.1)"
+                elif "SMB 2.0" in banner or "SMB 2." in banner:
+                    return "Windows Vista/Server 2008 (SMB 2.0)"
+                elif "SMB 1." in banner:
+                    return "Windows XP/2000 (SMB 1.x)"
+
+            seq = tcp_layer.seq
+            ack = tcp_layer.ack if tcp_layer.ack else 0
+
+            if seq and ack:
+                seq_diff = abs(seq - ack) if ack > 0 else 0
+                if 1000000 < seq_diff < 2000000000:
+                    if timestamp_present:
+                        return "Windows 10/11 (modern TCP stack)"
+                    else:
+                        return "Windows 7/8 (legacy TCP stack)"
+
+            if wscale == 8 and ttl == 128:
+                if timestamp_present:
+                    return "Windows 10/11 (likely)"
+                else:
+                    return "Windows 8/10 (likely)"
+
+            if wscale is None and ttl == 128:
+                if sack_present and not timestamp_present:
+                    return "Windows 7/Server 2008 R2 (likely)"
+                elif not sack_present and not timestamp_present:
+                    return "Windows Vista/XP/2000 (likely)"
+
+            if ttl == 128:
+                return "Windows (NT kernel - unknown version)"
+
+            if banner:
+                banner_lower = banner.lower()
+                if "windows 11" in banner_lower:
+                    return "Windows 11"
+                elif "windows 10" in banner_lower:
+                    return "Windows 10"
+                elif "windows nt 10.0" in banner_lower:
+                    return "Windows 10/11 (NT 10.0)"
+                elif "windows nt 6.3" in banner_lower:
+                    return "Windows 8.1 (NT 6.3 - build 9600)"
+                elif "windows nt 6.2" in banner_lower:
+                    return "Windows 8 (NT 6.2 - build 9200)"
+                elif "windows nt 6.1" in banner_lower:
+                    return "Windows 7 (NT 6.1 - build 7601)"
+                elif "windows nt 6.0" in banner_lower:
+                    return "Windows Vista (NT 6.0 - build 6002)"
+                elif "windows nt 5.1" in banner_lower:
+                    return "Windows XP (NT 5.1 - build 2600)"
+                elif "windows nt 5.0" in banner_lower:
+                    return "Windows 2000 (NT 5.0 - build 2195)"
+                elif "windows server 2022" in banner_lower:
+                    return "Windows Server 2022 (build 20348)"
+                elif "windows server 2019" in banner_lower:
+                    return "Windows Server 2019 (build 17763)"
+                elif "windows server 2016" in banner_lower:
+                    return "Windows Server 2016 (build 14393)"
+                elif "windows server 2012 r2" in banner_lower:
+                    return "Windows Server 2012 R2 (build 9600)"
+                elif "windows server 2012" in banner_lower:
+                    return "Windows Server 2012 (build 9200)"
+                elif "windows server 2008 r2" in banner_lower:
+                    return "Windows Server 2008 R2 (build 7601)"
+                elif "windows server 2008" in banner_lower:
+                    return "Windows Server 2008 (build 6002)"
+                elif "microsoft-httpapi" in banner_lower:
+                    return "Windows (HTTPAPI - 8/10/11/Server 2012+)"
+
+        if resp and resp.haslayer(TCP):
+            return "Windows (version undetermined - modern 8/10/11/Server 2012+)"
+
+        return "Windows (Unknown version)"
+
 
     def detect_freebsd_version(self, banner):
         version_map = {
@@ -447,6 +741,10 @@ class OS_DB:
                 for k in ['IOS', 'Windows', 'MacOS', 'Cisco']:
                     scores[k] = 0
             if "server: microsoft-httpapi" in banner.lower():
+                scores['Windows'] += 25
+                for k in ['MacOS', 'Cisco', 'Android', 'Linux', 'IOS']:
+                    scores[k] = 0
+            if "83 00 00 01 8f" in banner.lower():
                 scores['Windows'] += 25
                 for k in ['MacOS', 'Cisco', 'Android', 'Linux', 'IOS']:
                     scores[k] = 0

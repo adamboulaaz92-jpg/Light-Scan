@@ -4,9 +4,9 @@ import threading
 import platform
 import os
 from CTkMessagebox import CTkMessagebox
-from scapy.layers.inet import fragment
 
-version = "1.0.0"
+version = "1.0.1"
+
 
 def invalid_lightscan_command():
     CTkMessagebox(
@@ -43,6 +43,9 @@ def build_command():
     if not command or command == "python Lightscan.py -T example.com -F -st SYN":
         command = "python Lightscan.py"
 
+        if command == "LightSniff" or command == "LightSniff ":
+            command = "LightSniff"
+
         target = target_entry.get()
         if target:
             command += f" -T {target}"
@@ -69,12 +72,15 @@ def build_command():
                 command += " -st MAIMON"
             elif scan_type == "XMAS Scan":
                 command += " -st XMAS"
-            elif scan_type == "ACK Scan":
-                command += " -st ACK"
             elif scan_type == "FDD Scan":
                 command += " -st FDD"
             elif scan_type == "FTP Bounce":
                 command += " -st FTP-BOUNCE"
+            elif scan_type == "IPPROTO Scan":
+                command += " -st IPPROTO"
+            elif scan_type == "IDLE Scan":
+                command += " -st IDLE"
+
 
         speed_preset = speed_var.get()
         if speed_preset != "Normal (default)":
@@ -106,7 +112,27 @@ def build_command():
         if rc_var.get():
             command += " -Rc"
 
-    return command
+        save_preset = save_var.get()
+        if save_preset != "None":
+            if save_preset == "TXT":
+                return f'python LightSave.py -C "{command}" -S txt'
+            elif save_preset == "LIGHT":
+                return f'python LightSave.py -C "{command}" -S light'
+            elif save_preset == "HTML":
+                return f'python LightSave.py -C "{command}" -S html'
+            elif save_preset == "XML":
+                return f'python LightSave.py -C "{command}" -S xml'
+            elif save_preset == "CSV":
+                return f'python LightSave.py -C "{command}" -S csv'
+            elif save_preset == "JSON":
+                return f'python LightSave.py -C "{command}" -S json'
+            elif save_preset == "PDF":
+                return f'python LightSave.py -C "{command}" -S pdf'
+            elif save_preset == "YAML":
+                return f'python LightSave.py -C "{command}" -S yaml'
+        else:
+            return command
+
 
 def run_scan():
     command = build_command()
@@ -115,8 +141,11 @@ def run_scan():
     command_entry.insert(0, command)
 
     if command.startswith("python Lightscan.py ") or command.startswith("Lightscan ") or command.startswith(
-            "python LightSave.py ") or command.startswith("LightSave "):
+            "python LightSave.py ") or command.startswith("LightSave ") or command.startswith("LightSniff "):
         invalid_chars = ['&', '|']
+
+        if command.startswith("LightSniff"):
+            command = "LightSniff"
         for char in invalid_chars:
             if char in command:
                 command = command.replace(char, '')
@@ -140,16 +169,17 @@ def run_scan():
     else:
         invalid_lightscan_command()
 
+
+def start_scan():
+    scan_thread = threading.Thread(target=run_scan, daemon=True)
+    scan_thread.start()
+
 def switch_mode():
     mode = customtkinter.get_appearance_mode()
     if mode == "Dark":
         customtkinter.set_appearance_mode("Light")
     else:
         customtkinter.set_appearance_mode("Dark")
-
-def start_scan():
-    scan_thread = threading.Thread(target=run_scan, daemon=True)
-    scan_thread.start()
 
 def check_admin():
     if platform.system() == "Windows":
@@ -167,9 +197,7 @@ customtkinter.set_default_color_theme("blue")
 root = customtkinter.CTk()
 root.geometry("1300x880")
 root.title("LightPanel - Light-Scan GUI")
-
-if platform.system() == "Windows":
-    root.after(0, lambda: root.iconbitmap(default='icon.ico') if os.path.exists('icon.ico') else None)
+root.iconbitmap("images/Light-Scan-Logo.ico")
 
 switch_mode_button = customtkinter.CTkButton(
     root,
@@ -292,8 +320,46 @@ scan_types = [
     "MAIMON Scan",
     "WINDOW Scan",
     "FDD Scan",
-    "FTP Bounce"
+    "FTP Bounce",
+    "IPPROTO Scan",
+    "IDLE Scan"
 ]
+
+saving_label = customtkinter.CTkLabel(
+    root,
+    text="Saving Format :",
+    font=("Arial", 14),
+    text_color=("black", "white")
+)
+saving_label.place(x=25, y=760)
+
+saving_formats = [
+    "None",
+    "TXT",
+    "LIGHT",
+    "HTML",
+    "XML",
+    "JSON",
+    "CSV",
+    "PDF",
+    "YAML"
+]
+
+save_var = customtkinter.StringVar(value="None")
+save_dropdown = customtkinter.CTkOptionMenu(
+    root,
+    values=saving_formats,
+    variable=save_var,
+    width=140,
+    height=30,
+    font=("Arial", 13),
+    corner_radius=10,
+    fg_color=("#f7f5f0", "#1a1a1a"),
+    button_color=("#dbdbdb", "#121211"),
+    button_hover_color="grey",
+    text_color=("black", "white")
+)
+save_dropdown.place(x=150, y=760)
 
 scan_type_var = customtkinter.StringVar(value="TCP Connect (default)")
 scan_type_dropdown = customtkinter.CTkOptionMenu(
