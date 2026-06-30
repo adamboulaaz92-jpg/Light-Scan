@@ -1,0 +1,27 @@
+{
+    "name": "Example",
+    "description": "Example Profile with all the fields",
+    "settings": {
+        "target": "scanme.nmap.org",
+        "scan_type": "SYN",
+        "speed": "slow",
+        "ports": "1-1000,8080",
+        "threads": 100,
+        "timeout": 2.25,
+        "ttl": 64,
+        "hlim": 64,
+        "sport": 80,
+        "payload": "HELLO",
+        "id": 1,
+        "ip_flags": 0,
+        "max_retries": 2,
+        "banner": true,
+        "os": false,
+        "F": false,
+        "fragmente": false,
+        "no_ping": true,
+        "recursively": false,
+        "verbose": true,
+        "quiet": true
+    }
+}
