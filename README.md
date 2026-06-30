@@ -1047,12 +1047,7 @@ Educational and research purposes
 
 ## reading existing lbn,pcap and pcapng files by LightSniff
 
-## --rff to read a target from a file
-
-192.168.1.1
-192.168.1.0;5
-192.168.1.0-145
-scanme.nmap.org
+## --rff to read a target/s from a file
 
 ## upgrade LSSE with new 6 scripts:
 
