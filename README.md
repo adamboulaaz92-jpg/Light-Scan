@@ -457,19 +457,20 @@ LightScan classifies ports into **seven distinct states** based on response anal
 | **Undefended** | No firewall detected (FDD scan result) | Direct port access, no filtering |
 | **Unfiltered** | Port accessible but not open (ACK scan) | Used in firewall rule mapping |
 
-# Light-Scan Companion Tools — Complete Guide
+# Light-Scan Tools — Complete Guide
 
-Light-Scan is not just a port scanner - it is a complete network toolkit with 5 companion tools that work together seamlessly.
+Light-Scan is not just a port scanner - it is a complete network toolkit with 5 separated tools that work together seamlessly
+for multiple jobs (Scanning,Scripting,Saving,Sniffing and Creating) .
 
 
 ## Table of Contents
 
-1. LightSniff - Packet Capture Tool
-2. LightSave - Results Exporter
-3. LightPanel - Graphical Interface
-4. LightLab - Packet Crafting Laboratory
-5. LightBin - Custom Binary Format
-6. LSSE - Light-Scan Scripting Engine
+### 1. LightSniff - Packet Capture Tool
+### 2. LightSave - Results Exporter
+### 3. LightPanel - Graphical Interface
+### 4. LightLab - Packet Crafting Laboratory
+### 5. LightBin - Custom Binary Format
+### 6. LSSE - Light-Scan Scripting Engine
 
 
 ## LightSniff - Packet Capture Tool v1.0.1
