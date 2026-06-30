@@ -258,7 +258,7 @@ Before running Light-Scan, install libpcap:
       python Lightscan.py -T 192.168.1.1 -v -st SYN
 
 ## Lightscan 1.1.7 
-![](images/Lightscan.png)
+![](image/Lightscan.png)
   
 ## Command Line Options
   
@@ -473,7 +473,7 @@ Light-Scan is not just a port scanner - it is a complete network toolkit with 5 
 
 
 ## LightSniff - Packet Capture Tool v1.0.1
-![](images/LightSniff-.png)
+![](image/LightSniff-.png)
 
 ### Overview
 LightSniff is a lightweight, feature-rich packet sniffer built for network analysis and troubleshooting. It uses BPF (Berkeley Packet Filter) syntax for precise traffic filtering and supports both live capture and PCAP export.
@@ -550,7 +550,7 @@ LightSniff is a lightweight, feature-rich packet sniffer built for network analy
 
 
 ## LightSave - Results Exporter v1.0.1
-![](images/LightSave.png)
+![](image/LightSave.png)
 
 ### Overview
 LightSave captures the output of any Lightscan command and saves it in a structured format. It supports 8 export formats and is designed for easy integration with reporting pipelines and SIEM systems.
@@ -593,6 +593,7 @@ LightSave captures the output of any Lightscan command and saves it in a structu
 
 
 ## LightPanel - Graphical Interface v1.0.1
+![](image/LightPanel.png)
 
 ### Overview
 LightPanel is a basic graphical user interface for Lightscan. It provides a visual alternative to the command-line, making the toolkit accessible to users who prefer a point-and-click experience.
@@ -613,7 +614,7 @@ LightPanel is a basic graphical user interface for Lightscan. It provides a visu
 
 
 ## LightLab - Packet Crafting Laboratory v1.0.0
-![](images/LightLab.png)
+![](image/LightLab.png)
 
 ### Overview
 LightLab is an interactive packet crafting laboratory that allows users to build custom packets from scratch using a simple command-line interface. It supports all major protocol layers and includes built-in templates.
@@ -715,7 +716,7 @@ LightLab> new icmp
 LightLab> send -v
 
 ## LightBin - Custom Binary Format v1.0
-![](images/LightBin.ico)
+![](image/LightBin.ico)
 
 ### Overview
 LightBin is Light-Scan's native binary packet format (.lbn). It is designed for fast loading and rich metadata storage, making it ideal for large packet captures and automated analysis.
