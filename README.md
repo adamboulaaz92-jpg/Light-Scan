@@ -656,64 +656,64 @@ LightLab is an interactive packet crafting laboratory that allows users to build
 
 #### TCP SYN Scan Packet
 
-LightLab> new ip
-LightLab> set ip.dst=192.168.1.1
-LightLab> new tcp
-LightLab> set tcp.dport=80
-LightLab> set tcp.flags=S
-LightLab> send -v
+    LightLab> new ip
+    LightLab> set ip.dst=192.168.1.1
+    LightLab> new tcp
+    LightLab> set tcp.dport=80
+    LightLab> set tcp.flags=S
+    LightLab> send -v
 
 #### UDP DNS Query
 
-LightLab> new ip
-LightLab> set ip.dst=8.8.8.8
-LightLab> new udp
-LightLab> set udp.dport=53
-LightLab> new dns
-LightLab> set dns.id=1234
-LightLab> set dns.rd=1
-LightLab> set dns.qd=DNSQR(qname="google.com", qtype=1)
-LightLab> send -v
+    LightLab> new ip
+    LightLab> set ip.dst=8.8.8.8
+    LightLab> new udp
+    LightLab> set udp.dport=53
+    LightLab> new dns
+    LightLab> set dns.id=1234
+    LightLab> set dns.rd=1
+    LightLab> set dns.qd=DNSQR(qname="google.com", qtype=1)
+    LightLab> send -v
 
 #### HTTP GET Request
 
-LightLab> new ip
-LightLab> set ip.dst=example.com
-LightLab> new tcp
-LightLab> set tcp.dport=80
-LightLab> new http
-LightLab> set http.Method=GET
-LightLab> set http.Path=/
-LightLab> set http.Host=example.com
-LightLab> send -v
+    LightLab> new ip
+    LightLab> set ip.dst=example.com
+    LightLab> new tcp
+    LightLab> set tcp.dport=80
+    LightLab> new http
+    LightLab> set http.Method=GET
+    LightLab> set http.Path=/
+    LightLab> set http.Host=example.com
+    LightLab> send -v
 
 #### ICMP Ping
 
-LightLab> new ip
-LightLab> set ip.dst=192.168.1.1
-LightLab> new icmp
-LightLab> set icmp.type=8
-LightLab> set icmp.id=1234
-LightLab> set icmp.seq=1
-LightLab> send -v
+    LightLab> new ip
+    LightLab> set ip.dst=192.168.1.1
+    LightLab> new icmp
+    LightLab> set icmp.type=8
+    LightLab> set icmp.id=1234
+    LightLab> set icmp.seq=1
+    LightLab> send -v
 
 #### ARP Request
 
-LightLab> new ether
-LightLab> set ether.dst=ff:ff:ff:ff:ff:ff
-LightLab> new arp
-LightLab> set arp.pdst=192.168.1.1
-LightLab> send -v
+    LightLab> new ether
+    LightLab> set ether.dst=ff:ff:ff:ff:ff:ff
+    LightLab> new arp
+    LightLab> set arp.pdst=192.168.1.1
+    LightLab> send -v
 
 #### VLAN Tagged Packet
 
-LightLab> new vlan
-LightLab> set vlan.vlan=100
-LightLab> set vlan.prio=5
-LightLab> new ip
-LightLab> set ip.dst=192.168.1.1
-LightLab> new icmp
-LightLab> send -v
+    LightLab> new vlan
+    LightLab> set vlan.vlan=100
+    LightLab> set vlan.prio=5
+    LightLab> new ip
+    LightLab> set ip.dst=192.168.1.1
+    LightLab> new icmp
+    LightLab> send -v
 
 ## LightBin - Custom Binary Format v1.0
 ![](image/LightBin.ico)
