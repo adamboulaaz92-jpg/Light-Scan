@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Light-Scan v1.1.7 — Network Toolkit &amp; Mini-Framework</title>
+    <link rel="icon" type="image/x-icon" href="Assets/Light-Scan-Logo.ico" />
+    <div style="display:flex; gap:1.5rem; margin:0 0 2rem 0; flex-wrap:wrap; padding:0.75rem 1.5rem; background:rgba(19,26,34,0.8); border-radius:12px; border:1px solid #29323e; box-shadow:0 4px 20px rgba(0,0,0,0.3); backdrop-filter:blur(10px);">
+        <a href="index.html" style="color:#93c5fd; text-decoration:none; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:all 0.3s ease; letter-spacing:0.3px; border-bottom:2px solid transparent;"
+           onmouseover="this.style.color='#60a5fa'; this.style.background='rgba(96,165,250,0.1)'; this.style.borderBottomColor='#60a5fa'; this.style.transform='translateY(-2px)';"
+           onmouseout="this.style.color='#93c5fd'; this.style.background='transparent'; this.style.borderBottomColor='transparent'; this.style.transform='translateY(0)';">Home</a>
+
+        <a href="lsse.html" style="color:#93c5fd; text-decoration:none; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:all 0.3s ease; letter-spacing:0.3px; border-bottom:2px solid transparent;"
+           onmouseover="this.style.color='#60a5fa'; this.style.background='rgba(96,165,250,0.1)'; this.style.borderBottomColor='#60a5fa'; this.style.transform='translateY(-2px)';"
+           onmouseout="this.style.color='#93c5fd'; this.style.background='transparent'; this.style.borderBottomColor='transparent'; this.style.transform='translateY(0)';">LSSE Scripts</a>
+
+        <a href="lightbin.html" style="color:#93c5fd; text-decoration:none; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:all 0.3s ease; letter-spacing:0.3px; border-bottom:2px solid transparent;"
+           onmouseover="this.style.color='#60a5fa'; this.style.background='rgba(96,165,250,0.1)'; this.style.borderBottomColor='#60a5fa'; this.style.transform='translateY(-2px)';"
+           onmouseout="this.style.color='#93c5fd'; this.style.background='transparent'; this.style.borderBottomColor='transparent'; this.style.transform='translateY(0)';">LightBin (.lbn)</a>
+
+        <a href="https://github.com/adamboulaaz92-jpg/Light-Scan" target="_blank" style="color:#93c5fd; text-decoration:none; font-weight:500; padding:0.5rem 1rem; border-radius:8px; transition:all 0.3s ease; letter-spacing:0.3px; border-bottom:2px solid transparent; margin-left:auto;"
+           onmouseover="this.style.color='#60a5fa'; this.style.background='rgba(96,165,250,0.1)'; this.style.borderBottomColor='#60a5fa'; this.style.transform='translateY(-2px)';"
+           onmouseout="this.style.color='#93c5fd'; this.style.background='transparent'; this.style.borderBottomColor='transparent'; this.style.transform='translateY(0)';">GitHub</a>
+    </div>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #d4d8e0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #131a22;
+            padding: 2.5rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            border: 1px solid #29323e;
+        }
+
+        h1, h2, h3, h4 {
+            color: #f0f4fa;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 2px solid #2a3543;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #7f8fa3;
+            margin-left: auto;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #b9c7db;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1e2937;
+        }
+
+        .subtitle strong {
+            color: #7ab7ff;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            border-bottom: 1px solid #1e2937;
+            padding-bottom: 0.3rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.3rem;
+            color: #b9c7db;
+        }
+
+        a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #1e293b;
+            color: #b9c7db;
+            padding: 0.15rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-right: 0.3rem;
+            border: 1px solid #2d3a4a;
+        }
+
+        .badge-green {
+            background: #0f2a1f;
+            color: #7ee8b0;
+            border-color: #1f4a35;
+        }
+
+        .badge-blue {
+            background: #0f2440;
+            color: #7ab7ff;
+            border-color: #1f3f6a;
+        }
+
+        .badge-yellow {
+            background: #2a2410;
+            color: #fbbf24;
+            border-color: #4a3f1f;
+        }
+
+        .badge-red {
+            background: #2a0f1a;
+            color: #f87171;
+            border-color: #4a1f2a;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin: 1.2rem 0 1.8rem 0;
+            border-radius: 12px;
+            border: 1px solid #232e3c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.90rem;
+            background: #10171f;
+        }
+
+        th {
+            background: #1a2532;
+            color: #dce3ed;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #2c3a4a;
+        }
+
+        td {
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid #1e2937;
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            background: #0d141e;
+            padding: 0.1rem 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #25303f;
+            white-space: nowrap;
+        }
+
+        pre {
+            background: #0b1119;
+            padding: 1.2rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #24303f;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: #d4e0f0;
+            margin: 0.75rem 0 1.5rem 0;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            background: #0d141e;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid #1f2a38;
+        }
+
+        ul, ol {
+            padding-left: 1.6rem;
+            margin: 0.5rem 0 1.2rem 0;
+        }
+
+        li {
+            margin-bottom: 0.25rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 0.75rem 0 1.5rem 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            margin: 0.75rem 0 1.5rem 0;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            margin: 0.75rem 0 1.5rem 0;
+        }
+
+        .card {
+            background: #0f1822;
+            border: 1px solid #1e2a38;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #3b82f6;
+        }
+
+        .card h4 {
+            margin-top: 0;
+            color: #7ab7ff;
+            border-bottom: 1px solid #1e2937;
+            padding-bottom: 0.3rem;
+        }
+
+        .card ul {
+            padding-left: 1rem;
+            margin: 0.25rem 0;
+        }
+
+        .card .version-tag {
+            font-size: 0.65rem;
+            color: #7f8fa3;
+            background: #0d141e;
+            padding: 0.05rem 0.5rem;
+            border-radius: 12px;
+            border: 1px solid #1e2937;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.3rem 1.5rem;
+            margin: 0.3rem 0 0.5rem 0;
+        }
+
+        .feature-grid li {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-grid li::before {
+            content: "▸ ";
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .os-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;  /* 2 columns */
+            gap: 1.2rem;
+            margin: 1rem 0 1.5rem 0;
+        }
+
+        @media (max-width: 820px) {
+            .os-grid {
+                grid-template-columns: 1fr;  /* 1 column on mobile */
+            }
+        }
+
+        .os-card {
+            background: #0f1822;
+            border: 1px solid #1e2a38;
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .os-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .os-card h4 {
+            margin-top: 0;
+            color: #f0f4fa;
+            border-bottom: 1px solid #1e2a38;
+            padding-bottom: 0.4rem;
+        }
+
+        .os-card .mono {
+            background: #0a111a;
+            border-color: #1a2532;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.1rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-right: 0.25rem;
+        }
+
+        .tag-safe { background: #0f2a1f; color: #7ee8b0; border: 1px solid #1f4a35; }
+        .tag-medium { background: #2a2410; color: #fbbf24; border: 1px solid #4a3f1f; }
+        .tag-harmful { background: #2a0f1a; color: #f87171; border: 1px solid #4a1f2a; }
+        .tag-discovery { background: #0f2440; color: #7ab7ff; border: 1px solid #1f3f6a; }
+        .tag-analysis { background: #1f1f3a; color: #a78bfa; border: 1px solid #3a2a5a; }
+        .tag-extract { background: #2a1f1f; color: #fca5a5; border: 1px solid #4a2a2a; }
+        .tag-framework { background: #1a2a1a; color: #6ee7b7; border: 1px solid #2a4a3a; }
+
+        .mt-1 { margin-top: 0.75rem; }
+        .mb-1 { margin-bottom: 0.75rem; }
+        .text-muted { color: #8a9aaf; }
+        .text-small { font-size: 0.9rem; }
+
+        hr {
+            border: none;
+            border-top: 1px solid #24303f;
+            margin: 2rem 0 1.5rem 0;
+        }
+
+        .framework-badge {
+            display: inline-block;
+            background: #0f2440;
+            color: #7ab7ff;
+            padding: 0.2rem 1rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid #1f3f6a;
+            letter-spacing: 0.04em;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-header h3 {
+            margin: 0;
+            border: none;
+            padding: 0;
+        }
+
+        .tool-header .version-tag {
+            font-size: 0.75rem;
+            color: #7f8fa3;
+            background: #0d141e;
+            padding: 0.1rem 0.7rem;
+            border-radius: 12px;
+            border: 1px solid #1e2937;
+        }
+
+        .tool-header .tool-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.7rem;
+            border-radius: 20px;
+            background: #1a2532;
+            color: #b9c7db;
+            border: 1px solid #2d3a4a;
+        }
+
+        .tool-section {
+            background: #0d151f;
+            border: 1px solid #1e2a38;
+            border-radius: 16px;
+            padding: 1.8rem 2rem;
+            margin: 1.5rem 0 2.5rem 0;
+            transition: border-color 0.3s;
+        }
+
+        .tool-section:hover {
+            border-color: #3b82f6;
+        }
+
+        .tool-section h3 {
+            margin-top: 0;
+            border-bottom: 2px solid #1e2a38;
+            padding-bottom: 0.5rem;
+        }
+
+        .tool-section .tool-desc {
+            color: #b9c7db;
+            font-size: 1.05rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 2rem;
+            margin: 0.5rem 0 1rem 0;
+        }
+
+        .option-grid .opt-item {
+            background: #0b1119;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #1a2532;
+        }
+
+        .option-grid .opt-item .mono {
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-weight: 600;
+            color: #7ab7ff;
+        }
+
+        .option-grid .opt-item .opt-desc {
+            color: #b9c7db;
+            font-size: 0.85rem;
+            margin-left: 0.3rem;
+        }
+
+        .example-box {
+            background: #0a111a;
+            border-left: 3px solid #3b82f6;
+            padding: 0.8rem 1.2rem;
+            margin: 0.5rem 0 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-box .mono {
+            background: #0d141e;
+            border-color: #1f2a38;
+        }
+
+        .glow-text {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .hover-scale {
+            transition: transform 0.2s;
+        }
+
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: #0b1119;
+            border: 1px solid #1a2532;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: #8a9aaf;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+            .os-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 820px) {
+            .container { padding: 1.5rem 1.2rem; }
+            h1 { font-size: 1.8rem; flex-wrap: wrap; }
+            h1 small { margin-left: 0; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: 1fr; }
+            .os-grid { grid-template-columns: 1fr; }
+            .option-grid { grid-template-columns: 1fr; }
+            pre { font-size: 0.72rem; padding: 0.8rem 1rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .tool-section { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>
+        <span>⚡ Light-Scan</span>
+        <small>v1.1.7</small>
+    </h1>
+
+    <div class="subtitle">
+        <span class="framework-badge">Network Toolkit</span>
+        <span class="framework-badge" style="background:#1a2a1a; border-color:#2a4a3a; color:#6ee7b7;">Mini-Framework</span>
+        <span style="margin-left:0.75rem;">
+            Built with Python &amp; Scapy &bull; Multi-threaded &bull; Enterprise-ready
+        </span>
+    </div>
+
+    <p class="text-muted text-small">
+        <span class="badge">Security</span>
+        <span class="badge badge-green">Speed</span>
+        <span class="badge badge-blue">Extensible</span>
+        <span style="margin-left:0.75rem;">Windows &bull; Linux &bull; macOS &bull; BSD &bull; Solaris</span>
+    </p>
+
+    <hr />
+        <img src="Assets/Light-Scan-Logo.ico">
+    <hr />
+
+
+    <h2>Overview</h2>
+    <p>
+        <strong>Light-Scan</strong> is not just a port scanner — it is a complete
+        <strong>Network Toolkit and Mini-Framework</strong> designed for security professionals,
+        network administrators, and penetration testers. It is built to be modular, extensible,
+        and ready for enterprise use.
+    </p>
+    <p>
+        At its core, Lightscan is a powerful, multi-threaded port scanner built with Python and Scapy.
+        But it goes far beyond scanning: it includes a <strong>scripting engine (LSSE)</strong> with
+        <strong>14 built-in scripts</strong> for web and DNS reconnaissance, a <strong>packet sniffer</strong>,
+        a <strong>result exporter</strong>, a <strong>GUI interface</strong>, and a
+        <strong>packet crafting laboratory</strong> — all working together as a cohesive framework.
+    </p>
+
+    <div class="stat-grid">
+        <div class="stat-card hover-scale">
+            <div class="stat-number">14</div>
+            <div class="stat-label">Scan Types</div>
+        </div>
+        <div class="stat-card hover-scale">
+            <div class="stat-number">12</div>
+            <div class="stat-label">Host Discovery Methods</div>
+        </div>
+        <div class="stat-card hover-scale">
+            <div class="stat-number">13</div>
+            <div class="stat-label">LSSE Scripts</div>
+        </div>
+        <div class="stat-card hover-scale">
+            <div class="stat-number">11500+</div>
+            <div class="stat-label">Service Database</div>
+        </div>
+        <div class="stat-card hover-scale">
+            <div class="stat-number">7</div>
+            <div class="stat-label">Export Formats</div>
+        </div>
+        <div class="stat-card hover-scale">
+            <div class="stat-number">500</div>
+            <div class="stat-label">Max Threads</div>
+        </div>
+    </div>
+
+    <h2>Lightscan — The Core Scanner</h2>
+    <img src="Assets/Lightscan.png">
+    <p>
+        <strong>Lightscan</strong> is the heart of the entire toolkit. It is a high-performance,
+        multi-threaded port scanner built with Python and Scapy, designed to deliver
+        <strong>enterprise-grade network reconnaissance</strong> in a lightweight, flexible package.
+    </p>
+    <p>
+        Unlike traditional scanners that sacrifice accuracy for speed or vice versa,
+        LightScan strikes a careful balance. It supports <strong>14 distinct scan types</strong>,
+        from the standard TCP Connect and SYN Stealth scans to advanced techniques like
+        <strong>FDD (Firewall Detection Scan)</strong> — a proprietary scan type exclusive to Light-Scan.
+    </p>
+    <p>
+        Lightscan also features <strong>12 host discovery methods</strong>, including ICMP Echo,
+        Timestamp, Address Mask, and the rare <strong>Information (Type 15)</strong> and
+        <strong>Solicitation (Type 10)</strong> pings — both of which are <strong>not supported by Nmap</strong>.
+        By default, LightScan performs ICMP Echo (IPv4) and ICMPv6 Echo (IPv6) without requiring any additional flag.
+        With <strong>6 speed presets</strong> (from 2 to 500 threads), <strong>custom packet crafting</strong>
+        (TTL, HLIM, source port, payload, IP ID, and flags), and a <strong>+11500 port to service mapping database</strong>,
+        Lightscan gives you complete control over every scan.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>Lightscan</h3>
+            <span class="version-tag">v1.1.7</span>
+            <span class="tool-badge">Core Scanner</span>
+        </div>
+        <p class="tool-desc">
+            Lightscan is the main scanning engine. It handles everything from host discovery to port scanning,
+            service detection, OS fingerprinting, and banner grabbing. It is designed to be flexible,
+            fast, and accurate.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Perform host discovery using multiple methods (ARP, ICMP, TCP, UDP, etc.)</li>
+            <li>Scan ports using 14 different scan types (TCP, SYN, UDP, NULL, FIN, ACK, XMAS, WINDOW, MAIMON, FDD, FTP-BOUNCE, IPPROTO, PING, IDLE)</li>
+            <li>Detect services using a database of 11500+ port-to-service mappings</li>
+            <li>Grab banners from open services</li>
+            <li>Perform OS fingerprinting (Windows 2000 → 11, Linux, macOS, etc.)</li>
+            <li>Detect firewalls and filter rules</li>
+            <li>Customize packets with TTL, HLIM, source port, payload, IP ID, and flags</li>
+        </ul>
+
+        <h4>Options</h4>
+        <div class="option-grid">
+            <div class="opt-item">
+                <span class="mono">-T, --target</span>
+                <span class="opt-desc">Target IP, hostname, or CIDR range</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-p, --port</span>
+                <span class="opt-desc">Port(s) to scan (single, range, or list)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-st, --scan-type</span>
+                <span class="opt-desc">Scan type: TCP, SYN, UDP, NULL, FIN, ACK, XMAS, WINDOW, MAIMON, FDD, FTP-BOUNCE, IPPROTO, PING, IDLE</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-s, --speed</span>
+                <span class="opt-desc">Speed preset: paranoid, slow, normal, fast, insane, Light-mode</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-t, --threads</span>
+                <span class="opt-desc">Number of threads to use</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-tm, --timeout</span>
+                <span class="opt-desc">Timeout in seconds</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-mx, --max-retries</span>
+                <span class="opt-desc">Max number of retries if no response</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-b, --banner</span>
+                <span class="opt-desc">Enable banner grabbing</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-O, --os</span>
+                <span class="opt-desc">Enable OS fingerprinting</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-A, --agressive</span>
+                <span class="opt-desc">Aggressive mode: OS + banners + insane speed + SYN + top 100 ports</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-F</span>
+                <span class="opt-desc">Scan only the top 100 ports</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-sn</span>
+                <span class="opt-desc">Host discovery only (no port scanning)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pn, --no-ping</span>
+                <span class="opt-desc">Skip host discovery</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-f, --fragmente</span>
+                <span class="opt-desc">Fragment packets for stealth</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-ttl TTL</span>
+                <span class="opt-desc">IPv4 Time To Live</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-hlim HLIM</span>
+                <span class="opt-desc">IPv6 Hop Limit</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-sport SPORT</span>
+                <span class="opt-desc">Source port</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-payload PAYLOAD</span>
+                <span class="opt-desc">Custom payload data</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-id ID</span>
+                <span class="opt-desc">IPv4 identification field</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-ip-flags IP_FLAGS</span>
+                <span class="opt-desc">IP flags: DF=2, MF=1, None=0</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pan, --local-ping</span>
+                <span class="opt-desc">ARP Ping (IPv4) or NDP Ping (IPv6)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pt, --tcp-ping</span>
+                <span class="opt-desc">TCP ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Ps, --syn-ping</span>
+                <span class="opt-desc">SYN ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pk, --ack-ping</span>
+                <span class="opt-desc">ACK ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pu, --udp-ping</span>
+                <span class="opt-desc">UDP ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-PIt</span>
+                <span class="opt-desc">ICMP Timestamp ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-PA</span>
+                <span class="opt-desc">ICMP Address Mask ping</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pin</span>
+                <span class="opt-desc">ICMP Information ping (exclusive)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-Pas</span>
+                <span class="opt-desc">ICMP Solicitation ping (exclusive)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-v, --verbose</span>
+                <span class="opt-desc">Verbose output</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-q, --quiet</span>
+                <span class="opt-desc">Quiet mode (no banner)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-V, --version</span>
+                <span class="opt-desc">Show version of all tools</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--profile PROFILE</span>
+                <span class="opt-desc">Load scan profile from Profiles/ directory</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--profiles-lst</span>
+                <span class="opt-desc">List all available profiles</span>
+            </div>
+        </div>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.1</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Basic TCP scan on a single host</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.1 -st SYN -F -s fast</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">SYN stealth scan on top 100 ports with fast speed</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.0/24 -F -s fast</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Scan an entire /24 subnet</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.1 -O -b</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">OS detection and banner grabbing</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.1 -A</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Aggressive scan: OS + banners + insane speed + SYN + top 100 ports</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.0/24 -sn</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Host discovery only (no port scanning)</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan -T 192.168.1.1 -st SYN -ttl 64 -sport 31337 -id 12345</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Custom packet crafting</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan --profile example -T 192.168.1.1</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Load a predefined profile</span>
+        </div>
+    </div>
+
+    <h2>LightSniff — Packet Capture Tool</h2>
+    <img src="Assets/LightSniff.png">
+    <p>
+        <strong>LightSniff</strong> is a lightweight, feature-rich packet sniffer built for network
+        analysis and troubleshooting. It leverages <strong>BPF (Berkeley Packet Filter)</strong>
+        syntax for precise traffic filtering and supports both live capture and PCAP export.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>LightSniff</h3>
+            <span class="version-tag">v1.0.1</span>
+            <span class="tool-badge">Packet Capture</span>
+        </div>
+        <p class="tool-desc">
+            LightSniff captures and analyzes network traffic in real-time. It supports multiple protocol filters,
+            MAC address filtering, VLAN detection, and PCAP file export. It can also read existing PCAP files.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Capture live network traffic</li>
+            <li>Filter traffic using BPF syntax</li>
+            <li>Filter by protocol (TCP, UDP, ICMP, ARP)</li>
+            <li>Filter by MAC address</li>
+            <li>Detect VLAN tags (802.1Q)</li>
+            <li>Export to PCAP/PCAPNG/LBN files</li>
+            <li>Read existing PCAP/PCAPNG/LBN files</li>
+            <li>Support for TLS 1.0, 1.1, 1.2, 1.3, and SSLv3</li>
+        </ul>
+
+        <h4>Options</h4>
+        <div class="option-grid">
+            <div class="opt-item">
+                <span class="mono">-i, --interface</span>
+                <span class="opt-desc">Network interface (e.g., eth0, Wi-Fi)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-f, --filter</span>
+                <span class="opt-desc">BPF filter (e.g., 'tcp port 80', 'icmp')</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-c, --count</span>
+                <span class="opt-desc">Number of packets to capture (0 = infinite)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-w, --write</span>
+                <span class="opt-desc">Save to PCAP/PCAPNG file</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-r, --read</span>
+                <span class="opt-desc">Read packets from PCAP/PCAPNG file (offline mode)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--bin-save</span>
+                <span class="opt-desc">Save to LightBin binary format (.lbn)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--bin-load</span>
+                <span class="opt-desc">Load from LightBin binary format (.lbn)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-C, --compress</span>
+                <span class="opt-desc">To compress saved output (only for .lbn)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-v, --verbose</span>
+                <span class="opt-desc">Show detailed packet info</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--no-promisc</span>
+                <span class="opt-desc">Disable promiscuous mode</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-q, --quiet</span>
+                <span class="opt-desc">Quiet mode (no banner)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--eth</span>
+                <span class="opt-desc">Show Ethernet frame info (MAC addresses, frame type)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--vlan</span>
+                <span class="opt-desc">Show VLAN tags (802.1Q)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--arp</span>
+                <span class="opt-desc">Show only ARP packets</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--tcp</span>
+                <span class="opt-desc">Show only TCP packets</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--udp</span>
+                <span class="opt-desc">Show only UDP packets</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--icmp</span>
+                <span class="opt-desc">Show only ICMP packets</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--mac</span>
+                <span class="opt-desc">Filter by source or destination MAC address</span>
+            </div>
+        </div>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">LightSniff -i eth0</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Capture all traffic on interface eth0</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSniff -i eth0 -f 'tcp port 80' -w http.pcap</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Capture HTTP traffic and save to PCAP</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSniff -i Wi-Fi --tcp -c 100 -v</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Capture 100 TCP packets with verbose output</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSniff -i eth0 --arp --eth</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Show ARP packets with Ethernet frame details</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSniff -i eth0 --mac aa:bb:cc:dd:ee:ff</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Filter by MAC address</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSniff -i eth0 --tcp --udp --icmp</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Capture TCP, UDP, and ICMP packets together</span>
+        </div>
+    </div>
+
+    <h2>LightSave — Results Exporter</h2>
+    <img src="Assets/LightSave.png">
+    <p>
+        <strong>LightSave</strong> is a dedicated result exporter that captures the output of
+        Lightscan command and saves it in a structured format. It supports <strong>8 export formats</strong>
+        and is designed for easy integration with reporting pipelines and SIEM systems.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>LightSave</h3>
+            <span class="version-tag">v1.0.1</span>
+            <span class="tool-badge">Results Exporter</span>
+        </div>
+        <p class="tool-desc">
+            LightSave captures the output of any Lightscan command and saves it in a structured format.
+            It supports LIGHT, TXT, HTML, XML, CSV, JSON, PDF and YAML formats, making it easy to integrate with
+            reporting tools and SIEM systems.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Capture output of any LightScan command</li>
+            <li>Export in 8 formats: LIGHT, TXT, HTML, XML, CSV, JSON, PDF, YAML</li>
+            <li>Automated saving with timestamps</li>
+            <li>Machine-readable output for automation</li>
+            <li>Clean, well-formatted files</li>
+        </ul>
+
+        <h4>Options</h4>
+        <div class="option-grid">
+            <div class="opt-item">
+                <span class="mono">-C</span>
+                <span class="opt-desc">Full Lightscan command (must be enclosed in quotes)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-S {light,txt,html,xml,csv,json,pdf,yaml}</span>
+                <span class="opt-desc">Export format</span>
+            </div>
+        </div>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">LightSave -C "Lightscan -T 192.168.1.1 -F -st UDP" -S xml</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Save UDP scan results as XML</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSave -C "Lightscan -T 192.168.1.0/24 -s fast" -S html</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Save network scan as HTML report</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSave -C "Lightscan -T scanme.nmap.org -p 22,80,443" -S json</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Save scan results as JSON for automation</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightSave -C "Lightscan -T 192.168.1.100 -O -b" -S pdf</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Save OS and banner grab results as PDF</span>
+        </div>
+    </div>
+
+    <h2>LightPanel — Graphical Interface</h2>
+    <p>
+        <strong>LightPanel</strong> is a full-featured graphical user interface for Lightscan.
+        It provides a visual alternative to the command-line, making the toolkit accessible to
+        users who prefer a point-and-click experience without sacrificing functionality.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>LightPanel</h3>
+            <span class="version-tag">v1.0.1</span>
+            <span class="tool-badge">GUI</span>
+        </div>
+        <p class="tool-desc">
+            LightPanel is a complete graphical interface for Lightscan, integrated LightSave functionality. It is designed to be user-friendly
+            and intuitive while maintaining all the power of the command-line tool.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Provide a graphical interface for Lightscan</li>
+            <li>Integrated LightSave functionality</li>
+            <li>Cross-platform (Windows, Linux, macOS, BSD, Solaris)</li>
+            <li>Dark theme optimized</li>
+        </ul>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">LightPanel</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Launch LightPanel GUI</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">python LightPanel.py</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Launch LightPanel from source</span>
+        </div>
+    </div>
+
+    <h2>LightLab — Packet Crafting Laboratory</h2>
+    <img src="Assets/LightLab.png">
+    <p>
+        <strong>LightLab</strong> is an interactive packet crafting laboratory that allows users
+        to build custom packets from scratch using a simple command-line interface. It supports
+        all major protocol layers and includes built-in templates for common network operations.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>LightLab</h3>
+            <span class="version-tag">v1.0.0</span>
+            <span class="tool-badge">Packet Crafting</span>
+        </div>
+        <p class="tool-desc">
+            LightLab is an interactive packet builder that allows you to construct custom packets
+            layer by layer. It supports ethernet, VLAN, ARP, IPv4, IPv6, TCP, UDP, ICMP, NDP, HTTP, DNS,
+            and raw layers. You can send packets, save them to PCAP, and load existing PCAP files.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Build packets from scratch using the <span class="mono">new</span> command</li>
+            <li>Set parameters using <span class="mono">set</span> command</li>
+            <li>View packet structure with <span class="mono">show</span></li>
+            <li>Send packets with <span class="mono">send</span> (with count and verbose)</li>
+            <li>Save and load PCAP/PCAPNG/LBN files</li>
+            <li>Built-in templates for common operations</li>
+        </ul>
+
+        <h4>Commands</h4>
+        <div class="option-grid">
+            <div class="opt-item">
+                <span class="mono">new &lt;layer&gt;</span>
+                <span class="opt-desc">Add a layer: ether, vlan, arp, ip, ipv6, tcp, udp, icmp, ndp_rs, ndp_ra, ndp_na, ndp_ns, icmpv6, icmpv6_echo, http, dns, raw</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">delete &lt;layer&gt;</span>
+                <span class="opt-desc">Delete a layer</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">params &lt;layer&gt;</span>
+                <span class="opt-desc">Show available parameters for a layer</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">set &lt;layer&gt;.&lt;param&gt;=&lt;value&gt;</span>
+                <span class="opt-desc">Set a parameter value</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">show</span>
+                <span class="opt-desc">Show current packet structure</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">clear</span>
+                <span class="opt-desc">Clear all layers</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">send [count] [-v]</span>
+                <span class="opt-desc">Send packet (count=number, -v=verbose)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">timeout &lt;seconds&gt;</span>
+                <span class="opt-desc">Set response timeout</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">interval &lt;seconds&gt;</span>
+                <span class="opt-desc">Set interval time between packets</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">templates</span>
+                <span class="opt-desc">Show example configurations</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">save &lt;filename.pcap/.pcapng&gt;</span>
+                <span class="opt-desc">Save current packet to PCAP</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">load &lt;filename.pcap/.pcapng&gt;</span>
+                <span class="opt-desc">Load packet from PCAP</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">savebin &lt;filename.lbn&gt;</span>
+                <span class="opt-desc">Save current packet to LightBin</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">loadbin &lt;filename.lbn&gt;</span>
+                <span class="opt-desc">Load packet from LightBin</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">help</span>
+                <span class="opt-desc">Show this message</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">exit</span>
+                <span class="opt-desc">Quit LightLab</span>
+            </div>
+        </div>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">LightLab</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Launch LightLab interactive shell</span>
+        </div>
+        <div class="example-box">
+            <pre style="font-size:0.75rem; margin:0.5rem 0 0 0; padding:0.8rem 1rem;">
+LightLab> new ip
+LightLab> set ip.dst=192.168.1.1
+LightLab> new tcp
+LightLab> set tcp.dport=80
+LightLab> set tcp.flags=S
+LightLab> send -v</pre>
+            <span style="color:#8a9aaf;">Build and send a TCP SYN packet</span>
+        </div>
+        <div class="example-box">
+            <pre style="font-size:0.75rem; margin:0.5rem 0 0 0; padding:0.8rem 1rem;">
+LightLab> new ip
+LightLab> set ip.dst=8.8.8.8
+LightLab> new udp
+LightLab> set udp.dport=53
+LightLab> new dns
+LightLab> set dns.qd=DNSQR(qname="google.com", qtype=1)
+LightLab> send -v</pre>
+            <span style="color:#8a9aaf;">Build and send a DNS query</span>
+        </div>
+        <div class="example-box">
+            <pre style="font-size:0.75rem; margin:0.5rem 0 0 0; padding:0.8rem 1rem;">
+LightLab> new vlan
+LightLab> set vlan.vlan=100
+LightLab> new ip
+LightLab> set ip.dst=192.168.1.1
+LightLab> new icmp
+LightLab> send -v</pre>
+            <span style="color:#8a9aaf;">Build and send a VLAN-tagged ICMP packet</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">LightLab> save custom_syn.pcap</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Save the current packet to PCAP</span>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- LSSE — LIGHT-SCAN SCRIPTING ENGINE -->
+    <!-- ============================================================ -->
+    <h2>LSSE — Light-Scan Scripting Engine</h2>
+    <p>
+        The Light-Scan Scripting Engine (LSSE) is what makes Light-Scan a true <strong>mini-framework</strong>.
+        With <strong>13 built-in scripts</strong>, you can perform web and DNS reconnaissance without leaving
+        the Light-Scan ecosystem.
+    </p>
+
+    <div class="tool-section">
+        <div class="tool-header">
+            <h3>LSSE</h3>
+            <span class="version-tag">v1.0.6</span>
+            <span class="tool-badge">Scripting Engine</span>
+        </div>
+        <p class="tool-desc">
+            LSSE is the scripting engine that extends Light-Scan's capabilities. It includes 13 built-in scripts
+            for web and DNS reconnaissance, including spidering, HTTP header analysis, DNS zone transfers,
+            and subdomain enumeration. Scripts can be used independently or as part of a larger workflow.
+        </p>
+
+        <h4>Role</h4>
+        <ul>
+            <li>Extend Light-Scan's capabilities with scripts</li>
+            <li>Perform web reconnaissance (spidering, header analysis, directory brute force)</li>
+            <li>Perform DNS reconnaissance (lookup, NS records, zone transfer, subdomain fuzzing)</li>
+            <li>Analyze security headers, cookies, and HTTP methods</li>
+            <li>Support for wordlists, custom extensions, and status codes</li>
+        </ul>
+
+        <h4>HTTP / HTTPS Scripts</h4>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Script</th><th>Category</th><th>Required Args</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="mono">spider</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--url</span></td><td>Recursively crawls websites for links, forms, and resources</td></tr>
+                    <tr><td><span class="mono">http-robots</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain, -sp</span></td><td>Fetches and parses robots.txt for hidden paths</td></tr>
+                    <tr><td><span class="mono">http-cert</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-analysis">analysis</span></td><td><span class="mono">--domain, -sp</span></td><td>Grabs SSL/TLS certificate information</td></tr>
+                    <tr><td><span class="mono">script</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--url</span></td><td>Detects script tags in HTML pages</td></tr>
+                    <tr><td><span class="mono">http-title</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain, -sp</span></td><td>Extracts webpage titles</td></tr>
+                    <tr><td><span class="mono">http-dir</span></td><td><span class="tag tag-medium">medium</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--url</span></td><td>Brute forces directories and files</td></tr>
+                    <tr><td><span class="mono">http-headers</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-analysis">analysis</span></td><td><span class="mono">--domain, -sp</span></td><td>Security headers analysis (HSTS, CSP, XFO, etc.)</td></tr>
+                    <tr><td><span class="mono">http-methods</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain, -sp</span></td><td>Checks allowed HTTP methods (GET, POST, PUT, DELETE, etc.)</td></tr>
+                    <tr><td><span class="mono">http-cookie</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-analysis">analysis</span></td><td><span class="mono">--domain, -sp</span></td><td>Checks cookies for Secure and HttpOnly flags</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>DNS Scripts</h4>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Script</th><th>Category</th><th>Required Args</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="mono">dns-lookup</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain</span></td><td>Fast DNS lookup for IPv4, IPv6 addresses</td></tr>
+                    <tr><td><span class="mono">dns-ns</span></td><td><span class="tag tag-safe">safe</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain</span></td><td>Get Name-Server (NS) record of a domain</td></tr>
+                    <tr><td><span class="mono">dns-subdomain-fuzzing</span></td><td><span class="tag tag-medium">medium</span> <span class="tag tag-discovery">discovery</span></td><td><span class="mono">--domain</span></td><td>Brute forces subdomains using wordlist</td></tr>
+                    <tr><td><span class="mono">dns-zone-transfer</span></td><td><span class="tag tag-medium">medium</span> <span class="tag tag-extract">extracting</span></td><td><span class="mono">--domain</span></td><td>Attempts AXFR zone transfer to enumerate all DNS records</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h4>Options</h4>
+        <div class="option-grid">
+            <div class="opt-item">
+                <span class="mono">--lsse</span>
+                <span class="opt-desc">Use LSSE scripting engine</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--script SCRIPT</span>
+                <span class="opt-desc">Script to execute (e.g., http-cert, dns-lookup)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--url URL</span>
+                <span class="opt-desc">Target URL for HTTP/HTTPS scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--domain DOMAIN</span>
+                <span class="opt-desc">Target domain for HTTP and DNS scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-sp SP</span>
+                <span class="opt-desc">Port(s) for scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--redirect</span>
+                <span class="opt-desc">Follow HTTP redirects</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">-W, --wordlist</span>
+                <span class="opt-desc">Wordlist for scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--extensions</span>
+                <span class="opt-desc">Extensions for web scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--status-codes</span>
+                <span class="opt-desc">Status codes for web scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--mxp MXP</span>
+                <span class="opt-desc">Max pages to get (spider)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--mxd MXD</span>
+                <span class="opt-desc">Max depth to crawl (spider)</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--dns-server</span>
+                <span class="opt-desc">DNS server for DNS scripts</span>
+            </div>
+            <div class="opt-item">
+                <span class="mono">--lsse-lst</span>
+                <span class="opt-desc">List all available LSSE scripts</span>
+            </div>
+        </div>
+
+        <h4>Usage Examples</h4>
+        <div class="example-box">
+            <span class="mono">Lightscan --lsse --script http-headers --domain google.com -sp 443</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Check security headers on google.com</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan --lsse --script dns-zone-transfer --domain example.com</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Attempt zone transfer on example.com</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan --lsse --script spider --url https://scanme.nmap.org --mxp 50 --mxd 3</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Spider scanme.nmap.org with limits</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan --lsse --script http-dir --url http://192.168.1.1 -W common.txt --extensions php,html,txt</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">Directory brute force with wordlist and extensions</span>
+        </div>
+        <div class="example-box">
+            <span class="mono">Lightscan --lsse-lst</span>
+            <span style="color:#8a9aaf; margin-left:1rem;">List all available LSSE scripts</span>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SCAN TYPES -->
+    <!-- ============================================================ -->
+    <h2>Scan Types — 14 in Total</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Scan Type</th><th>Flag</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>TCP Connect</td><td><span class="mono">-st TCP</span></td><td>Full 3-way handshake — most reliable</td></tr>
+                <tr><td>SYN Stealth</td><td><span class="mono">-st SYN</span></td><td>Half-open scan — stealthier than TCP</td></tr>
+                <tr><td>UDP</td><td><span class="mono">-st UDP</span></td><td>UDP datagram scan — for DNS, DHCP, etc.</td></tr>
+                <tr><td>NULL</td><td><span class="mono">-st NULL</span></td><td>No flags set — evades some firewalls</td></tr>
+                <tr><td>FIN</td><td><span class="mono">-st FIN</span></td><td>FIN flag only — evades some firewalls</td></tr>
+                <tr><td>ACK</td><td><span class="mono">-st ACK</span></td><td>ACK flag only — firewall mapping</td></tr>
+                <tr><td>XMAS</td><td><span class="mono">-st XMAS</span></td><td>FIN+URG+PSH — evades some firewalls</td></tr>
+                <tr><td>WINDOW</td><td><span class="mono">-st WINDOW</span></td><td>Window scan — TCP window size analysis</td></tr>
+                <tr><td>MAIMON</td><td><span class="mono">-st MAIMON</span></td><td>FIN+ACK — evades some firewalls</td></tr>
+                <tr><td><strong>FDD</strong> (Proprietary)</td><td><span class="mono">-st FDD</span></td><td>Firewall Detection Scan — exclusive to Light-Scan</td></tr>
+                <tr><td>FTP-BOUNCE</td><td><span class="mono">-st FTP-BOUNCE</span></td><td>FTP bounce scan — scans through FTP server</td></tr>
+                <tr><td>IPPROTO</td><td><span class="mono">-st IPPROTO</span></td><td>IP protocol scan — scans IP protocols</td></tr>
+                <tr><td>PING</td><td><span class="mono">-st PING</span></td><td>Ping sweep — host discovery only</td></tr>
+                <tr><td>IDLE</td><td><span class="mono">-st IDLE</span></td><td>Idle scan — ultra stealth scan</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- SPEED PRESETS -->
+    <!-- ============================================================ -->
+    <h2>Speed Presets</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Preset</th><th>Threads</th><th>Timeout</th><th>Best For</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><span class="mono">paranoid</span></td><td>2</td><td>4.0s</td><td>Stealth, IDS/IPS evasion</td></tr>
+                <tr><td><span class="mono">slow</span></td><td>30</td><td>3.0s</td><td>Noisy / unstable networks</td></tr>
+                <tr><td><span class="mono">normal</span></td><td>60</td><td>2.5s</td><td><strong>Default</strong> — balanced</td></tr>
+                <tr><td><span class="mono">fast</span></td><td>120</td><td>2.5s</td><td>Internal / trusted networks</td></tr>
+                <tr><td><span class="mono">insane</span></td><td>240</td><td>1.25s</td><td>High-speed LAN scans</td></tr>
+                <tr><td><span class="mono">Light-mode</span></td><td>500</td><td>1.25s</td><td>Maximum speed on reliable networks</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PORT STATES -->
+    <!-- ============================================================ -->
+    <h2>Port States</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>State</th><th>Meaning</th><th>Common Causes</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>Open</strong></td><td>Service actively listening</td><td>Web server, SSH, DB, etc.</td></tr>
+                <tr><td><strong>Closed</strong></td><td>Host up, no service listening</td><td>Unused port</td></tr>
+                <tr><td><strong>Filtered</strong></td><td>Firewall / ACL blocking</td><td>DROP rules, stateful firewall</td></tr>
+                <tr><td><strong>Open|Filtered</strong></td><td>No response (UDP scans)</td><td>Packet loss, no reply</td></tr>
+                <tr><td><strong>Defended</strong></td><td>Firewall detected (FDD scan)</td><td>Active firewall protection</td></tr>
+                <tr><td><strong>Undefended</strong></td><td>No firewall detected</td><td>Direct port access</td></tr>
+                <tr><td><strong>Unfiltered</strong></td><td>Accessible but not open (ACK)</td><td>Firewall rule mapping</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PROFILES -->
+    <!-- ============================================================ -->
+    <h2>Profiles</h2>
+    <p>
+        Save and load complete scan configurations from the <span class="mono">Profiles/</span> directory.
+        This is a key framework feature that enables repeatable, shareable scan configurations.
+    </p>
+    <pre>Lightscan --profiles-lst
+
+Lightscan --profile example -T 192.168.1.1
+
+{
+    "name": "Example",
+    "description": "Example Profile with all the fields",
+    "settings": {
+        "target": "scanme.nmap.org",
+        "scan_type": "SYN",
+        "speed": "slow",
+        "ports": "1-1000,8080",
+        "threads": 100,
+        "timeout": 2.25,
+        "ttl": 64,
+        "hlim": 64,
+        "sport": 80,
+        "payload": "HELLO",
+        "id": 1,
+        "ip_flags": 0,
+        "max_retries": 2,
+        "banner": true,
+        "os": false,
+        "F": false,
+        "fragmente": false,
+        "no_ping": true,
+        "recursively": false,
+        "verbose": true,
+        "quiet": true
+    }
+    }</pre>
+
+    <!-- ============================================================ -->
+    <!-- INSTALLATION -->
+    <!-- ============================================================ -->
+    <h2>Installation</h2>
+    <p>Light-Scan supports all major operating systems. Choose your platform below for setup instructions.</p>
+
+    <div class="os-grid">
+
+        <div class="os-card">
+            <h4>Windows</h4>
+            <ol style="padding-left:1.2rem; margin:0.25rem 0;">
+                <li>Install <a href="https://npcap.com/#download" target="_blank">Npcap</a> (required)</li>
+                <li>Clone &amp; setup:</li>
+            </ol>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python -m venv venv
+    .\venv\Scripts\activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Linux (Debian / Ubuntu)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo apt install libpcap-dev python3-venv
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Linux (Arch)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo pacman -S libpcap
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Linux (RHEL / CentOS / Fedora)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo yum install libpcap-devel python3-venv
+    # or: sudo dnf install libpcap-devel python3-venv
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Linux (SUSE)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo zypper install libpcap-devel python3-venv
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Linux (Alpine)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo apk add libpcap-dev python3 py3-pip
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>macOS (Homebrew)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">brew install libpcap
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>macOS (MacPorts)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo port install libpcap
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>FreeBSD</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo pkg install libpcap python3
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>OpenBSD</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo pkg_add libpcap python3
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>NetBSD</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo pkgin install libpcap python3
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Solaris 11</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">pkg install libpcap
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+        <div class="os-card">
+            <h4>Illumos (OpenIndiana)</h4>
+            <pre style="margin:0.4rem 0 0 0; font-size:0.75rem;">sudo pkg install libpcap
+    git clone https://github.com/adamboulaaz92-jpg/Light-Scan.git
+    cd Light-Scan
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt</pre>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- LEGAL DISCLAIMER -->
+    <!-- ============================================================ -->
+    <h2>Legal Disclaimer</h2>
+    <p>
+        This tool is intended for:
+    </p>
+    <ul>
+        <li>Security professionals conducting <strong>authorised</strong> assessments</li>
+        <li>Network administrators monitoring their own networks</li>
+        <li>Educational and research purposes</li>
+    </ul>
+    <p>
+        <strong>Always ensure you have proper authorisation</strong> before scanning any
+        network or system. Unauthorised scanning may be illegal in your jurisdiction.
+    </p>
+
+    <hr />
+
+    <p class="text-muted text-small" style="text-align:center; margin-top:1rem;">
+        Light-Scan v1.1.7 &bull; Open Source &bull; GPLv2 License &bull; Built with Heretic's power
+    </p>
+
+</div>
+
+</body>
+</html>
