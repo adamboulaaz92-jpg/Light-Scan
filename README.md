@@ -1045,6 +1045,15 @@ Educational and research purposes
 
 ## new custum binary format LightBin (.lbn)
 
+## reading existing lbn,pcap and pcapng files by LightSniff
+
+## --rff to read a target from a file
+
+192.168.1.1
+192.168.1.0;5
+192.168.1.0-145
+scanme.nmap.org
+
 ## upgrade LSSE with new 6 scripts:
 
     [8] dns-lookup
