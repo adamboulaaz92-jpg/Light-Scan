@@ -33,11 +33,17 @@ CIDR notation (/8, /16, /24, etc.) for subnet scanning
 
 Multiple target support via comma-separated lists
 
-Octet ranges (192.168.1.0-100)
+Octet ranges (192.168.1.0-100,192.168.1-10.1-244,192.168.1.0;1)
 
 Intelligent host filtering - skips non-responsive hosts in network scans
 
 Safety warnings for large network ranges
+
+## Multiple Saving options
+
+you can save Lightscan results with LightSave that supports 7 differents saving formats from TXT to PDF and YAML
+
+for other tools like LightSniff and LightLab that enteracts with binary packeys they support lbn,pcap and pcang saving
 
 ## Advanced Detection
 
@@ -56,6 +62,8 @@ Flexible port specification: ranges, lists, and top ports
 Verbose output for debugging and analysis
 
 Customizable timeouts and thread counts
+
+Custom scan profiles
 
 Clean, organized output with per-target results
     
@@ -228,7 +236,35 @@ Before running Light-Scan, install libpcap:
   ### UDP Scan on Specific Port
   
       python Lightscan.py -T 192.168.1.1 -st UDP -p 53
-  
+
+## Basic Sniffing
+
+### Sniffing With Infinite Packet Count
+
+    python LightSniff.py -c 0 -i Wi-Fi
+
+### Sniffing With Built-in Filters
+
+    python LightSniff.py -c 10 -i wlan0 --tcp --icmp
+
+### Sniffing With binary saving option
+
+    python LightSniff.py -c 100 -i eth0 --bin-save result.lbn
+
+## Basic Saving
+
+### Saving Result in XML
+
+    python LightSave.py -C "python Lightscan.py -T 192.168.1.1" -S xml
+
+### Saving Result in YAML
+
+    python LightSave.py -C "python Lightscan.py -T 192.168.1.1 -st SYN" -S yaml
+
+### Saving Result in HTML
+
+    python LightSave.py -C "python Lightscan.py -T 192.168.1.1 -st UDP -p 53" -S html
+
 ## Network Scanning
   
   ### Scan Entire Subnet
