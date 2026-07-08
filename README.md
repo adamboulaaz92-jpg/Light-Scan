@@ -1178,4 +1178,4 @@ For all inquiries regarding Light-Scan Pro subscriptions, enterprise licensing, 
 
 ---
 
-**📧 Contact:** adamboulaaz92@gmail.com
+**📧 Contact:** lightscanframework@gmail.com 
