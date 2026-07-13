@@ -1,3 +1,4 @@
+import sys
 import customtkinter
 import subprocess
 import threading
@@ -5,7 +6,7 @@ import platform
 import os
 from CTkMessagebox import CTkMessagebox
 
-version = "1.0.1"
+version = "1.0.2"
 
 
 def invalid_lightscan_command():
@@ -54,6 +55,10 @@ def build_command():
         if ports:
             command += f" -p {ports}"
 
+        proname = pro_entry.get()
+        if proname:
+            command += f" --save-profile {proname}"
+
         scan_type = scan_type_var.get()
         if scan_type != "TCP Connect (default)":
             if scan_type == "SYN Stealth":
@@ -80,6 +85,8 @@ def build_command():
                 command += " -st IPPROTO"
             elif scan_type == "IDLE Scan":
                 command += " -st IDLE"
+            elif scan_type == "Ping Sweep":
+                command += " -st PING"
 
 
         speed_preset = speed_var.get()
@@ -101,6 +108,8 @@ def build_command():
             command += " -F"
         if os_detect_var.get():
             command += " -O"
+        if rdns_var.get():
+            command += " -n"
         if banner_grab_var.get():
             command += " -b"
         if no_ping_var.get():
@@ -111,6 +120,13 @@ def build_command():
             command += " -f"
         if rc_var.get():
             command += " -Rc"
+
+        pro_preset = pro_var.get()
+        pro_preset = pro_preset.split(".")[0]
+        if pro_preset == "None":
+            pass
+        else:
+            command += f" --load-profile {pro_preset}"
 
         save_preset = save_var.get()
         if save_preset != "None":
@@ -141,24 +157,24 @@ def run_scan():
     command_entry.insert(0, command)
 
     if command.startswith("python Lightscan.py ") or command.startswith("Lightscan ") or command.startswith(
-            "python LightSave.py ") or command.startswith("LightSave ") or command.startswith("LightSniff "):
-        invalid_chars = ['&', '|']
+            "python LightSave.py ") or command.startswith("LightSave "):
+        invalid_chars = ['&', '|',':','`','$']
 
-        if command.startswith("LightSniff"):
-            command = "LightSniff"
         for char in invalid_chars:
             if char in command:
-                command = command.replace(char, '')
-        exploit_args = ['cd', 'pwd', 'netstat', 'winget', 'wmic', 'ls', 'chdir', 'mkdir', 'dir']
+                print(f"\n[!] CMD INJECTION\n")
+                sys.exit(-1)
+        exploit_args = ['cd', 'pwd', 'netstat', 'winget', 'wmic', 'ls', 'ping','chdir', 'mkdir', 'dir']
         for arg in exploit_args:
             if arg in command:
-                command = command.replace(arg, '')
+                print(f"\n[!] CMD INJECTION\n")
+                sys.exit(-1)
 
         output_text.delete("1.0", "end")
         output_text.insert("end", f"[+] Running: {command}\n\n")
 
         try:
-            result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=300)
+            result = subprocess.run(command, shell=False, capture_output=True, text=True, timeout=300)
             output = result.stdout + result.stderr
             output_text.insert("end", output)
             command_entry.delete(0, "end")
@@ -322,7 +338,8 @@ scan_types = [
     "FDD Scan",
     "FTP Bounce",
     "IPPROTO Scan",
-    "IDLE Scan"
+    "IDLE Scan",
+    "Ping Sweep"
 ]
 
 saving_label = customtkinter.CTkLabel(
@@ -360,6 +377,74 @@ save_dropdown = customtkinter.CTkOptionMenu(
     text_color=("black", "white")
 )
 save_dropdown.place(x=150, y=760)
+
+pro_label = customtkinter.CTkLabel(
+    root,
+    text="Profiles :",
+    font=("Arial", 14),
+    text_color=("black", "white")
+)
+pro_label.place(x=320, y=760)
+
+profiles = ["None"]
+profiles.extend([f for f in os.listdir(os.path.join(os.path.dirname(__file__), "Profiles")) if f.endswith('.json')])
+for profile in profiles:
+    if profile == "None":
+        pass
+    else:
+        a = profile.split('.')[0]
+        profiles.remove(profile)
+        profiles.append(a)
+
+pro_var = customtkinter.StringVar(value="None")
+pro_dropdown = customtkinter.CTkOptionMenu(
+    root,
+    values=profiles,
+    variable=pro_var,
+    width=140,
+    height=30,
+    font=("Arial", 13),
+    corner_radius=10,
+    fg_color=("#f7f5f0", "#1a1a1a"),
+    button_color=("#dbdbdb", "#121211"),
+    button_hover_color="grey",
+    text_color=("black", "white")
+)
+pro_dropdown.place(x=400, y=760)
+
+pro_name_label = customtkinter.CTkLabel(
+    root,
+    text="Save Profile :",
+    font=("Arial", 14),
+    text_color=("black", "white")
+)
+pro_name_label.place(x=570, y=760)
+
+rdns_var = customtkinter.BooleanVar()
+rdns_check = customtkinter.CTkCheckBox(
+    root,
+    text="No rDNS (-n)",
+    variable=rdns_var,
+    font=("Arial", 13),
+    corner_radius=5,
+    hover_color=("lightblue","#525452"),
+    fg_color="#72d466"
+)
+rdns_check.place(x=1000, y=763)
+
+pro_entry = customtkinter.CTkEntry(
+    root,
+    width=300,
+    height=30,
+    placeholder_text="heretic_scan",
+    font=("Arial", 14),
+    corner_radius=10,
+    border_color=("#dbdbdb", "#121211"),
+    fg_color=("#f7f5f0", "#1a1a1a"),
+    bg_color="transparent",
+    border_width=2
+)
+pro_entry.place(x=680, y=760)
 
 scan_type_var = customtkinter.StringVar(value="TCP Connect (default)")
 scan_type_dropdown = customtkinter.CTkOptionMenu(

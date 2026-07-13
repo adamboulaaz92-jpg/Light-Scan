@@ -14,7 +14,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 import io
 import yaml
 
-Version = "1.0.2"
+Version = "1.0.1"
 
 parser = argparse.ArgumentParser(description="LightSave : Light-Scan Scans Saving Tool")
 parser.add_argument("-C", required=True, help="Lightscan command")
@@ -156,6 +156,7 @@ def parse_scan_output(output):
         results['lsse_response'] = lsse_response_match.group(1)
 
     return results
+
 
 def generate_pdf(data, raw_output):
     from reportlab.lib.pagesizes import letter
@@ -404,56 +405,8 @@ def generate_pdf(data, raw_output):
     return pdf_data
 
 def generate_yaml(data, raw_output):
-    """
-    Generate YAML format report from scan data.
-
-    Args:
-        data (dict): Parsed scan data
-        raw_output (str): Raw output from LightScan
-
-    Returns:
-        str: YAML formatted string
-    """
-
-    # Process LSSE scripts for clean YAML structure
     lsse_scripts_processed = []
-    for script in data.get('lsse_scripts', []):
-        if script.get('type') == 'subdomain':
-            lsse_scripts_processed.append({
-                'type': 'subdomain',
-                'subdomain': script.get('name'),
-                'ip': script.get('ip')
-            })
-        elif script.get('type') == 'ssl_cert':
-            lsse_scripts_processed.append({
-                'type': 'ssl_certificate',
-                'certificate_data': script.get('data', {})
-            })
-        elif script.get('type') == 'http_title':
-            lsse_scripts_processed.append({
-                'type': 'http_titles',
-                'titles': script.get('titles', [])
-            })
-        elif script.get('type') == 'robots':
-            lsse_scripts_processed.append({
-                'type': 'robots_txt',
-                'disallowed_paths': script.get('disallowed', []),
-                'sitemaps': script.get('sitemaps', [])
-            })
-        elif script.get('type') == 'cert_info':
-            lsse_scripts_processed.append({
-                'type': 'certificate_info',
-                'details': script.get('data', {})
-            })
-        elif script.get('type') == 'http_dir':
-            lsse_scripts_processed.append({
-                'type': 'directory_bruteforce',
-                'found_directories': script.get('directories', []),
-                'wordlist_used': script.get('wordlist'),
-                'total_tested': script.get('total_tested', 0)
-            })
 
-    # Enrich open ports with banner information
     open_ports_enriched = []
     for port in data.get('open_ports', []):
         port_num = port.get('port')
@@ -468,12 +421,10 @@ def generate_yaml(data, raw_output):
             'banner_length': len(banner_info.get('content', '')) if banner_info else 0
         })
 
-    # Calculate statistics
     total_ports = len(data.get('open_ports', [])) + data.get('closed_ports_count', 0) + data.get('filtered_ports_count',
                                                                                                  0)
     open_pct = round((len(data.get('open_ports', [])) / max(1, total_ports)) * 100, 2)
 
-    # Build the YAML structure
     yaml_data = {
         'metadata': {
             'report_generated': datetime.datetime.now().isoformat(),
@@ -516,7 +467,6 @@ def generate_yaml(data, raw_output):
         'raw_output': raw_output
     }
 
-    # Clean None values for cleaner YAML
     def clean_none(obj):
         if isinstance(obj, dict):
             return {k: clean_none(v) for k, v in obj.items() if v is not None}
@@ -527,7 +477,6 @@ def generate_yaml(data, raw_output):
 
     yaml_data = clean_none(yaml_data)
 
-    # Generate YAML with proper formatting
     return yaml.dump(
         yaml_data,
         default_flow_style=False,
@@ -1118,14 +1067,28 @@ def generate_xml(data, raw_output):
     return '\n'.join(xml_parts)
 
 
-if platform.system() == "Windows":
-    try:
+
+try:
+        if args.C.startswith("python Lightscan.py ") or args.C.startswith("Lightscan "):
+            invalid_chars = ['&', '|', ';', '`', '$']
+
+            for char in invalid_chars:
+                if char in args.C:
+                    print(f"\n[!] CMD INJECTION\n")
+                    sys.exit(-1)
+            exploit_args = ['cd', 'pwd', 'netstat', 'winget', 'wmic', 'ls ', 'ping', 'chdir', 'mkdir', 'dir']
+            for arg in exploit_args:
+                if arg in args.C:
+                    print(f"\n[!] CMD INJECTION\n")
+                    sys.exit(-1)
+        else:
+            sys.exit(-1)
+
         print(f"\n[+] Running: {args.C}")
         print(f"[+] Saving to: {filename}\n")
         print("-" * 60)
 
         output_lines = []
-
         if args.S.lower() in ["txt", "light"]:
             result = subprocess.run(args.C, shell=True, capture_output=True, text=True)
             output = result.stdout + result.stderr
@@ -1207,7 +1170,5 @@ if platform.system() == "Windows":
                 f.write(yaml_content)
             print(f"[+] YAML report saved to {filename}")
 
-    except Exception as e:
+except Exception as e:
         print(f"\n[-] Error: {e}")
-else:
-    print("[-] LightSave currently supports Windows only")
