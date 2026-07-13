@@ -40,3 +40,8 @@ Light-Scan 1.1.7:
 ## automatique version parsing (Alpha) 100%
 ## read targets from file using --rff 100%
 ## automatic reverse dns 100%
+
+Light-Scan 1.1.7 Patch:
+
+## Patching command injection in LightSave and LightPanel
+## changing from ; to : to avoid conflict
