@@ -1070,7 +1070,7 @@ def generate_xml(data, raw_output):
 
 try:
         if args.C.startswith("python Lightscan.py ") or args.C.startswith("Lightscan "):
-            invalid_chars = ['&', '|', ';', '`', '$']
+            invalid_chars = ['&', '|', ';', '`', '$','>','<']
 
             for char in invalid_chars:
                 if char in args.C:
