@@ -332,7 +332,7 @@ class Lightscan:
                         target_list = T.split(",")
                         for target in target_list:
                             print(target)
-                            if "/" in T or "-" in T or ";" in T:
+                            if "/" in T or "-" in T or ":" in T:
                                 targett = self.parse_multi_target(T)
                                 self.targets.extend(targett)
                             else:
@@ -340,7 +340,7 @@ class Lightscan:
 
                     except Exception as error:
                         print(f"\n{red}[!] Unexpected error: {error}{reset}")
-                elif "/" in T or "-" in T or ";" in T:
+                elif "/" in T or "-" in T or ":" in T:
                     S = self.parse_multi_target(T)
                     self.targets.extend(S)
                 else:
@@ -351,7 +351,7 @@ class Lightscan:
                     target_list = self.args.target.split(",")
                     for target in target_list:
                         print(target)
-                        if "/" in self.args.target or "-" in self.args.target or ";" in self.args.target:
+                        if "/" in self.args.target or "-" in self.args.target or ":" in self.args.target:
                             targett = self.parse_multi_target(target)
                             self.targets.extend(targett)
                         else:
@@ -359,7 +359,7 @@ class Lightscan:
 
                 except Exception as error:
                     print(f"\n{red}[!] Unexpected error: {error}{reset}")
-            elif "/" in self.args.target or "-" in self.args.target or ";" in self.args.target:
+            elif "/" in self.args.target or "-" in self.args.target or ":" in self.args.target:
                 self.targets = self.parse_multi_target(self.args.target)
             else:
                 self.targets.append(self.args.target)
@@ -521,8 +521,8 @@ class Lightscan:
         try:
             ip_list = []
 
-            if ';' in range_str:
-                base_ip, suffix = range_str.split(';')
+            if ':' in range_str:
+                base_ip, suffix = range_str.split(':')
 
                 ip_list.append(base_ip)
 
@@ -649,7 +649,7 @@ class Lightscan:
                 return ip_list
             elif "-" in cidr_target:
                 return self.expand_hyphen_range(cidr_target)
-            elif ";" in cidr_target:
+            elif ":" in cidr_target:
                 return self.expand_hyphen_range(cidr_target)
 
 
