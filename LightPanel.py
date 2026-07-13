@@ -158,7 +158,7 @@ def run_scan():
 
     if command.startswith("python Lightscan.py ") or command.startswith("Lightscan ") or command.startswith(
             "python LightSave.py ") or command.startswith("LightSave "):
-        invalid_chars = ['&', '|',':','`','$']
+        invalid_chars = ['&', '|',':','`','$','>','<']
 
         for char in invalid_chars:
             if char in command:
