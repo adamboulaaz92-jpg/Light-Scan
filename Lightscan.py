@@ -86,7 +86,7 @@ class Lightscan:
         self.saving = None
         self.Proto = "tcp"
         self.scan_type = "tcp"
-        self.version = "1.1.7"
+        self.version = "1.1.7 Patch"
         self.dns = None
         self.max_threads = 60
         self.socket_timeout = 0.0
